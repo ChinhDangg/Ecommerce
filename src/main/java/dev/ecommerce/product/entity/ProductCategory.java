@@ -17,7 +17,7 @@ public class ProductCategory {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id", nullable = false)
+    @JoinColumn(name = "parent_id")
     private ProductCategory parentProductCategory;
 
     @OneToMany(mappedBy = "parentProductCategory", cascade = CascadeType.PERSIST)
