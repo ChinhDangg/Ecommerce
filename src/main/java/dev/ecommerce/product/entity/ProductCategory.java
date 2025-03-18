@@ -13,10 +13,11 @@ public class ProductCategory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true, nullable = false)
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", nullable = false)
     private ProductCategory parentProductCategory;
 
     @OneToMany(mappedBy = "parentProductCategory", cascade = CascadeType.PERSIST)
