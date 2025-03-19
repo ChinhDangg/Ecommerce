@@ -1,12 +1,14 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 @Setter
 @Table(name = "product_categories")
 public class ProductCategory {
