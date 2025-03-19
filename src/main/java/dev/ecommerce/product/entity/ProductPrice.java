@@ -1,5 +1,6 @@
 package dev.ecommerce.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -20,5 +21,6 @@ public class ProductPrice {
 
     private Integer discount;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM/dd/yyyy")
     private LocalDate endDisCountDate;
 }
