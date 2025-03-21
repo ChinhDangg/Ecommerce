@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Integer> {
 
-    @Query("SELECT pc.id AS id, pc.name AS name FROM ProductCategory pc WHERE pc.parentProductCategory IS NULL")
+    @Query("SELECT new dev.ecommerce.product.DTO.ProductCategoryDTO(pc.id, pc.name) " +
+            "FROM ProductCategory pc WHERE pc.parentProductCategory IS NULL")
     List<ProductCategoryDTO> findAllTopParentCategory();
 }
