@@ -1,10 +1,13 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Setter;
 
 @Entity
 @Table(name = "product_features")
 public class ProductFeature {
+    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

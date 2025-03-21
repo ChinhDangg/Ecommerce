@@ -1,6 +1,8 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "product_lines")
 public class ProductLine {
+    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
