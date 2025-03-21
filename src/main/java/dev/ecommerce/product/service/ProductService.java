@@ -4,17 +4,16 @@ import dev.ecommerce.product.DTO.ProductCategoryDTO;
 import dev.ecommerce.product.entity.ProductCategory;
 import dev.ecommerce.product.repository.ProductCategoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class ProductCategoryService {
+public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
 
-    public ProductCategoryService(ProductCategoryRepository productCategoryRepository) {
+    public ProductService(ProductCategoryRepository productCategoryRepository) {
         this.productCategoryRepository = productCategoryRepository;
     }
 
@@ -30,5 +29,17 @@ public class ProductCategoryService {
                 .stream()
                 .map(c -> new ProductCategoryDTO(c.getId(), c.getName()))
                 .toList();
+    }
+
+    @Transactional
+    public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
+        ProductCategory parentCategory = productCategoryRepository
+                .findById(productCategoryDTO.getId()).orElse(null);
+        ProductCategory newCategory = new ProductCategory();
+        newCategory.setName(productCategoryDTO.getName());
+        newCategory.setParentProductCategory(parentCategory);
+
+        ProductCategory createdCategory = productCategoryRepository.save(newCategory);
+        return new ProductCategoryDTO(createdCategory.getId(), createdCategory.getName());
     }
 }
