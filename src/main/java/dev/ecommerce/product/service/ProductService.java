@@ -33,8 +33,9 @@ public class ProductService {
 
     @Transactional
     public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
-        ProductCategory parentCategory = productCategoryRepository
-                .findById(productCategoryDTO.getId()).orElse(null);
+        Integer id = productCategoryDTO.getId();
+        ProductCategory parentCategory = (id == null) ? null : productCategoryRepository
+                .findById(id).orElse(null);
         ProductCategory newCategory = new ProductCategory();
         newCategory.setName(productCategoryDTO.getName());
         newCategory.setParentProductCategory(parentCategory);
