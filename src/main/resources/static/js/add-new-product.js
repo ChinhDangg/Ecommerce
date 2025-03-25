@@ -8,11 +8,14 @@ productLineImageBtn.addEventListener('click', function() {
 });
 
 productLineImageInput.addEventListener('change', function() {
-    productLineImages = Array.from(productLineImageInput.files);
+    const inputImageFiles = Array.from(productLineImageInput.files);
     const imageEntryTemplate = document.querySelector('.image-entry-template').cloneNode(true);
     imageEntryTemplate.classList.remove('hidden');
-    let max = 5;
-    productLineImages.some(file => {
+    let max = 5 - productLineImages.length;
+    inputImageFiles.some(file => {
+        if (max <= 0)
+            return true;
+        productLineImages.push(file);
         const reader = new FileReader();
         reader.onload = function(e) {
             const newImageEntry = imageEntryTemplate.cloneNode(true);
@@ -22,15 +25,15 @@ productLineImageInput.addEventListener('change', function() {
         }
         reader.readAsDataURL(file); // start the reading process which trigger the onload
         max--;
-        if (max <= 0)
-            return true;
     });
+    console.log(productLineImages);
 })
 
 function initializeImageButtons(imageContainer) {
     imageContainer.querySelector('.delete-image-btn').addEventListener('click', function() {
         let index = getChildIndex(imageContainer);
         productLineImages.splice(index, 1);
+        console.log(productLineImages);
         imageContainer.remove();
     });
     imageContainer.querySelector('.move-left-btn').addEventListener('click', function() {
@@ -40,6 +43,15 @@ function initializeImageButtons(imageContainer) {
             [productLineImages[currentIndex], productLineImages[currentIndex-1]] = [productLineImages[currentIndex-1], productLineImages[currentIndex]]
             console.log(productLineImages);
             productLineImageContainer.insertBefore(imageContainer, previousSib);
+        }
+    });
+    imageContainer.querySelector('.move-right-btn').addEventListener('click', function() {
+        const nextSib = imageContainer.nextElementSibling;
+        if (nextSib) {
+            const currentIndex = getChildIndex(imageContainer);
+            [productLineImages[currentIndex], productLineImages[currentIndex+1]] = [productLineImages[currentIndex+1], productLineImages[currentIndex]]
+            console.log(productLineImages);
+            productLineImageContainer.insertBefore(nextSib, imageContainer);
         }
     });
 }
