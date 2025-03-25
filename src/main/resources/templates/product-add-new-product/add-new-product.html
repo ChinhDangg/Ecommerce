@@ -1,356 +1,356 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>B&H Style Product Card - Admin Mode</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-<div class="flex min-h-screen">
-  <!-- Admin Sidebar (Fixed, Light Background, Black Text) -->
-  <div class="w-64 bg-gray-100 text-black fixed h-full overflow-y-auto">
-    <div class="p-4 border-b border-gray-300">
-      <h2 class="text-xl font-bold text-black">Admin Dashboard</h2>
-      <p class="text-gray-600 text-sm">Product Management</p>
-    </div>
-
-    <!-- Admin Tools -->
-    <nav class="mt-4">
-      <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-        Tools
-      </div>
-
-      <a href="#" id="add-product-link" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Add New Product
-      </a>
-
-      <div class="mt-8 px-4">
-        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
-          Save Changes
-        </button>
-      </div>
-    </nav>
-  </div>
-
-  <!-- Main Content Area (Scrollable) -->
-  <div class="flex-1 ml-64 overflow-y-auto h-screen">
-    <div class="bg-white shadow sticky top-0 z-10">
-      <div class="px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center">
-          <span class="text-xl font-semibold text-gray-800">Admin Panel</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>B&H Style Product Card - Admin Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex min-h-screen">
+      <!-- Admin Sidebar (Fixed, Light Background, Black Text) -->
+      <div class="w-64 bg-gray-100 text-black fixed h-full overflow-y-auto">
+        <div class="p-4 border-b border-gray-300">
+          <h2 class="text-xl font-bold text-black">Admin Dashboard</h2>
+          <p class="text-gray-600 text-sm">Product Management</p>
         </div>
-        <div class="flex items-center space-x-3">
-          <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Draft</span>
-          <button class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Discard</button>
-          <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Publish</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="p-6" id="main-content">
-      <!-- Default content -->
-      <div class="bg-white rounded-lg shadow p-4 text-gray-800" id="default-content">
-        Select "Add New Product" from the sidebar to begin.
-      </div>
-
-      <!-- Product Line Section (Initially Hidden) -->
-      <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-line-section">
-        <div class="border-b border-gray-200 px-4 py-4">
-          <h3 class="text-lg font-medium text-gray-800">Product Line</h3>
-        </div>
-        <div class="p-4">
-          <!-- Product Line Name -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Product Line Name</label>
-            <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter product line name">
-            <p class="text-sm text-gray-500 mt-1">Group this product with others under the same product line (e.g., EOS R Series, Z Series).</p>
+        
+        <!-- Admin Tools -->
+        <nav class="mt-4">
+          <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Tools
           </div>
-
-          <!-- Product Line Images -->
-          <div class="mb-6">
-            <div class="flex justify-between items-center mb-4">
-              <label class="block text-sm font-medium text-gray-700">Product Line Images</label>
-              <div>
-                <input type="file" accept="image/*" id="add-line-image-input" class="hidden" multiple>
-                <button id="add-line-image-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
-              </div>
-            </div>
-            <div id="product-line-images" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-            <p class="text-sm text-gray-500 mt-2">These images will be shared across all products in this product line (max 5).</p>
-          </div>
-
-          <!-- Product Line Descriptions -->
-          <div class="mb-6">
-            <h4 class="text-md font-medium text-gray-700 mb-2">Product Line Descriptions</h4>
-            <div id="product-line-descriptions" class="space-y-4">
-              <div class="description-entry flex items-start space-x-2">
-                <div class="flex-1 description-content">
-                  <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
-                </div>
-                <button class="toggle-description-type px-2 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" title="Switch to Image">Image</button>
-                <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
-              </div>
-            </div>
-            <button id="add-line-description-btn" class="mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Category Section (Initially Hidden) -->
-      <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-category-section">
-        <div class="border-b border-gray-200 px-4 py-4">
-          <h3 class="text-lg font-medium text-gray-800">Product Category</h3>
-        </div>
-        <div class="p-4">
-          <p class="text-sm text-gray-500 mb-4">Select one category for the product. Expand a parent category to view its subcategories.</p>
-          <div id="category-list" class="space-y-2">
-            <!-- Categories will be dynamically inserted here -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Options Section (Initially Hidden) -->
-      <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-options-section">
-        <div class="border-b border-gray-200 px-4 py-4">
-          <h3 class="text-lg font-medium text-gray-800">Product Options</h3>
-        </div>
-        <div class="p-4">
-          <div class="mb-4 flex space-x-4">
-            <button id="add-option-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Option</button>
-            <button id="add-product-btn" class="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">Add New Product</button>
-          </div>
-          <div id="option-values" class="mb-4"></div>
-          <div id="options-table" class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-700">
-              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr id="options-header">
-                <th class="px-4 py-2">Product</th>
-              </tr>
-              </thead>
-              <tbody id="options-body">
-              <!-- Empty by default -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Specifications Section (Initially Hidden) -->
-      <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-specifications-section">
-        <div class="border-b border-gray-200 px-4 py-4">
-          <h3 class="text-lg font-medium text-gray-800">Product Specifications</h3>
-        </div>
-        <div class="p-4">
-          <div class="mb-4 flex space-x-4">
-            <button id="add-spec-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Specification</button>
-          </div>
-          <div id="spec-values" class="mb-4"></div>
-          <div id="specs-table" class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-700">
-              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr id="specs-header">
-                <th class="px-4 py-2">Product</th>
-              </tr>
-              </thead>
-              <tbody id="specs-body">
-              <!-- Empty by default -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Groups Container -->
-      <div id="product-groups"></div>
-
-      <!-- Hidden Product Group Template -->
-      <div class="bg-white rounded-lg shadow mb-6 product-group hidden" id="product-group-template" data-product-id="0">
-        <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
-          <h3 class="text-lg font-medium text-gray-800">Product <span class="product-number">0</span></h3>
-          <div class="flex items-center space-x-2">
-            <button class="delete-product-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete Product</button>
-            <button class="toggle-collapse text-gray-600 hover:text-gray-800 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
+          
+          <a href="#" id="add-product-link" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add New Product
+          </a>
+          
+          <div class="mt-8 px-4">
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+              Save Changes
             </button>
           </div>
+        </nav>
+      </div>
+      
+      <!-- Main Content Area (Scrollable) -->
+      <div class="flex-1 ml-64 overflow-y-auto h-screen">
+        <div class="bg-white shadow sticky top-0 z-10">
+          <div class="px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="text-xl font-semibold text-gray-800">Admin Panel</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Draft</span>
+              <button class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Discard</button>
+              <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Publish</button>
+            </div>
+          </div>
         </div>
-        <div class="p-4 product-details">
-          <!-- Basic Information -->
-          <div class="mb-6">
-            <h4 class="text-md font-medium text-gray-700 mb-2">Basic Information</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-                <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-                <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                  <option>Canon</option>
-                  <option>Nikon</option>
-                  <option>Sony</option>
-                  <option>Fujifilm</option>
-                  <option>Panasonic</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part Number</label>
-                <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                <input type="number" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="0">
-              </div>
-            </div>
+        
+        <div class="p-6" id="main-content">
+          <!-- Default content -->
+          <div class="bg-white rounded-lg shadow p-4 text-gray-800" id="default-content">
+            Select "Add New Product" from the sidebar to begin.
           </div>
-          <!-- Pricing -->
-          <div class="mb-6">
-            <h4 class="text-md font-medium text-gray-700 mb-2">Pricing</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
-                <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($)</label>
-                <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Sale End Date</label>
-                <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
-              </div>
+
+          <!-- Product Line Section (Initially Hidden) -->
+          <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-line-section">
+            <div class="border-b border-gray-200 px-4 py-4">
+              <h3 class="text-lg font-medium text-gray-800">Product Line</h3>
             </div>
-          </div>
-          <!-- Product Features -->
-          <div class="mb-6">
-            <h4 class="text-md font-medium text-gray-700 mb-2">Product Features</h4>
-            <div class="product-features space-y-4">
-              <div class="feature-entry flex items-start space-x-2">
-                <div class="flex-1">
-                  <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter product feature">
+            <div class="p-4">
+              <!-- Product Line Name -->
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Product Line Name</label>
+                <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter product line name">
+                <p class="text-sm text-gray-500 mt-1">Group this product with others under the same product line (e.g., EOS R Series, Z Series).</p>
+              </div>
+      
+              <!-- Product Line Images -->
+              <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                  <label class="block text-sm font-medium text-gray-700">Product Line Images</label>
+                  <div>
+                    <input type="file" accept="image/*" id="add-line-image-input" class="hidden" multiple>
+                    <button id="add-line-image-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
+                  </div>
                 </div>
-                <button class="delete-feature-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                <div id="product-line-images" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <p class="text-sm text-gray-500 mt-2">These images will be shared across all products in this product line (max 5).</p>
               </div>
-            </div>
-            <button class="add-feature-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Feature</button>
-          </div>
-          <!-- Product Images -->
-          <div class="mb-6">
-            <div class="flex justify-between items-center mb-4">
-              <h4 class="text-md font-medium text-gray-700">Product Images</h4>
-              <div>
-                <input type="file" accept="image/*" class="add-product-image-input hidden" multiple>
-                <button class="add-product-image-btn px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
-              </div>
-            </div>
-            <div class="product-images grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-          </div>
-          <!-- Product Descriptions -->
-          <div class="mb-6">
-            <h4 class="text-md font-medium text-gray-700 mb-2">Product Descriptions</h4>
-            <div class="product-descriptions space-y-4">
-              <div class="description-entry flex items-start space-x-2">
-                <div class="flex-1 description-content">
-                  <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
+
+              <!-- Product Line Descriptions -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Product Line Descriptions</h4>
+                <div id="product-line-descriptions" class="space-y-4">
+                  <div class="description-entry flex items-start space-x-2">
+                    <div class="flex-1 description-content">
+                      <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
+                    </div>
+                    <button class="toggle-description-type px-2 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" title="Switch to Image">Image</button>
+                    <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
                 </div>
-                <button class="toggle-description-type px-2 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" title="Switch to Image">Image</button>
-                <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                <button id="add-line-description-btn" class="mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
               </div>
             </div>
-            <button class="add-product-description-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
           </div>
-          <!-- Hidden Image Entry Template -->
-          <div class="image-entry-template hidden">
-            <div class="image-entry border border-gray-200 rounded-md p-2 relative">
-              <img src="" alt="Uploaded Image" class="h-40 w-full object-contain image-entry-img">
-              <div class="absolute top-2 right-2 flex space-x-1">
-                <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+
+          <!-- Product Category Section (Initially Hidden) -->
+          <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-category-section">
+            <div class="border-b border-gray-200 px-4 py-4">
+              <h3 class="text-lg font-medium text-gray-800">Product Category</h3>
+            </div>
+            <div class="p-4">
+              <p class="text-sm text-gray-500 mb-4">Select one category for the product. Expand a parent category to view its subcategories.</p>
+              <div id="category-list" class="space-y-2">
+                <!-- Categories will be dynamically inserted here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Options Section (Initially Hidden) -->
+          <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-options-section">
+            <div class="border-b border-gray-200 px-4 py-4">
+              <h3 class="text-lg font-medium text-gray-800">Product Options</h3>
+            </div>
+            <div class="p-4">
+              <div class="mb-4 flex space-x-4">
+                <button id="add-option-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Option</button>
+                <button id="add-product-btn" class="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">Add New Product</button>
+              </div>
+              <div id="option-values" class="mb-4"></div>
+              <div id="options-table" class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-700">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr id="options-header">
+                      <th class="px-4 py-2">Product</th>
+                    </tr>
+                  </thead>
+                  <tbody id="options-body">
+                    <!-- Empty by default -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Specifications Section (Initially Hidden) -->
+          <div class="bg-white rounded-lg shadow mb-6 hidden" id="product-specifications-section">
+            <div class="border-b border-gray-200 px-4 py-4">
+              <h3 class="text-lg font-medium text-gray-800">Product Specifications</h3>
+            </div>
+            <div class="p-4">
+              <div class="mb-4 flex space-x-4">
+                <button id="add-spec-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Specification</button>
+              </div>
+              <div id="spec-values" class="mb-4"></div>
+              <div id="specs-table" class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-700">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr id="specs-header">
+                      <th class="px-4 py-2">Product</th>
+                    </tr>
+                  </thead>
+                  <tbody id="specs-body">
+                    <!-- Empty by default -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Groups Container -->
+          <div id="product-groups"></div>
+
+          <!-- Hidden Product Group Template -->
+          <div class="bg-white rounded-lg shadow mb-6 product-group hidden" id="product-group-template" data-product-id="0">
+            <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-800">Product <span class="product-number">0</span></h3>
+              <div class="flex items-center space-x-2">
+                <button class="delete-product-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete Product</button>
+                <button class="toggle-collapse text-gray-600 hover:text-gray-800 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-                <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+              </div>
+            </div>
+            <div class="p-4 product-details">
+              <!-- Basic Information -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Basic Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                    <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                      <option>Canon</option>
+                      <option>Nikon</option>
+                      <option>Sony</option>
+                      <option>Fujifilm</option>
+                      <option>Panasonic</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part Number</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="0">
+                  </div>
+                </div>
+              </div>
+              <!-- Pricing -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Pricing</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($)</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sale End Date</label>
+                    <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                  </div>
+                </div>
+              </div>
+              <!-- Product Features -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Product Features</h4>
+                <div class="product-features space-y-4">
+                  <div class="feature-entry flex items-start space-x-2">
+                    <div class="flex-1">
+                      <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter product feature">
+                    </div>
+                    <button class="delete-feature-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
+                </div>
+                <button class="add-feature-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Feature</button>
+              </div>
+              <!-- Product Images -->
+              <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="text-md font-medium text-gray-700">Product Images</h4>
+                  <div>
+                    <input type="file" accept="image/*" class="add-product-image-input hidden" multiple>
+                    <button class="add-product-image-btn px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
+                  </div>
+                </div>
+                <div class="product-images grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+              </div>
+              <!-- Product Descriptions -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Product Descriptions</h4>
+                <div class="product-descriptions space-y-4">
+                  <div class="description-entry flex items-start space-x-2">
+                    <div class="flex-1 description-content">
+                      <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
+                    </div>
+                    <button class="toggle-description-type px-2 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" title="Switch to Image">Image</button>
+                    <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
+                </div>
+                <button class="add-product-description-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
+              </div>
+              <!-- Hidden Image Entry Template -->
+              <div class="image-entry-template hidden">
+                <div class="image-entry border border-gray-200 rounded-md p-2 relative">
+                  <img src="" alt="Uploaded Image" class="h-40 w-full object-contain image-entry-img">
+                  <div class="absolute top-2 right-2 flex space-x-1">
+                    <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- JavaScript -->
-<script>
-  // Store the default content
-  const defaultContent = document.getElementById('default-content');
+    <!-- JavaScript -->
+    <script>
+      // Store the default content
+      const defaultContent = document.getElementById('default-content');
 
-  // Navigation Link Handler
-  document.getElementById('add-product-link').addEventListener('click', function(e) {
-    e.preventDefault();
-    defaultContent.classList.add('hidden');
-    document.getElementById('product-line-section').classList.remove('hidden');
-    document.getElementById('product-category-section').classList.remove('hidden');
-    document.getElementById('product-options-section').classList.remove('hidden');
-    document.getElementById('product-specifications-section').classList.remove('hidden');
-    initializeProductEditing();
-  });
+      // Navigation Link Handler
+      document.getElementById('add-product-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        defaultContent.classList.add('hidden');
+        document.getElementById('product-line-section').classList.remove('hidden');
+        document.getElementById('product-category-section').classList.remove('hidden');
+        document.getElementById('product-options-section').classList.remove('hidden');
+        document.getElementById('product-specifications-section').classList.remove('hidden');
+        initializeProductEditing();
+      });
 
-  // Simulated backend data: Category tree as a nested object
-  const categoryTree = [
-    {
-      id: 'laptops',
-      name: 'Laptops',
-      subcategories: [
-        { id: 'macs', name: 'Macs' },
-        { id: 'gaming-laptops', name: 'Gaming Laptops' },
-        { id: 'ultrabooks', name: 'Ultrabooks' }
-      ]
-    },
-    {
-      id: 'cameras',
-      name: 'Cameras',
-      subcategories: [
-        { id: 'dslr', name: 'DSLR' },
-        { id: 'mirrorless', name: 'Mirrorless' },
-        { id: 'point-and-shoot', name: 'Point and Shoot' }
-      ]
-    },
-    {
-      id: 'smartphones',
-      name: 'Smartphones',
-      subcategories: [
-        { id: 'android', name: 'Android' },
-        { id: 'iphone', name: 'iPhone' }
-      ]
-    }
-  ];
+      // Simulated backend data: Category tree as a nested object
+      const categoryTree = [
+        {
+          id: 'laptops',
+          name: 'Laptops',
+          subcategories: [
+            { id: 'macs', name: 'Macs' },
+            { id: 'gaming-laptops', name: 'Gaming Laptops' },
+            { id: 'ultrabooks', name: 'Ultrabooks' }
+          ]
+        },
+        {
+          id: 'cameras',
+          name: 'Cameras',
+          subcategories: [
+            { id: 'dslr', name: 'DSLR' },
+            { id: 'mirrorless', name: 'Mirrorless' },
+            { id: 'point-and-shoot', name: 'Point and Shoot' }
+          ]
+        },
+        {
+          id: 'smartphones',
+          name: 'Smartphones',
+          subcategories: [
+            { id: 'android', name: 'Android' },
+            { id: 'iphone', name: 'iPhone' }
+          ]
+        }
+      ];
 
-  // Product Editing Functionality
-  function initializeProductEditing() {
-    // Generate Category HTML
-    function generateCategoryHTML(categories) {
-      const categoryList = document.getElementById('category-list');
+      // Product Editing Functionality
+      function initializeProductEditing() {
+        // Generate Category HTML
+        function generateCategoryHTML(categories) {
+          const categoryList = document.getElementById('category-list');
+          
+          categories.forEach(category => {
+            const categoryItem = document.createElement('div');
+            categoryItem.className = 'category-item';
 
-      categories.forEach(category => {
-        const categoryItem = document.createElement('div');
-        categoryItem.className = 'category-item';
-
-        const parentHTML = `
+            const parentHTML = `
               <div class="flex items-center">
                 <input type="radio" name="category" id="category-${category.id}" value="${category.id}" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                 <label for="category-${category.id}" class="ml-2 text-sm font-medium text-gray-700 flex-1 cursor-pointer">${category.name}</label>
@@ -363,506 +363,506 @@
                 ` : ''}
               </div>
             `;
-        categoryItem.innerHTML = parentHTML;
+            categoryItem.innerHTML = parentHTML;
 
-        if (category.subcategories && category.subcategories.length > 0) {
-          const subcategoriesDiv = document.createElement('div');
-          subcategoriesDiv.className = 'subcategories hidden ml-6 mt-2 space-y-2';
+            if (category.subcategories && category.subcategories.length > 0) {
+              const subcategoriesDiv = document.createElement('div');
+              subcategoriesDiv.className = 'subcategories hidden ml-6 mt-2 space-y-2';
 
-          category.subcategories.forEach(subcategory => {
-            const subcategoryHTML = `
+              category.subcategories.forEach(subcategory => {
+                const subcategoryHTML = `
                   <div class="flex items-center">
                     <input type="radio" name="category" id="category-${subcategory.id}" value="${subcategory.id}" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                     <label for="category-${subcategory.id}" class="ml-2 text-sm text-gray-700">${subcategory.name}</label>
                   </div>
                 `;
-            subcategoriesDiv.insertAdjacentHTML('beforeend', subcategoryHTML);
+                subcategoriesDiv.insertAdjacentHTML('beforeend', subcategoryHTML);
+              });
+
+              categoryItem.appendChild(subcategoriesDiv);
+            }
+
+            categoryList.appendChild(categoryItem);
           });
 
-          categoryItem.appendChild(subcategoriesDiv);
+          attachToggleListeners();
         }
 
-        categoryList.appendChild(categoryItem);
-      });
+        // Attach toggle event listeners to subcategory buttons
+        function attachToggleListeners() {
+          document.querySelectorAll('.toggle-subcategories').forEach(button => {
+            button.addEventListener('click', function() {
+              const subcategories = this.closest('.category-item').querySelector('.subcategories');
+              const svg = this.querySelector('svg');
+              
+              subcategories.classList.toggle('hidden');
+              svg.classList.toggle('rotate-180');
+            });
+          });
+        }
 
-      attachToggleListeners();
-    }
+        // Generate category list when product editing is initialized
+        generateCategoryHTML(categoryTree);
 
-    // Attach toggle event listeners to subcategory buttons
-    function attachToggleListeners() {
-      document.querySelectorAll('.toggle-subcategories').forEach(button => {
-        button.addEventListener('click', function() {
-          const subcategories = this.closest('.category-item').querySelector('.subcategories');
-          const svg = this.querySelector('svg');
-
-          subcategories.classList.toggle('hidden');
-          svg.classList.toggle('rotate-180');
-        });
-      });
-    }
-
-    // Generate category list when product editing is initialized
-    generateCategoryHTML(categoryTree);
-
-    // Image Deletion and Movement (for Product Line and Product Images)
-    function initializeImageControls(container) {
-      container.querySelectorAll('.delete-image-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          this.closest('.image-entry').remove();
-        });
-      });
-      container.querySelectorAll('.move-left-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const imageEntry = this.closest('.image-entry');
-          const previousSibling = imageEntry.previousElementSibling;
-          if (previousSibling && previousSibling.classList.contains('image-entry')) {
-            imageEntry.parentNode.insertBefore(imageEntry, previousSibling);
+        // Image Deletion and Movement (for Product Line and Product Images)
+        function initializeImageControls(container) {
+          container.querySelectorAll('.delete-image-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              this.closest('.image-entry').remove();
+            });
+          });
+          container.querySelectorAll('.move-left-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              const imageEntry = this.closest('.image-entry');
+              const previousSibling = imageEntry.previousElementSibling;
+              if (previousSibling && previousSibling.classList.contains('image-entry')) {
+                imageEntry.parentNode.insertBefore(imageEntry, previousSibling);
+              }
+            });
+          });
+          container.querySelectorAll('.move-right-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              const imageEntry = this.closest('.image-entry');
+              const nextSibling = imageEntry.nextElementSibling;
+              if (nextSibling && nextSibling.classList.contains('image-entry')) {
+                imageEntry.parentNode.insertBefore(nextSibling, imageEntry);
+              }
+            });
+          });
+        }
+    
+        // Add Image Functionality with Max 5 Limit (for Product Line and Product Images)
+        function addImages(container, fileInput) {
+          const currentCount = container.querySelectorAll('.image-entry').length;
+          const files = Array.from(fileInput.files);
+          const availableSlots = 5 - currentCount;
+          
+          if (availableSlots <= 0) {
+            alert('Maximum of 5 images reached.');
+            return;
           }
-        });
-      });
-      container.querySelectorAll('.move-right-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const imageEntry = this.closest('.image-entry');
-          const nextSibling = imageEntry.nextElementSibling;
-          if (nextSibling && nextSibling.classList.contains('image-entry')) {
-            imageEntry.parentNode.insertBefore(nextSibling, imageEntry);
-          }
-        });
-      });
-    }
+    
+          const filesToAdd = files.slice(0, availableSlots);
+          const template = document.querySelector('.image-entry-template').cloneNode(true);
+          template.classList.remove('image-entry-template', 'hidden');
+          
+          filesToAdd.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const newImageEntry = template.cloneNode(true);
+              newImageEntry.querySelector('.image-entry-img').src = e.target.result;
+              container.appendChild(newImageEntry);
+              initializeImageControls(container);
+            };
+            reader.readAsDataURL(file);
+          });
+          fileInput.value = '';
+        }
 
-    // Add Image Functionality with Max 5 Limit (for Product Line and Product Images)
-    function addImages(container, fileInput) {
-      const currentCount = container.querySelectorAll('.image-entry').length;
-      const files = Array.from(fileInput.files);
-      const availableSlots = 5 - currentCount;
-
-      if (availableSlots <= 0) {
-        alert('Maximum of 5 images reached.');
-        return;
-      }
-
-      const filesToAdd = files.slice(0, availableSlots);
-      const template = document.querySelector('.image-entry-template').cloneNode(true);
-      template.classList.remove('image-entry-template', 'hidden');
-
-      filesToAdd.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const newImageEntry = template.cloneNode(true);
-          newImageEntry.querySelector('.image-entry-img').src = e.target.result;
-          container.appendChild(newImageEntry);
-          initializeImageControls(container);
-        };
-        reader.readAsDataURL(file);
-      });
-      fileInput.value = '';
-    }
-
-    // Add Description Image (for Product Line and Product Descriptions)
-    function addDescriptionImage(container, fileInput) {
-      const file = fileInput.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          container.innerHTML = `
+        // Add Description Image (for Product Line and Product Descriptions)
+        function addDescriptionImage(container, fileInput) {
+          const file = fileInput.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              container.innerHTML = `
                 <div class="description-image-entry border border-gray-200 rounded-md p-2">
                   <img src="${e.target.result}" alt="Description Image" class="h-40 w-full object-contain">
                 </div>
               `;
-        };
-        reader.readAsDataURL(file);
-      }
-      fileInput.value = '';
-    }
+            };
+            reader.readAsDataURL(file);
+          }
+          fileInput.value = '';
+        }
+    
+        // Product Line Images - Add Images
+        const lineImageBtn = document.getElementById('add-line-image-btn');
+        const lineImageInput = document.getElementById('add-line-image-input');
+        lineImageBtn.addEventListener('click', function() {
+          lineImageInput.click();
+        });
+        lineImageInput.addEventListener('change', function() {
+          addImages(document.getElementById('product-line-images'), lineImageInput);
+        });
 
-    // Product Line Images - Add Images
-    const lineImageBtn = document.getElementById('add-line-image-btn');
-    const lineImageInput = document.getElementById('add-line-image-input');
-    lineImageBtn.addEventListener('click', function() {
-      lineImageInput.click();
-    });
-    lineImageInput.addEventListener('change', function() {
-      addImages(document.getElementById('product-line-images'), lineImageInput);
-    });
-
-    // Product Line Descriptions
-    const lineDescriptionsContainer = document.getElementById('product-line-descriptions');
-    document.getElementById('add-line-description-btn').addEventListener('click', function() {
-      const newDescription = document.createElement('div');
-      newDescription.className = 'description-entry flex items-start space-x-2';
-      newDescription.innerHTML = `
+        // Product Line Descriptions
+        const lineDescriptionsContainer = document.getElementById('product-line-descriptions');
+        document.getElementById('add-line-description-btn').addEventListener('click', function() {
+          const newDescription = document.createElement('div');
+          newDescription.className = 'description-entry flex items-start space-x-2';
+          newDescription.innerHTML = `
             <div class="flex-1 description-content">
               <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
             </div>
             <button class="toggle-description-type px-2 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" title="Switch to Image">Image</button>
             <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
           `;
-      lineDescriptionsContainer.appendChild(newDescription);
-      attachDescriptionListeners(newDescription);
-    });
+          lineDescriptionsContainer.appendChild(newDescription);
+          attachDescriptionListeners(newDescription);
+        });
 
-    lineDescriptionsContainer.querySelectorAll('.description-entry').forEach(entry => {
-      attachDescriptionListeners(entry);
-    });
+        lineDescriptionsContainer.querySelectorAll('.description-entry').forEach(entry => {
+          attachDescriptionListeners(entry);
+        });
 
-    function attachDescriptionListeners(entry) {
-      const toggleBtn = entry.querySelector('.toggle-description-type');
-      toggleBtn.addEventListener('click', function() {
-        const contentDiv = this.previousElementSibling;
-        const currentContent = contentDiv.firstElementChild;
-        if (currentContent.tagName === 'TEXTAREA') {
-          contentDiv.innerHTML = `
+        function attachDescriptionListeners(entry) {
+          const toggleBtn = entry.querySelector('.toggle-description-type');
+          toggleBtn.addEventListener('click', function() {
+            const contentDiv = this.previousElementSibling;
+            const currentContent = contentDiv.firstElementChild;
+            if (currentContent.tagName === 'TEXTAREA') {
+              contentDiv.innerHTML = `
                 <input type="file" accept="image/*" class="description-image-input w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
               `;
-          this.textContent = 'Text';
-          this.title = 'Switch to Text';
-          const fileInput = contentDiv.querySelector('.description-image-input');
-          fileInput.addEventListener('change', function() {
-            addDescriptionImage(contentDiv, fileInput);
-          });
-        } else {
-          contentDiv.innerHTML = `
+              this.textContent = 'Text';
+              this.title = 'Switch to Text';
+              const fileInput = contentDiv.querySelector('.description-image-input');
+              fileInput.addEventListener('change', function() {
+                addDescriptionImage(contentDiv, fileInput);
+              });
+            } else {
+              contentDiv.innerHTML = `
                 <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
               `;
-          this.textContent = 'Image';
-          this.title = 'Switch to Image';
+              this.textContent = 'Image';
+              this.title = 'Switch to Image';
+            }
+          });
+
+          entry.querySelector('.delete-description-btn').addEventListener('click', function() {
+            entry.remove();
+          });
         }
-      });
 
-      entry.querySelector('.delete-description-btn').addEventListener('click', function() {
-        entry.remove();
-      });
-    }
+        // Product Options Logic
+        const optionsHeader = document.getElementById('options-header');
+        const optionsBody = document.getElementById('options-body');
+        const optionValuesContainer = document.getElementById('option-values');
+        let optionKeys = [];
+        let optionValues = {};
 
-    // Product Options Logic
-    const optionsHeader = document.getElementById('options-header');
-    const optionsBody = document.getElementById('options-body');
-    const optionValuesContainer = document.getElementById('option-values');
-    let optionKeys = [];
-    let optionValues = {};
-
-    function updateOptionsUI() {
-      optionValuesContainer.innerHTML = '';
-      optionKeys.forEach(key => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center space-x-2 mb-2';
-        div.innerHTML = `
+        function updateOptionsUI() {
+          optionValuesContainer.innerHTML = '';
+          optionKeys.forEach(key => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center space-x-2 mb-2';
+            div.innerHTML = `
               <button class="add-value-btn px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700" data-key="${key}">Add Value</button>
               <span class="font-medium">${key}:</span>
               <span>${optionValues[key].join(', ')}</span>
               <button class="remove-option-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700" data-key="${key}">Remove</button>
             `;
-        optionValuesContainer.appendChild(div);
-      });
+            optionValuesContainer.appendChild(div);
+          });
 
-      document.querySelectorAll('.add-value-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-key');
-          const value = prompt(`Enter a new value for ${key}:`);
-          if (value && !optionValues[key].includes(value)) {
-            optionValues[key].push(value);
-            updateOptionsUI();
-            updateOptionsTable();
-          }
-        });
-      });
+          document.querySelectorAll('.add-value-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const key = this.getAttribute('data-key');
+              const value = prompt(`Enter a new value for ${key}:`);
+              if (value && !optionValues[key].includes(value)) {
+                optionValues[key].push(value);
+                updateOptionsUI();
+                updateOptionsTable();
+              }
+            });
+          });
 
-      document.querySelectorAll('.remove-option-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-key');
-          if (confirm(`Are you sure you want to remove the option "${key}"?`)) {
-            const index = optionKeys.indexOf(key);
-            if (index > -1) {
-              optionKeys.splice(index, 1);
-              delete optionValues[key];
-              updateOptionsUI();
-              updateOptionsTable();
-            }
-          }
-        });
-      });
-    }
+          document.querySelectorAll('.remove-option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const key = this.getAttribute('data-key');
+              if (confirm(`Are you sure you want to remove the option "${key}"?`)) {
+                const index = optionKeys.indexOf(key);
+                if (index > -1) {
+                  optionKeys.splice(index, 1);
+                  delete optionValues[key];
+                  updateOptionsUI();
+                  updateOptionsTable();
+                }
+              }
+            });
+          });
+        }
 
-    function updateOptionsTable() {
-      optionsHeader.innerHTML = '<th class="px-4 py-2">Product</th>';
-      optionKeys.forEach(key => {
-        const th = document.createElement('th');
-        th.className = 'px-4 py-2';
-        th.textContent = key;
-        optionsHeader.appendChild(th);
-      });
+        function updateOptionsTable() {
+          optionsHeader.innerHTML = '<th class="px-4 py-2">Product</th>';
+          optionKeys.forEach(key => {
+            const th = document.createElement('th');
+            th.className = 'px-4 py-2';
+            th.textContent = key;
+            optionsHeader.appendChild(th);
+          });
 
-      optionsBody.querySelectorAll('tr').forEach(row => {
-        const productId = row.getAttribute('data-product-id');
-        const existingCells = row.querySelectorAll('td');
-        const newCells = [`<td class="px-4 py-2 font-medium">Product ${productId}</td>`];
-        optionKeys.forEach(key => {
-          const existingCell = Array.from(existingCells).find(cell => cell.querySelector(`select[data-option="${key}"]`));
-          if (existingCell) {
-            const select = existingCell.querySelector('select');
-            const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
-            select.innerHTML = optionValues[key].map(value =>
-                    `<option value="${value}" ${selectedValues.includes(value) ? 'selected' : ''}>${value}</option>`
-            ).join('');
-            newCells.push(existingCell.outerHTML);
-          } else {
-            newCells.push(`
+          optionsBody.querySelectorAll('tr').forEach(row => {
+            const productId = row.getAttribute('data-product-id');
+            const existingCells = row.querySelectorAll('td');
+            const newCells = [`<td class="px-4 py-2 font-medium">Product ${productId}</td>`];
+            optionKeys.forEach(key => {
+              const existingCell = Array.from(existingCells).find(cell => cell.querySelector(`select[data-option="${key}"]`));
+              if (existingCell) {
+                const select = existingCell.querySelector('select');
+                const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
+                select.innerHTML = optionValues[key].map(value => 
+                  `<option value="${value}" ${selectedValues.includes(value) ? 'selected' : ''}>${value}</option>`
+                ).join('');
+                newCells.push(existingCell.outerHTML);
+              } else {
+                newCells.push(`
                   <td class="px-4 py-2">
                     <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}">
                       ${optionValues[key].map(value => `<option value="${value}">${value}</option>`).join('')}
                     </select>
                   </td>
                 `);
+              }
+            });
+            row.innerHTML = newCells.join('');
+          });
+        }
+
+        document.getElementById('add-option-btn').addEventListener('click', function() {
+          const key = prompt('Enter a new option name:');
+          if (key && !optionKeys.includes(key)) {
+            optionKeys.push(key);
+            optionValues[key] = [];
+            updateOptionsUI();
+            optionsBody.querySelectorAll('tr').forEach(row => {
+              const td = document.createElement('td');
+              td.className = 'px-4 py-2';
+              td.innerHTML = `<select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}"></select>`;
+              row.appendChild(td);
+            });
+            updateOptionsTable();
           }
         });
-        row.innerHTML = newCells.join('');
-      });
-    }
 
-    document.getElementById('add-option-btn').addEventListener('click', function() {
-      const key = prompt('Enter a new option name:');
-      if (key && !optionKeys.includes(key)) {
-        optionKeys.push(key);
-        optionValues[key] = [];
-        updateOptionsUI();
-        optionsBody.querySelectorAll('tr').forEach(row => {
-          const td = document.createElement('td');
-          td.className = 'px-4 py-2';
-          td.innerHTML = `<select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}"></select>`;
-          row.appendChild(td);
-        });
-        updateOptionsTable();
-      }
-    });
+        // Product Specifications Logic
+        const specsHeader = document.getElementById('specs-header');
+        const specsBody = document.getElementById('specs-body');
+        const specValuesContainer = document.getElementById('spec-values');
+        let specKeys = [];
+        let specValues = {};
 
-    // Product Specifications Logic
-    const specsHeader = document.getElementById('specs-header');
-    const specsBody = document.getElementById('specs-body');
-    const specValuesContainer = document.getElementById('spec-values');
-    let specKeys = [];
-    let specValues = {};
-
-    function updateSpecsUI() {
-      specValuesContainer.innerHTML = '';
-      specKeys.forEach(key => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center space-x-2 mb-2';
-        div.innerHTML = `
+        function updateSpecsUI() {
+          specValuesContainer.innerHTML = '';
+          specKeys.forEach(key => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center space-x-2 mb-2';
+            div.innerHTML = `
               <button class="add-spec-value-btn px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700" data-key="${key}">Add Value</button>
               <span class="font-medium">${key}:</span>
               <span>${specValues[key].join(', ')}</span>
               <button class="remove-spec-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700" data-key="${key}">Remove</button>
             `;
-        specValuesContainer.appendChild(div);
-      });
+            specValuesContainer.appendChild(div);
+          });
 
-      document.querySelectorAll('.add-spec-value-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-key');
-          const value = prompt(`Enter a new value for ${key}:`);
-          if (value && !specValues[key].includes(value)) {
-            specValues[key].push(value);
-            updateSpecsUI();
-            updateSpecsTable();
-          }
-        });
-      });
+          document.querySelectorAll('.add-spec-value-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const key = this.getAttribute('data-key');
+              const value = prompt(`Enter a new value for ${key}:`);
+              if (value && !specValues[key].includes(value)) {
+                specValues[key].push(value);
+                updateSpecsUI();
+                updateSpecsTable();
+              }
+            });
+          });
 
-      document.querySelectorAll('.remove-spec-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-key');
-          if (confirm(`Are you sure you want to remove the specification "${key}"?`)) {
-            const index = specKeys.indexOf(key);
-            if (index > -1) {
-              specKeys.splice(index, 1);
-              delete specValues[key];
-              updateSpecsUI();
-              updateSpecsTable();
-            }
-          }
-        });
-      });
-    }
+          document.querySelectorAll('.remove-spec-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const key = this.getAttribute('data-key');
+              if (confirm(`Are you sure you want to remove the specification "${key}"?`)) {
+                const index = specKeys.indexOf(key);
+                if (index > -1) {
+                  specKeys.splice(index, 1);
+                  delete specValues[key];
+                  updateSpecsUI();
+                  updateSpecsTable();
+                }
+              }
+            });
+          });
+        }
 
-    function updateSpecsTable() {
-      specsHeader.innerHTML = '<th class="px-4 py-2">Product</th>';
-      specKeys.forEach(key => {
-        const th = document.createElement('th');
-        th.className = 'px-4 py-2';
-        th.textContent = key;
-        specsHeader.appendChild(th);
-      });
+        function updateSpecsTable() {
+          specsHeader.innerHTML = '<th class="px-4 py-2">Product</th>';
+          specKeys.forEach(key => {
+            const th = document.createElement('th');
+            th.className = 'px-4 py-2';
+            th.textContent = key;
+            specsHeader.appendChild(th);
+          });
 
-      specsBody.querySelectorAll('tr').forEach(row => {
-        const productId = row.getAttribute('data-product-id');
-        const existingCells = row.querySelectorAll('td');
-        const newCells = [`<td class="px-4 py-2 font-medium">Product ${productId}</td>`];
-        specKeys.forEach(key => {
-          const existingCell = Array.from(existingCells).find(cell => cell.querySelector(`select[data-spec="${key}"]`));
-          if (existingCell) {
-            const select = existingCell.querySelector('select');
-            const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
-            select.innerHTML = specValues[key].map(value =>
-                    `<option value="${value}" ${selectedValues.includes(value) ? 'selected' : ''}>${value}</option>`
-            ).join('');
-            newCells.push(existingCell.outerHTML);
-          } else {
-            newCells.push(`
+          specsBody.querySelectorAll('tr').forEach(row => {
+            const productId = row.getAttribute('data-product-id');
+            const existingCells = row.querySelectorAll('td');
+            const newCells = [`<td class="px-4 py-2 font-medium">Product ${productId}</td>`];
+            specKeys.forEach(key => {
+              const existingCell = Array.from(existingCells).find(cell => cell.querySelector(`select[data-spec="${key}"]`));
+              if (existingCell) {
+                const select = existingCell.querySelector('select');
+                const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
+                select.innerHTML = specValues[key].map(value => 
+                  `<option value="${value}" ${selectedValues.includes(value) ? 'selected' : ''}>${value}</option>`
+                ).join('');
+                newCells.push(existingCell.outerHTML);
+              } else {
+                newCells.push(`
                   <td class="px-4 py-2">
                     <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-spec="${key}">
                       ${specValues[key].map(value => `<option value="${value}">${value}</option>`).join('')}
                     </select>
                   </td>
                 `);
+              }
+            });
+            row.innerHTML = newCells.join('');
+          });
+        }
+
+        document.getElementById('add-spec-btn').addEventListener('click', function() {
+          const key = prompt('Enter a new specification name:');
+          if (key && !specKeys.includes(key)) {
+            specKeys.push(key);
+            specValues[key] = [];
+            updateSpecsUI();
+            specsBody.querySelectorAll('tr').forEach(row => {
+              const td = document.createElement('td');
+              td.className = 'px-4 py-2';
+              td.innerHTML = `<select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-spec="${key}"></select>`;
+              row.appendChild(td);
+            });
+            updateSpecsTable();
           }
         });
-        row.innerHTML = newCells.join('');
-      });
-    }
 
-    document.getElementById('add-spec-btn').addEventListener('click', function() {
-      const key = prompt('Enter a new specification name:');
-      if (key && !specKeys.includes(key)) {
-        specKeys.push(key);
-        specValues[key] = [];
-        updateSpecsUI();
-        specsBody.querySelectorAll('tr').forEach(row => {
-          const td = document.createElement('td');
-          td.className = 'px-4 py-2';
-          td.innerHTML = `<select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-spec="${key}"></select>`;
-          row.appendChild(td);
-        });
-        updateSpecsTable();
-      }
-    });
+        document.getElementById('add-product-btn').addEventListener('click', function() {
+          const productCount = optionsBody.children.length + 1;
+          const productId = productCount;
 
-    document.getElementById('add-product-btn').addEventListener('click', function() {
-      const productCount = optionsBody.children.length + 1;
-      const productId = productCount;
-
-      // Add row to options table
-      const newOptionRow = document.createElement('tr');
-      newOptionRow.setAttribute('data-product-id', productId);
-      newOptionRow.innerHTML = `<td class="px-4 py-2 font-medium">Product ${productCount}</td>`;
-      optionKeys.forEach(key => {
-        newOptionRow.innerHTML += `
+          // Add row to options table
+          const newOptionRow = document.createElement('tr');
+          newOptionRow.setAttribute('data-product-id', productId);
+          newOptionRow.innerHTML = `<td class="px-4 py-2 font-medium">Product ${productCount}</td>`;
+          optionKeys.forEach(key => {
+            newOptionRow.innerHTML += `
               <td class="px-4 py-2">
                 <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}">
                   ${optionValues[key].map(value => `<option value="${value}">${value}</option>`).join('')}
                 </select>
               </td>
             `;
-      });
-      optionsBody.appendChild(newOptionRow);
+          });
+          optionsBody.appendChild(newOptionRow);
 
-      // Add row to specifications table
-      const newSpecRow = document.createElement('tr');
-      newSpecRow.setAttribute('data-product-id', productId);
-      newSpecRow.innerHTML = `<td class="px-4 py-2 font-medium">Product ${productCount}</td>`;
-      specKeys.forEach(key => {
-        newSpecRow.innerHTML += `
+          // Add row to specifications table
+          const newSpecRow = document.createElement('tr');
+          newSpecRow.setAttribute('data-product-id', productId);
+          newSpecRow.innerHTML = `<td class="px-4 py-2 font-medium">Product ${productCount}</td>`;
+          specKeys.forEach(key => {
+            newSpecRow.innerHTML += `
               <td class="px-4 py-2">
                 <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-spec="${key}">
                   ${specValues[key].map(value => `<option value="${value}">${value}</option>`).join('')}
                 </select>
               </td>
             `;
-      });
-      specsBody.appendChild(newSpecRow);
+          });
+          specsBody.appendChild(newSpecRow);
 
-      // Clone and add new product group
-      const productGroups = document.getElementById('product-groups');
-      const template = document.getElementById('product-group-template');
-      const newProductGroup = template.cloneNode(true);
-      newProductGroup.classList.remove('hidden');
-      newProductGroup.setAttribute('data-product-id', productId);
-      newProductGroup.querySelector('.product-number').textContent = productId;
-      productGroups.appendChild(newProductGroup);
+          // Clone and add new product group
+          const productGroups = document.getElementById('product-groups');
+          const template = document.getElementById('product-group-template');
+          const newProductGroup = template.cloneNode(true);
+          newProductGroup.classList.remove('hidden');
+          newProductGroup.setAttribute('data-product-id', productId);
+          newProductGroup.querySelector('.product-number').textContent = productId;
+          productGroups.appendChild(newProductGroup);
 
-      // Add Collapse Listener
-      const toggleButton = newProductGroup.querySelector('.toggle-collapse');
-      toggleButton.addEventListener('click', function() {
-        const details = newProductGroup.querySelector('.product-details');
-        details.classList.toggle('hidden');
-        const svg = this.querySelector('svg');
-        svg.classList.toggle('rotate-180');
-      });
+          // Add Collapse Listener
+          const toggleButton = newProductGroup.querySelector('.toggle-collapse');
+          toggleButton.addEventListener('click', function() {
+            const details = newProductGroup.querySelector('.product-details');
+            details.classList.toggle('hidden');
+            const svg = this.querySelector('svg');
+            svg.classList.toggle('rotate-180');
+          });
 
-      // Delete Product
-      newProductGroup.querySelector('.delete-product-btn').addEventListener('click', function() {
-        const productId = newProductGroup.getAttribute('data-product-id');
-        const optionRow = document.querySelector(`#options-body tr[data-product-id="${productId}"]`);
-        const specRow = document.querySelector(`#specs-body tr[data-product-id="${productId}"]`);
-        if (optionRow) optionRow.remove();
-        if (specRow) specRow.remove();
-        newProductGroup.remove();
-      });
+          // Delete Product
+          newProductGroup.querySelector('.delete-product-btn').addEventListener('click', function() {
+            const productId = newProductGroup.getAttribute('data-product-id');
+            const optionRow = document.querySelector(`#options-body tr[data-product-id="${productId}"]`);
+            const specRow = document.querySelector(`#specs-body tr[data-product-id="${productId}"]`);
+            if (optionRow) optionRow.remove();
+            if (specRow) specRow.remove();
+            newProductGroup.remove();
+          });
 
-      // Toggle Description Type and Image Upload for Product Descriptions
-      newProductGroup.querySelectorAll('.description-entry').forEach(entry => {
-        attachDescriptionListeners(entry);
-      });
+          // Toggle Description Type and Image Upload for Product Descriptions
+          newProductGroup.querySelectorAll('.description-entry').forEach(entry => {
+            attachDescriptionListeners(entry);
+          });
 
-      newProductGroup.querySelector('.add-product-description-btn').addEventListener('click', function() {
-        const descriptionsContainer = this.previousElementSibling;
-        const newDescription = document.createElement('div');
-        newDescription.className = 'description-entry flex items-start space-x-2';
-        newDescription.innerHTML = `
+          newProductGroup.querySelector('.add-product-description-btn').addEventListener('click', function() {
+            const descriptionsContainer = this.previousElementSibling;
+            const newDescription = document.createElement('div');
+            newDescription.className = 'description-entry flex items-start space-x-2';
+            newDescription.innerHTML = `
               <div class="flex-1 description-content">
                 <textarea class="w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph or URL"></textarea>
               </div>
               <button class="toggle-description-type px-2 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" title="Switch to Image">Image</button>
               <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
             `;
-        descriptionsContainer.appendChild(newDescription);
-        attachDescriptionListeners(newDescription);
-      });
+            descriptionsContainer.appendChild(newDescription);
+            attachDescriptionListeners(newDescription);
+          });
 
-      // Product Features Logic
-      newProductGroup.querySelectorAll('.feature-entry').forEach(entry => {
-        attachFeatureListeners(entry);
-      });
+          // Product Features Logic
+          newProductGroup.querySelectorAll('.feature-entry').forEach(entry => {
+            attachFeatureListeners(entry);
+          });
 
-      newProductGroup.querySelector('.add-feature-btn').addEventListener('click', function() {
-        const featuresContainer = this.previousElementSibling;
-        const newFeature = document.createElement('div');
-        newFeature.className = 'feature-entry flex items-start space-x-2';
-        newFeature.innerHTML = `
+          newProductGroup.querySelector('.add-feature-btn').addEventListener('click', function() {
+            const featuresContainer = this.previousElementSibling;
+            const newFeature = document.createElement('div');
+            newFeature.className = 'feature-entry flex items-start space-x-2';
+            newFeature.innerHTML = `
               <div class="flex-1">
                 <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter product feature">
               </div>
               <button class="delete-feature-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
             `;
-        featuresContainer.appendChild(newFeature);
-        attachFeatureListeners(newFeature);
-      });
+            featuresContainer.appendChild(newFeature);
+            attachFeatureListeners(newFeature);
+          });
 
-      function attachFeatureListeners(entry) {
-        entry.querySelector('.delete-feature-btn').addEventListener('click', function() {
-          entry.remove();
+          function attachFeatureListeners(entry) {
+            entry.querySelector('.delete-feature-btn').addEventListener('click', function() {
+              entry.remove();
+            });
+          }
+
+          // Add Product Images
+          const newProductImageBtn = newProductGroup.querySelector('.add-product-image-btn');
+          const newProductImageInput = newProductGroup.querySelector('.add-product-image-input');
+          newProductImageBtn.addEventListener('click', function() {
+            newProductImageInput.click();
+          });
+          newProductImageInput.addEventListener('change', function() {
+            addImages(newProductGroup.querySelector('.product-images'), newProductImageInput);
+          });
+
+          // Initialize Image Controls
+          initializeImageControls(newProductGroup.querySelector('.product-images'));
         });
+
+        // Initialize controls for Product Line Images
+        initializeImageControls(document.getElementById('product-line-images'));
+        updateOptionsUI();
+        updateSpecsUI();
       }
-
-      // Add Product Images
-      const newProductImageBtn = newProductGroup.querySelector('.add-product-image-btn');
-      const newProductImageInput = newProductGroup.querySelector('.add-product-image-input');
-      newProductImageBtn.addEventListener('click', function() {
-        newProductImageInput.click();
-      });
-      newProductImageInput.addEventListener('change', function() {
-        addImages(newProductGroup.querySelector('.product-images'), newProductImageInput);
-      });
-
-      // Initialize Image Controls
-      initializeImageControls(newProductGroup.querySelector('.product-images'));
-    });
-
-    // Initialize controls for Product Line Images
-    initializeImageControls(document.getElementById('product-line-images'));
-    updateOptionsUI();
-    updateSpecsUI();
-  }
-</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'921fdef6be614539',t:'MTc0MjI0OTk1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'921fdef6be614539',t:'MTc0MjI0OTk1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
