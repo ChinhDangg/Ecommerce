@@ -1,9 +1,8 @@
-const productLineImageBtn = document.getElementById('add-line-image-btn');
 const productLineImageContainer = document.getElementById('product-line-images');
 const productLineImageInput = document.getElementById('add-line-image-input');
 let productLineImages = []
 
-productLineImageBtn.addEventListener('click', function() {
+document.getElementById('add-line-image-btn').addEventListener('click', function() {
     productLineImageInput.click();
 });
 
@@ -27,7 +26,7 @@ productLineImageInput.addEventListener('change', function() {
         max--;
     });
     console.log(productLineImages);
-})
+});
 
 function initializeImageButtons(imageContainer) {
     imageContainer.querySelector('.delete-image-btn').addEventListener('click', function() {
@@ -63,3 +62,42 @@ function getChildIndex(child) {
     return index;
 }
 
+
+const productLineDescription = document.getElementById('product-line-descriptions');
+const productLineDescriptionImages = []
+
+document.getElementById('add-line-description-btn').addEventListener('click', function() {
+    const newDescription = productLineDescription.querySelector('.description-entry').cloneNode(true);
+    newDescription.classList.remove('hidden');
+    initializeDescriptionButtons(newDescription);
+    productLineDescription.appendChild(newDescription);
+});
+
+function initializeDescriptionButtons(descriptionContainer) {
+    descriptionContainer.querySelector('.delete-description-btn').addEventListener('click', function() {
+        productLineDescriptionImages.splice(getChildIndex(descriptionContainer), 1);
+        console.log(productLineDescriptionImages);
+        descriptionContainer.remove();
+    });
+    const descriptionImageInput = descriptionContainer.querySelector('.description-image-input');
+    descriptionImageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const index = getChildIndex(descriptionContainer);
+            productLineDescriptionImages[index] = file;
+            console.log(productLineDescriptionImages);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                descriptionContainer.querySelector('.description-textarea-entry').classList.add('hidden');
+                const descriptionImageContainer = descriptionContainer.querySelector('.description-image-entry');
+                descriptionImageContainer.classList.remove('hidden');
+                descriptionImageContainer.querySelector('img').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    descriptionContainer.querySelector('.toggle-description-type').addEventListener('click', function() {
+        descriptionImageInput.click();
+    });
+
+}
