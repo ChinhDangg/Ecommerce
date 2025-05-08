@@ -15,6 +15,6 @@ public class ProductCategoryDTO {
     private Integer id;
 
     @NotBlank(message = "Name is required")
-    @Size(min = 3, max = 100, message = "Name must be between 2 and 30 characters")
+    @Size(min = 3, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
 }
