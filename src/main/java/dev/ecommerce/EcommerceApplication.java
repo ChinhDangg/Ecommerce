@@ -1,11 +1,15 @@
 package dev.ecommerce;
 
+import dev.ecommerce.product.DTO.ProductCategoryDTO;
 import dev.ecommerce.product.entity.ProductCategory;
 import dev.ecommerce.product.repository.ProductCategoryRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootApplication
 public class EcommerceApplication {
@@ -17,20 +21,31 @@ public class EcommerceApplication {
     @Bean
     CommandLineRunner commandLineRunner(ProductCategoryRepository productCategoryRepository) {
         return _ -> {
-            ProductCategory computers = new ProductCategory();
-            computers.setName("Computers");
+            ProductCategory electronics = new ProductCategory("Electronics", null);
 
-            ProductCategory laptops = new ProductCategory();
-            laptops.setName("Laptops");
-            laptops.setParentProductCategory(computers); // Hibernate sets parent_id = computers.id
+            ProductCategory computers = new ProductCategory("Computers", electronics);
 
-            ProductCategory gamingLaptops = new ProductCategory();
-            gamingLaptops.setName("Gaming Laptops");
-            gamingLaptops.setParentProductCategory(laptops); // Hibernate sets parent_id = laptops.id
+            ProductCategory laptops = new ProductCategory("Laptop", computers);
 
+            ProductCategory gamingLaptops = new ProductCategory("GamingLaptops", laptops);
+
+            ProductCategory macs = new ProductCategory("Mac", laptops);
+
+            ProductCategory computerComponent= new ProductCategory("Computer Component", electronics);
+
+            ProductCategory graphicsCard = new ProductCategory("Graphics Card", computerComponent);
+
+            productCategoryRepository.save(electronics);
             productCategoryRepository.save(computers);
             productCategoryRepository.save(laptops);
             productCategoryRepository.save(gamingLaptops);
+            productCategoryRepository.save(macs);
+            productCategoryRepository.save(computerComponent);
+            productCategoryRepository.save(graphicsCard);
+
+            List<ProductCategoryDTO> parentProductCategories = productCategoryRepository.findAllTopParentCategory();
+            System.out.println(parentProductCategories.getFirst().getId());
+            System.out.println(parentProductCategories.getFirst().getName());
 
         };
     }

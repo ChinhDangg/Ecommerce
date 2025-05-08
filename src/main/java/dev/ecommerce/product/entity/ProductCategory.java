@@ -3,6 +3,7 @@ package dev.ecommerce.product.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
+@NoArgsConstructor
 @Table(name = "product_categories")
 public class ProductCategory {
     @Setter(AccessLevel.NONE)
@@ -25,5 +26,10 @@ public class ProductCategory {
     private ProductCategory parentProductCategory;
 
     @OneToMany(mappedBy = "parentProductCategory", cascade = CascadeType.PERSIST)
-    private List<ProductCategory> subcategories = new ArrayList<>();
+    private final List<ProductCategory> subcategories = new ArrayList<>();
+
+    public ProductCategory(String name, ProductCategory parentProductCategory) {
+        this.name = name;
+        this.parentProductCategory = parentProductCategory;
+    }
 }

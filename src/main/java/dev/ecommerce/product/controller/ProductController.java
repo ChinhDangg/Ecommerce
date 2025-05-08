@@ -1,14 +1,21 @@
 package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductCategoryDTO;
+import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/product")
 public class ProductController {
@@ -26,7 +33,7 @@ public class ProductController {
         return categoryService.findAllTopCategory();
     }
 
-    @GetMapping("/category/{id}")
+    @GetMapping("/subcategory/{id}")
     public List<ProductCategoryDTO> subCategories(@PathVariable int id) {
         return categoryService.findAllSubCategoryOf(id);
     }
@@ -37,4 +44,38 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(cat);
     }
 
+    @PostMapping("/newProductLine")
+    public ResponseEntity<String> addProduct(@Valid @RequestBody ProductLineDTO productLineDTO) {
+        System.out.println(productLineDTO.getProductLineName());
+        System.out.println(Arrays.toString(productLineDTO.getProductLineImageNames()));
+        System.out.println(Arrays.toString(productLineDTO.getProductLineDescriptions()));
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
+    }
+
+    @PostMapping("/uploadImages")
+    public ResponseEntity<List<String>> handleFileUpload(@RequestParam("images") MultipartFile[] images) {
+        try {
+            System.out.println("Received " + images.length + " images");
+            // Process each file
+            List<String> fileNames = Arrays.stream(images)
+                    .map(file -> {
+                        try {
+                            // Save file to a directory (e.g., uploads/)
+                            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                            Path path = Paths.get("uploads/" + fileName);
+                            Files.createDirectories(path.getParent()); // Ensure directory exists
+                            Files.write(path, file.getBytes());
+                            return fileName;
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to store file: " + file.getOriginalFilename(), e);
+                        }
+                    })
+                    .toList();
+            System.out.println(fileNames);
+            return ResponseEntity.ok(fileNames);
+        } catch (Exception e) {
+            System.out.println("File upload failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 }

@@ -1,26 +1,34 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Setter;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@NoArgsConstructor
 @Table(name = "product_lines")
 public class ProductLine {
-    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
 
+    @OneToMany(mappedBy = "productLine")
+    private final List<ProductLineMedia> productLineMedias = new ArrayList<>();
+
     // variants of product (configurations or options) fall into same product line
     @OneToMany(mappedBy = "productLine")
-    private List<Product> products = new ArrayList<>();
+    private final List<Product> products = new ArrayList<>();
 
     @OneToMany(mappedBy = "productLine")
-    private List<ProductDescription> productLineDescriptions = new ArrayList<>();
+    private final List<ProductLineDescription> productLineDescriptions = new ArrayList<>();
+
+    public ProductLine(String name) {
+        this.name = name;
+    }
 
 }

@@ -1,17 +1,16 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "product_descriptions")
-public class ProductDescription {
+@Getter
+@NoArgsConstructor
+@Table(name = "product_line_descriptions")
+public class ProductLineDescription {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // can have either description for one product or the whole product line
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product; // product exclusive description
 
     @ManyToOne
     @JoinColumn(name = "product_line_id")
@@ -25,4 +24,12 @@ public class ProductDescription {
 
     // to know which description to display first
     private Integer sortOrder;
+
+    public ProductLineDescription(ProductLine productLine, DescriptionType descriptionType,
+                                  String content, Integer sortOrder) {
+        this.productLine = productLine;
+        this.descriptionType = descriptionType;
+        this.content = content;
+        this.sortOrder = sortOrder;
+    }
 }
