@@ -119,23 +119,13 @@ async function fetchTopCategories() {
     try {
         const response = await fetch('http://localhost:8080/api/product/category');
         const topCategories = await response.json(); // [{id, name}]
-
+        initializeTopCategories(topCategories);
     } catch (error) {
         console.error('Error fetching top categories:', error);
         categoryContainer.innerHTML = 'Fail to load categories';
     }
 }
-
-async function fetchSubCategories(parentId) {
-    try {
-        const response = await fetch('http://localhost:8080/api/product/subcategory/' + parentId);
-        const subCategories = await response.json(); // [{id, name}]
-        return subCategories;
-    } catch (error) {
-        console.error('Error fetching top categories:', error);
-        return null;
-    }
-}
+fetchTopCategories();
 
 async function addTopCategories(topCategories, categoryToToggle = null) {
     removeAllTopCategoryDisplay();
@@ -154,9 +144,16 @@ async function addTopCategories(topCategories, categoryToToggle = null) {
             categoryTree.push(topCategory); // update
         }
         toggleButton.addEventListener('click', async function () {
-            toggleSubcategories(topCategory, this);
+            await toggleSubcategories(topCategory, this);
         });
     });
+}
+
+function initializeTopCategories(topCategories) {
+    topCategories.forEach(topCategory => {
+        categoryTree.push(topCategory); // update
+    });
+    addTopCategories(topCategories);
 }
 
 function removeAllTopCategoryDisplay() {
@@ -183,6 +180,16 @@ function removeAllSubcategoryDisplay() {
     Array.from(allSubcategoryItems).slice(1).forEach(item => item.remove()); // remove all sub item except first one
 }
 
+async function fetchSubCategories(parentId) {
+    try {
+        const response = await fetch('http://localhost:8080/api/product/subcategory/' + parentId);
+        return await response.json(); // [{id, name}]
+    } catch (error) {
+        console.error('Error fetching top categories:', error);
+        return null;
+    }
+}
+
 async function toggleSubcategories(topCategory, toggleButton) {
     toggleButton.querySelector('svg').classList.toggle('rotate-[-90deg]');
     if (checkSameCategoryToggle(topCategory)) {
@@ -192,12 +199,7 @@ async function toggleSubcategories(topCategory, toggleButton) {
     if (foundCategory && foundCategory.subcategories && foundCategory.subcategories.length !== 0) {
         addSubCategories(foundCategory.subcategories);
     } else {
-        // const querySubcategories = await fetchSubCategories(topCategory.id);
-        const querySubcategories = [
-            { id: 'macs', name: 'Macs' },
-            { id: 'gaming-laptops', name: 'Gaming Laptops' },
-            { id: 'ultrabooks', name: 'Ultrabooks' }
-        ];
+        const querySubcategories = await fetchSubCategories(topCategory.id);
         if (querySubcategories) {
             foundCategory.subcategories = querySubcategories;
             addSubCategories(querySubcategories);
@@ -245,30 +247,7 @@ document.getElementById('category-back-button').addEventListener('click', functi
     console.log(categoryNavStack);
 });
 
-const top_categories = [
-    {
-        id: '1',
-        name: 'Laptops',
-    },
-    {
-        id: '2',
-        name: 'Cameras',
-    },
-    {
-        id: '3',
-        name: 'Smartphones',
-    }
-];
 
-function initializeTopCategories(topCategories) {
-    const testSet = new Set();
-    topCategories.forEach(topCategory => {
-        categoryTree.push(topCategory); // update
-    });
-    addTopCategories(topCategories);
-}
-
-initializeTopCategories(top_categories);
 
 /* Subcategories element is either in a subcategories class or in category-item (id - top),
 in sub then is sub of the sub, else direct sub of a top cate,
@@ -281,7 +260,7 @@ const optionValueContainer = document.getElementById('option-values-container');
 const optionHeaderWrapper = document.getElementById('option-header-tr');
 const optionBodyContainer = document.getElementById('options-body');
 const optionMap = new Map();
-let products = [];
+let products = [0];
 
 document.getElementById('add-option-btn').addEventListener('click', function () {
     const key = prompt('Enter a new option name:');
@@ -293,7 +272,7 @@ document.getElementById('add-option-btn').addEventListener('click', function () 
         optionValueContainer.appendChild(optionValueItem);
         initializeOptionValueButtons(optionValueItem, key);
         const optionHeaderItem = optionHeaderWrapper.querySelector('.option-header-th').cloneNode(true);
-        optionHeaderItem.classList.add(`option-id-${key}`);
+        optionHeaderItem.dataset.optionId = key;
         optionHeaderItem.innerHTML = key;
         optionHeaderWrapper.appendChild(optionHeaderItem);
         addProductOptionSelection(key);
@@ -320,9 +299,9 @@ function initializeOptionValueButtons(optionValueItem, optionKey) {
     optionValueItem.querySelector('.remove-option-btn').addEventListener('click', function () {
         optionMap.delete(optionKey);
         optionValueItem.remove();
-        optionHeaderWrapper.querySelector(`.option-id-${optionKey}`).remove();
+        optionHeaderWrapper.querySelector(`[data-option-id="${optionKey}"]`).remove();
         optionBodyContainer.querySelectorAll('.option-product-selection').forEach(selectionWrapper => {
-            if (selectionWrapper.querySelector(`select[data-option="${optionKey}"]`)) {
+            if (selectionWrapper.querySelector(`select[data-option-id="${optionKey}"]`)) {
                 selectionWrapper.remove();
             }
         });
@@ -333,10 +312,10 @@ function initializeOptionValueButtons(optionValueItem, optionKey) {
 function addProductOptionSelection(optionKey) {
     const allProductOptionItems = optionBodyContainer.querySelectorAll('.option-product-item');
     Array.from(allProductOptionItems).slice(1).forEach(item => {
-        if (item.querySelector(`select[data-option="${optionKey}"]`) == null) {
+        if (item.querySelector(`select[data-option-id="${optionKey}"]`) == null) {
             const optionSelectionWrapper = optionBodyContainer.querySelector('.option-product-selection').cloneNode(true);
             const optionSelection = optionSelectionWrapper.querySelector('select');
-            optionSelection.dataset.option = optionKey;
+            optionSelection.dataset.optionId = optionKey;
             optionSelection.innerHTML = "";
             item.appendChild(optionSelectionWrapper);
         }
@@ -345,7 +324,7 @@ function addProductOptionSelection(optionKey) {
 
 function updateProductOptionSelectionValue(optionKey) {
     const optionValues = optionMap.get(optionKey);
-    optionBodyContainer.querySelectorAll(`select[data-option="${optionKey}"]`).forEach(select => {
+    optionBodyContainer.querySelectorAll(`select[data-option-id="${optionKey}"]`).forEach(select => {
         select.innerHTML = "";
         const selectOptions = getValuesAsSelectOption(optionValues);
         select.append(...selectOptions);
@@ -353,13 +332,14 @@ function updateProductOptionSelectionValue(optionKey) {
 }
 
 document.getElementById('add-product-btn').addEventListener('click', async function () {
-    const newProductId = `Product ${products.length + 1}`;
+    const newProductId = products[products.length - 1] + 1;
     products.push(newProductId);
     addProductForOption(newProductId);
     addProductForSpec(newProductId);
     addNewProductGroupTemplate(newProductId);
-    const [name, images, descriptions] = await getProductLineInfo();
-    await postProductLineInfo(name, images, descriptions);
+
+    // const [name, images, descriptions] = await getProductLineInfo();
+    // await postProductLineInfo(name, images, descriptions);
 });
 
 function addProductForOption(productId) {
@@ -367,7 +347,7 @@ function addProductForOption(productId) {
     optionProductItem.dataset.productId = productId;
     optionProductItem.classList.remove('hidden');
     const optionProductName = optionBodyContainer.querySelector('.option-product-name').cloneNode();
-    optionProductName.innerHTML = products[products.length - 1];
+    optionProductName.innerHTML = 'Product ' + productId.toString();
     optionProductItem.appendChild(optionProductName);
     optionBodyContainer.appendChild(optionProductItem);
     optionMap.forEach((optionValues, optionKey) => {
@@ -375,7 +355,7 @@ function addProductForOption(productId) {
         const optionSelectionWrapper = optionBodyContainer.querySelector('.option-product-selection').cloneNode(true);
         const optionSelection = optionSelectionWrapper.querySelector('select');
         optionSelection.innerHTML = "";
-        optionSelection.dataset.option = optionKey;
+        optionSelection.dataset.optionId = optionKey;
         optionSelection.append(...options);
         optionProductItem.appendChild(optionSelectionWrapper);
     });
@@ -386,7 +366,7 @@ function addProductForSpec(productId) {
     specProductItem.dataset.productId = productId;
     specProductItem.classList.remove('hidden');
     const specProductName = specBodyContainer.querySelector('.spec-product-name').cloneNode();
-    specProductName.innerHTML = products[products.length - 1];
+    specProductName.innerHTML = 'Product ' + productId.toString();
     specProductItem.appendChild(specProductName);
     specBodyContainer.appendChild(specProductItem);
     specMap.forEach((specValues, specKey) => {
@@ -394,7 +374,7 @@ function addProductForSpec(productId) {
         const specSelectionWrapper = specBodyContainer.querySelector('.spec-product-selection').cloneNode(true);
         const specSelection = specSelectionWrapper.querySelector('select');
         specSelection.innerHTML = "";
-        specSelection.dataset.spec = specKey;
+        specSelection.dataset.specId = specKey;
         specSelection.append(...specOptions);
         specProductItem.appendChild(specSelectionWrapper);
     });
@@ -416,7 +396,7 @@ function removeProductItemFromOption(productId) {
 }
 
 
-/* Product Options Section */
+/* Product Specifications Section */
 const specHeaderWrapper = document.getElementById('spec-header-tr');
 const specBodyContainer = document.getElementById('spec-body');
 const specMap = new Map();
@@ -432,7 +412,7 @@ document.getElementById('add-spec-btn').addEventListener('click', function () {
         specValueContainer.appendChild(specValueItem);
         initializeSpecValueButtons(specValueItem, key);
         const specHeaderItem = specHeaderWrapper.querySelector('.spec-header-th').cloneNode(true);
-        specHeaderItem.classList.add(`spec-id-${key}`);
+        specHeaderItem.dataset.specId = `spec-id-${key}`;
         specHeaderItem.innerHTML = key;
         specHeaderWrapper.appendChild(specHeaderItem);
         addProductSpecSelection(key);
@@ -459,9 +439,9 @@ function initializeSpecValueButtons(specValueItem, specKey) {
     specValueItem.querySelector('.remove-option-btn').addEventListener('click', function () {
         specMap.delete(specKey);
         specValueItem.remove();
-        specHeaderWrapper.querySelector(`.spec-id-${specKey}`).remove();
+        specHeaderWrapper.querySelector(`[data-spec-id="${specKey}"]`).remove();
         specBodyContainer.querySelectorAll('.spec-product-selection').forEach(selectionWrapper => {
-            if (selectionWrapper.querySelector(`select[data-spec="${specKey}"]`)) {
+            if (selectionWrapper.querySelector(`select[data-spec-id="${specKey}"]`)) {
                 selectionWrapper.remove();
             }
         });
@@ -472,10 +452,10 @@ function initializeSpecValueButtons(specValueItem, specKey) {
 function addProductSpecSelection(specKey) {
     const allProductSpecItems = specBodyContainer.querySelectorAll('.spec-product-item');
     Array.from(allProductSpecItems).slice(1).forEach(item => {
-        if (item.querySelector(`select[data-spec="${specKey}"]`) == null) {
+        if (item.querySelector(`select[data-spec-id="${specKey}"]`) == null) {
             const specSelectionWrapper = specBodyContainer.querySelector('.spec-product-selection').cloneNode(true);
             const specSelection = specSelectionWrapper.querySelector('select');
-            specSelection.dataset.spec = specKey;
+            specSelection.dataset.specId = specKey;
             specSelection.innerHTML = "";
             item.appendChild(specSelectionWrapper);
         }
@@ -484,7 +464,7 @@ function addProductSpecSelection(specKey) {
 
 function updateProductSpecSelectionValue(specKey) {
     const specValues = specMap.get(specKey);
-    specBodyContainer.querySelectorAll(`select[data-spec="${specKey}"]`).forEach(select => {
+    specBodyContainer.querySelectorAll(`select[data-spec-id="${specKey}"]`).forEach(select => {
         select.innerHTML = "";
         const specSelectOptions = getValuesAsSelectOption(specValues);
         select.append(...specSelectOptions);
@@ -507,7 +487,7 @@ function addNewProductGroupTemplate(productId) {
     const productGroupItem = productGroupContainer.querySelector('.product-group-template').cloneNode(true);
     productGroupItem.classList.remove('hidden');
     productGroupItem.dataset.productId = productId;
-    productGroupItem.querySelector('.product-number').innerHTML = productId;
+    productGroupItem.querySelector('.product-number').innerHTML = 'Product ' + productId;
     productGroupItem.querySelector('.feature-entry').remove(); // remove uninitialized one
     productGroupContainer.appendChild(productGroupItem);
     data_allProductImages.set(productId, []);
@@ -564,59 +544,60 @@ function deleteProductData(productId) {
 
 
 /* POST */
+// product line POST
 async function getProductLineInfo() {
     const productLineNameInput = document.getElementById('product-line-name-input');
     const productLineName = productLineNameInput.value.trim();
     if (!productLineName)
         return null;
     const productLineImageNames = data_productLineImages.length > 0 ? await uploadImages(data_productLineImages) : [];
-    if (productLineImageNames == null)
-        console.error('Fail uploading product line images');
-    const descriptionImageNames = data_productLineDescriptionImages.length > 0 ? await uploadImages(data_productLineDescriptionImages) : [];
     const allDescriptionEntries =
         Array.from(document.getElementById('product-line-descriptions').querySelectorAll('.description-entry')).slice(1);
+    const descriptionContent = await getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries);
+    return {
+        name: productLineName,
+        imageNames: productLineImageNames,
+        descriptions: descriptionContent
+    };
+}
+
+async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
+    const descriptionImageNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
     const descriptionTexts = [];
-    let descriptionImageIndex = 0;
-    allDescriptionEntries.forEach((descriptionEntry, index) => {
+    allDescriptionEntries.forEach(descriptionEntry => {
         const image = descriptionEntry.querySelector('img');
         if (image.src && image.alt !== "empty") {
             descriptionTexts.push(
                 {
                     type: "IMAGE",
-                    content: descriptionImageNames[descriptionImageIndex++]
+                    content: descriptionImageNames.shift()
                 }
             );
         }
         else {
             const descriptionTextValue = descriptionEntry.querySelector('textarea').value.trim();
-            if (descriptionTextValue)
+            if (descriptionTextValue) {
                 descriptionTexts.push(
                     {
                         type: "TEXT",
                         content: descriptionTextValue
                     }
                 );
+            }
         }
     });
-    return [productLineName, productLineImageNames, descriptionTexts];
+    return descriptionTexts;
 }
 
-function postProductLineInfo(name, imageNames, descriptions) {
+function postProductLineInfo(productLineInfoData) {
     const url = 'http://localhost:8080/api/product/newProductLine';
-    console.log(name);
-    console.log(imageNames);
-    console.log(descriptions);
-    const data = {
-        productLineName: name,
-        productLineImageNames: imageNames,
-        productLineDescriptions: descriptions
-    };
+    console.log(productLineInfoData);
     return fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(productLineInfoData)
     })
         .then(response => {
             if (!response.ok)
@@ -631,6 +612,66 @@ function postProductLineInfo(name, imageNames, descriptions) {
             console.error('Error uploading product line info', error);
             return null;
         });
+}
+
+function getProductOptionContent(productId) {
+    const productOptionItem = optionBodyContainer.querySelector(`[data-product-id="${productId}"]`);
+    if (!productOptionItem)
+        return null;
+    const optionContent = [];
+    productOptionItem.querySelectorAll('select').forEach(select => {
+        optionContent.push({
+            name: select.dataset.optionId,
+            value: select.value,
+        });
+    })
+    return optionContent.length === 0 ? null : optionContent;
+}
+
+function getProductSpecificationContent(productId) {
+    const productSpecItem = specBodyContainer.querySelector(`[data-product-id="${productId}"]`);
+    if (!productSpecItem)
+        return null;
+    const specContent = [];
+    productSpecItem.querySelectorAll('select').forEach(select => {
+        specContent.push({
+            name: select.dataset.specId,
+            value: select.value,
+        })
+    })
+    return specContent.length === 0 ? null : specContent;
+}
+
+// product group POST
+async function getProductInfo(productId) {
+    const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
+    if (!productContainer)
+        return null;
+    const productFeatures = [];
+    productContainer.querySelectorAll('.product-feature-input').forEach(input => {
+        const featureContent = input.value.trim();
+        if (featureContent)
+            productFeatures.push(featureContent);
+    });
+    const productImageNames = data_allProductImages.get(productId).length > 0 ?
+        await uploadImages(data_allProductImages.get(productId)) : [];
+    const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
+    const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries);
+    return {
+        name: productContainer.querySelector('.product-name-input').value,
+        brand: productContainer.querySelector('.product-brand-input').value,
+        manufacturerId: productContainer.querySelector('.product-manufacturer-part-number-input').value,
+        quantity: productContainer.querySelector('.product-quantity-input').value,
+        regularPrice: productContainer.querySelector('.product-regular-price-input').value,
+        salePrice: productContainer.querySelector('.product-sale-price-input').value,
+        saleEndDate: productContainer.querySelector('.product-sale-date-input').value,
+        categoryId: document.querySelector('input[name="category"]:checked')?.id.replace("category-", ""),
+        options: getProductOptionContent(productId),
+        specs: getProductSpecificationContent(productId),
+        features: productFeatures,
+        imageNames: productImageNames,
+        descriptions: productDescriptionContent
+    };
 }
 
 function uploadImages(dataImageArray) {
