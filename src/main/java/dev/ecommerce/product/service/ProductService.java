@@ -66,26 +66,26 @@ public class ProductService {
 
     @Transactional
     public Integer saveProductLine(ProductLineDTO productLineDTO) {
-        if (productLineDTO.getProductLineName() == null)
+        if (productLineDTO.getName() == null)
             throw new IllegalStateException("Product line name is null");
-        ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getProductLineName()));
+        ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getName()));
 
         List<ProductLineMedia> mediaList = new ArrayList<>();
-        for (int j = 0; j < productLineDTO.getProductLineImageNames().length; j++) {
+        for (int j = 0; j < productLineDTO.getImageNames().length; j++) {
             mediaList.add(new ProductLineMedia(
                     savedProductLine,
-                    productLineDTO.getProductLineImageNames()[j],
+                    productLineDTO.getImageNames()[j],
                     j
             ));
         }
         productLineMediaRepository.saveAll(mediaList);
 
         List<ProductLineDescription> descriptionList = new ArrayList<>();
-        for (int j = 0; j < productLineDTO.getProductLineDescriptions().length; j++) {
+        for (int j = 0; j < productLineDTO.getDescriptions().length; j++) {
             descriptionList.add(new ProductLineDescription(
                     savedProductLine,
-                    productLineDTO.getProductLineDescriptions()[j].type(),
-                    productLineDTO.getProductLineDescriptions()[j].content(),
+                    productLineDTO.getDescriptions()[j].type(),
+                    productLineDTO.getDescriptions()[j].content(),
                     j
             ));
         }

@@ -45,11 +45,11 @@ public class ProductController {
     }
 
     @PostMapping("/newProductLine")
-    public ResponseEntity<String> addProduct(@Valid @RequestBody ProductLineDTO productLineDTO) {
-        System.out.println(productLineDTO.getProductLineName());
-        System.out.println(Arrays.toString(productLineDTO.getProductLineImageNames()));
-        System.out.println(Arrays.toString(productLineDTO.getProductLineDescriptions()));
-        return ResponseEntity.status(HttpStatus.OK).body("OK");
+    public ResponseEntity<Integer> addProduct(@Valid @RequestBody ProductLineDTO productLineDTO) {
+        Integer savedProductLineId = categoryService.saveProductLine(productLineDTO);
+        if (savedProductLineId == null)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        return ResponseEntity.status(HttpStatus.OK).body(savedProductLineId);
     }
 
     @PostMapping("/uploadImages")
