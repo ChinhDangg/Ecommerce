@@ -1,17 +1,15 @@
 package dev.ecommerce.product.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Setter;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@Getter
 @Table(name = "product_prices")
 public class ProductPrice {
-    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
@@ -22,8 +20,8 @@ public class ProductPrice {
     @Column(precision = 10, scale = 2)  // 8 digits before, 2 after decimal
     private BigDecimal price;
 
-    private Integer discount;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal salePrice;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM/dd/yyyy")
     private LocalDate endDisCountDate;
 }

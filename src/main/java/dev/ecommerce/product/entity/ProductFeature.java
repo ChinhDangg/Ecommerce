@@ -1,13 +1,12 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Setter;
+import lombok.Getter;
 
 @Entity
+@Getter
 @Table(name = "product_features")
 public class ProductFeature {
-    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -15,7 +14,5 @@ public class ProductFeature {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private String name;
-
-    private String value;
+    private String content;
 }
