@@ -11,11 +11,11 @@ public class ProductLineDTO {
 
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
-    private String productLineName;
+    private String name;
 
     @Size(max = 5, message = "Max of 5 images only")
-    private String[] productLineImageNames;
+    private String[] imageNames;
 
     @Size(max = 10, message = "Max of 10 descriptions only")
-    private Descriptions[] productLineDescriptions;
+    private Descriptions[] descriptions;
 }
