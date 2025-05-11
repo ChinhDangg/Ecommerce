@@ -2,9 +2,11 @@ package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "product_options")
 public class ProductOption {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,4 +19,10 @@ public class ProductOption {
     private String name;
 
     private String value;
+
+    public ProductOption(Product product, String name, String value) {
+        this.product = product;
+        this.name = name;
+        this.value = value;
+    }
 }

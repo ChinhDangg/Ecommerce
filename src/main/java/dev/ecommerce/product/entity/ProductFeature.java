@@ -2,9 +2,11 @@ package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "product_features")
 public class ProductFeature {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,4 +17,9 @@ public class ProductFeature {
     private Product product;
 
     private String content;
+
+    public ProductFeature(Product product, String content) {
+        this.product = product;
+        this.content = content;
+    }
 }

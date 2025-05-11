@@ -1,8 +1,12 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@Getter
 @Table(name = "product_media")
 public class ProductMedia {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,4 +20,10 @@ public class ProductMedia {
     private String contentURL;
 
     private Integer sortOrder;
+
+    public ProductMedia(Product product, String contentURL, Integer sortOrder) {
+        this.product = product;
+        this.contentURL = contentURL;
+        this.sortOrder = sortOrder;
+    }
 }

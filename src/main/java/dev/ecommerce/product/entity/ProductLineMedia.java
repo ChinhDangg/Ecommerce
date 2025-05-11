@@ -1,10 +1,12 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@Getter
 @Table(name = "product_line_media")
 public class ProductLineMedia {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

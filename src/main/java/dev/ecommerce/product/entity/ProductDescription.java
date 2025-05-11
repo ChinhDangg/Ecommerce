@@ -1,8 +1,12 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 @Table(name = "product_descriptions")
 public class ProductDescription {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,10 +17,6 @@ public class ProductDescription {
     @JoinColumn(name = "product_id")
     private Product product; // product exclusive description
 
-    @ManyToOne
-    @JoinColumn(name = "product_line_id")
-    private ProductLine productLine;  // product-shared descriptions
-
     @Enumerated(EnumType.STRING)
     private DescriptionType descriptionType; // TEXT, IMAGE, VIDEO
 
@@ -25,4 +25,11 @@ public class ProductDescription {
 
     // to know which description to display first
     private Integer sortOrder;
+
+    public ProductDescription(Product product, DescriptionType descriptionType, String content, Integer sortOrder) {
+        this.product = product;
+        this.descriptionType = descriptionType;
+        this.content = content;
+        this.sortOrder = sortOrder;
+    }
 }
