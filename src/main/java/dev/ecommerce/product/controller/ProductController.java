@@ -1,6 +1,7 @@
 package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductCategoryDTO;
+import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -45,11 +46,17 @@ public class ProductController {
     }
 
     @PostMapping("/newProductLine")
-    public ResponseEntity<Integer> addProduct(@Valid @RequestBody ProductLineDTO productLineDTO) {
+    public ResponseEntity<Integer> addProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
         Integer savedProductLineId = categoryService.saveProductLine(productLineDTO);
         if (savedProductLineId == null)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        return ResponseEntity.status(HttpStatus.OK).body(savedProductLineId);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
+    }
+
+    @PostMapping("/newProduct")
+    public ResponseEntity<Long> addProduct(@Valid @RequestBody ProductDTO productDTO) {
+        Long savedProductId = productService.saveProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
 
     @PostMapping("/uploadImages")
@@ -72,7 +79,7 @@ public class ProductController {
                     })
                     .toList();
             System.out.println(fileNames);
-            return ResponseEntity.ok(fileNames);
+            return ResponseEntity.status(HttpStatus.CREATED).body(fileNames);
         } catch (Exception e) {
             System.out.println("File upload failed: " + e.getMessage());
             return ResponseEntity.status(500).body(null);
