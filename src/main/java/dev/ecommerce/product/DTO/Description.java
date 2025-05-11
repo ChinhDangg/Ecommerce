@@ -2,4 +2,4 @@ package dev.ecommerce.product.DTO;
 
 import dev.ecommerce.product.entity.DescriptionType;
 
-public record Descriptions(DescriptionType type, String content) {}
+public record Description(DescriptionType type, String content) {}
