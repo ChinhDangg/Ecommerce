@@ -17,5 +17,5 @@ public class ProductLineDTO {
     private String[] imageNames;
 
     @Size(max = 10, message = "Max of 10 descriptions only")
-    private Descriptions[] descriptions;
+    private Description[] descriptions;
 }
