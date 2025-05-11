@@ -71,6 +71,10 @@ const data_productLineDescriptionImages = []
 
 document.getElementById('add-line-description-btn').addEventListener('click', function () {
     const productLineDescriptionContainer = document.getElementById('product-line-descriptions');
+    if (productLineDescriptionContainer.children.length > 10) {
+        alert('Max of 10 descriptions only');
+        return;
+    }
     const newDescription = productLineDescriptionContainer.querySelector('.description-entry').cloneNode(true);
     newDescription.classList.remove('hidden');
     initializeDescriptionButtons(newDescription, data_productLineDescriptionImages);
@@ -503,8 +507,13 @@ function addNewProductGroupTemplate(productId) {
         productGroupItem.querySelector('.product-details').classList.toggle('hidden');
     });
     productGroupItem.querySelector('.add-feature-btn').addEventListener('click', function () {
+        const productFeatureContainer = productGroupItem.querySelector('.product-features');
+        if (productFeatureContainer.children.length > 10) {
+            alert('Max of 10 features only');
+            return;
+        }
         const featureEntry = productGroupContainer.querySelector('.feature-entry').cloneNode(true);
-        productGroupItem.querySelector('.product-features').appendChild(featureEntry);
+        productFeatureContainer.appendChild(featureEntry);
         featureEntry.querySelector('.delete-feature-btn').addEventListener('click', function () {
             featureEntry.remove();
         })
@@ -521,9 +530,14 @@ function addNewProductGroupTemplate(productId) {
         addProductImageInput.click();
     });
     productGroupItem.querySelector('.add-product-description-btn').addEventListener('click', function () {
+        const productDescriptionContainer = productGroupItem.querySelector('.product-descriptions');
+        if (productDescriptionContainer.children.length > 10) {
+            alert('Max of 10 descriptions only');
+            return;
+        }
         const descriptionItem = productGroupContainer.querySelector('.description-entry').cloneNode(true);
         descriptionItem.classList.remove('hidden');
-        productGroupItem.querySelector('.product-descriptions').appendChild(descriptionItem);
+        productDescriptionContainer.appendChild(descriptionItem);
         initializeDescriptionButtons(descriptionItem, data_allProductDescriptionImages.get(productId));
     });
 }
@@ -625,7 +639,7 @@ function getProductOptionContent(productId) {
             value: select.value,
         });
     })
-    return optionContent.length === 0 ? null : optionContent;
+    return optionContent.length === 0 ? [] : optionContent;
 }
 
 function getProductSpecificationContent(productId) {
@@ -639,13 +653,39 @@ function getProductSpecificationContent(productId) {
             value: select.value,
         })
     })
-    return specContent.length === 0 ? null : specContent;
+    return specContent.length === 0 ? [] : specContent;
 }
 
 // product group POST
-async function getProductInfo(productId) {
+function postProductInfo(productInfoData) {
+    const url = 'http://localhost:8080/api/product/newProduct';
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productInfoData)
+    })
+        .then(response => {
+            if (response.status === 201) //created
+                return response.text();
+            throw new Error('Fail upload product info');
+        })
+        .then(data => {
+            console.log('Success upload product info: ', data);
+            return data;
+        })
+        .catch(error => {
+            console.error('Error uploading product info', error);
+            return null;
+        });
+}
+
+async function getProductInfo(productLineId, productId) {
     const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productContainer)
+        return null;
+    if (!checkProductInfoFilled(productId))
         return null;
     const productFeatures = [];
     productContainer.querySelectorAll('.product-feature-input').forEach(input => {
@@ -658,20 +698,49 @@ async function getProductInfo(productId) {
     const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
     const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries);
     return {
+        productLineId: productLineId,
         name: productContainer.querySelector('.product-name-input').value,
         brand: productContainer.querySelector('.product-brand-input').value,
         manufacturerId: productContainer.querySelector('.product-manufacturer-part-number-input').value,
         quantity: productContainer.querySelector('.product-quantity-input').value,
+        conditionType: productContainer.querySelector('.product-condition-select').value,
+        categoryId: document.querySelector('input[name="category"]:checked')?.id.replace("category-", ""),
         regularPrice: productContainer.querySelector('.product-regular-price-input').value,
         salePrice: productContainer.querySelector('.product-sale-price-input').value,
-        saleEndDate: productContainer.querySelector('.product-sale-date-input').value,
-        categoryId: document.querySelector('input[name="category"]:checked')?.id.replace("category-", ""),
+        saleEndDate: productContainer.querySelector('.product-sale-end-date-input').value,
         options: getProductOptionContent(productId),
-        specs: getProductSpecificationContent(productId),
+        specifications: getProductSpecificationContent(productId),
         features: productFeatures,
         imageNames: productImageNames,
         descriptions: productDescriptionContent
     };
+}
+
+function checkProductInfoFilled(productId) {
+    const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
+    if (!productContainer.querySelector('.product-name-input').value) {
+        alert('Product name is required');
+        return false;
+    } else if (!productContainer.querySelector('.product-brand-input').value) {
+        alert('Product brand is required');
+        return false;
+    } else if (!productContainer.querySelector('.product-manufacturer-part-number-input').value) {
+        alert('Product manufacturer is required');
+        return false;
+    } else if (!productContainer.querySelector('.product-quantity-input').value) {
+        alert('Product quantity is required');
+        return false;
+    } else if (!productContainer.querySelector('.product-condition-select').value) {
+        alert('Product condition is required');
+        return false;
+    } else if (!document.querySelector('input[name="category"]:checked')?.id.replace("category-", "")) {
+        alert('Product category is required');
+        return false;
+    } else if (!productContainer.querySelector('.product-regular-price-input').value) {
+        alert('Product price is required');
+        return false;
+    }
+    return true;
 }
 
 function uploadImages(dataImageArray) {
@@ -684,9 +753,9 @@ function uploadImages(dataImageArray) {
         body: formData,
     })
         .then(response => {
-            if (!response.ok)
-                throw new Error('Fail upload images');
-            return response.json(); // return list of image names
+            if (response.status === 201) // created
+                return response.json(); // return list of image names
+            throw new Error('Fail upload images');
         })
         .then(data => {
             console.log('Success upload images: ', data);
@@ -698,3 +767,9 @@ function uploadImages(dataImageArray) {
         })
 }
 
+document.getElementById('publish-btn').addEventListener('click', async function () {
+    const productInfo = await getProductInfo(null, products[(products.length - 1)]);
+    console.log(productInfo);
+    if (productInfo)
+        await postProductInfo(productInfo);
+});
