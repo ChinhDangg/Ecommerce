@@ -14,15 +14,15 @@ public class ProductDTO {
 
     private Integer productLineId;
 
+    @NotNull(message = "Manufacturer id is required")
+    private String manufacturerId;
+
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     @NotBlank(message = "Name is required")
     private String name;
 
     @NotBlank(message = "Brand is required")
     private String brand;
-
-    @NotNull(message = "Manufacturer id is required")
-    private String manufacturerId;
 
     @NotNull(message = "Quantity is required")
     private Integer quantity;
@@ -34,20 +34,20 @@ public class ProductDTO {
     private Integer categoryId;
 
     @NotBlank(message = "Price is required")
-    private String regularPrice;
+    private String price;
     private String salePrice;
     private LocalDate saleEndDate;
 
-    private Option[] options;
+    private OptionDTO[] options;
 
-    private Specification[] specifications;
+    private OptionDTO[] specifications;
 
     @Size(max = 10, message = "Max of 10 features only")
     private String[] features;
 
-    @Size(max = 5, message = "Max of 5 images only")
-    private String[] imageNames;
+    @Size(max = 5, message = "Max of 5 media only")
+    private ContentDTO[] media;
 
     @Size(max = 10, message = "Max of 10 descriptions only")
-    private Description[] descriptions;
+    private ContentDTO[] descriptions;
 }

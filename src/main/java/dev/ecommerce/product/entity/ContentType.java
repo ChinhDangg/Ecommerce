@@ -1,5 +1,5 @@
 package dev.ecommerce.product.entity;
 
-public enum DescriptionType {
+public enum ContentType {
     TEXT, IMAGE, VIDEO
 }
