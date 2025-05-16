@@ -5,6 +5,7 @@ import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,22 +22,31 @@ import java.util.List;
 @RequestMapping("/api/product")
 public class ProductController {
 
-    private final ProductService categoryService;
     private final ProductService productService;
 
-    public ProductController(ProductService categoryService, ProductService productService) {
-        this.categoryService = categoryService;
+    public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
     @GetMapping("/category")
-    public List<ProductCategoryDTO> topCategories() {
-        return categoryService.findAllTopCategory();
+    public List<ProductCategoryDTO> getTopCategories() {
+        return productService.findAllTopCategory();
     }
 
     @GetMapping("/subcategory/{id}")
-    public List<ProductCategoryDTO> subCategories(@PathVariable int id) {
-        return categoryService.findAllSubCategoryOf(id);
+    public List<ProductCategoryDTO> getSubCategories(@PathVariable int id) {
+        return productService.findAllSubCategoryOf(id);
+    }
+
+    @GetMapping("/productLine/{productLineId}")
+    public ProductLineDTO getProductLine(@PathVariable int productLineId) {
+        return productService.findProductLineById(productLineId);
+    }
+
+    @GetMapping("/search/product")
+    public Page<ProductDTO> getProducts(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "") String search) {
+        return productService.findProductsByName(search, page);
     }
 
     @PostMapping("/category/new")
@@ -47,7 +57,7 @@ public class ProductController {
 
     @PostMapping("/newProductLine")
     public ResponseEntity<Integer> addProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer savedProductLineId = categoryService.saveProductLine(productLineDTO);
+        Integer savedProductLineId = productService.saveProductLine(productLineDTO);
         if (savedProductLineId == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
@@ -69,7 +79,7 @@ public class ProductController {
                         try {
                             // Save file to a directory (e.g., uploads/)
                             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                            Path path = Paths.get("uploads/" + fileName);
+                            Path path = Paths.get("/static/images" + fileName);
                             Files.createDirectories(path.getParent()); // Ensure directory exists
                             Files.write(path, file.getBytes());
                             return fileName;
