@@ -33,7 +33,7 @@ public class WebConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:63342")); // or "*" for testing
+        config.setAllowedOrigins(List.of("http://localhost:63342", "http://localhost:8080")); // or "*" for testing
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // only if you send cookies or auth headers
