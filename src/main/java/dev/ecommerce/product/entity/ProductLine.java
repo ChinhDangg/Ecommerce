@@ -18,14 +18,17 @@ public class ProductLine {
     private String name;
 
     @OneToMany(mappedBy = "productLine")
-    private final List<ProductLineMedia> productLineMedias = new ArrayList<>();
+    @OrderBy("sortOrder ASC")
+    private final List<ProductLineMedia> media = new ArrayList<>();
+
+    @OneToMany(mappedBy = "productLine")
+    @OrderBy("sortOrder ASC")
+    private final List<ProductLineDescription> descriptions = new ArrayList<>();
 
     // variants of product (configurations or options) fall into same product line
+    //@JsonManagedReference
     @OneToMany(mappedBy = "productLine")
     private final List<Product> products = new ArrayList<>();
-
-    @OneToMany(mappedBy = "productLine")
-    private final List<ProductLineDescription> productLineDescriptions = new ArrayList<>();
 
     public ProductLine(String name) {
         this.name = name;

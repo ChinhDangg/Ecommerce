@@ -31,7 +31,7 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ConditionType condition;
+    private ConditionType conditionType;
 
     @Column(nullable = false)
     private LocalDate addedDate;
@@ -42,47 +42,48 @@ public class Product {
     @Column(precision = 10, scale = 2)
     private BigDecimal salePrice;
 
-    private LocalDate endDisCountDate;
+    private LocalDate saleEndDate;
 
+    //@JsonBackReference
     @ManyToOne
     @JoinColumn(name = "product_line_id")
     private ProductLine productLine;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private ProductCategory category;
 
     public Product(String manufacturerId, String name, String brand,
-                   Integer quantity, ConditionType condition, LocalDate addedDate,
-                   BigDecimal price, BigDecimal salePrice, LocalDate endDisCountDate,
+                   Integer quantity, ConditionType conditionType, LocalDate addedDate,
+                   BigDecimal price, BigDecimal salePrice, LocalDate saleEndDate,
                    ProductLine productLine, ProductCategory category) {
         this.manufacturerId = manufacturerId;
         this.name = name;
         this.brand = brand;
         this.quantity = quantity;
-        this.condition = condition;
+        this.conditionType = conditionType;
         this.addedDate = addedDate;
         this.price = price;
         this.salePrice = salePrice;
-        this.endDisCountDate = endDisCountDate;
+        this.saleEndDate = saleEndDate;
         this.productLine = productLine;
         this.category = category;
     }
 
     @OneToMany(mappedBy = "product")
-    private final List<ProductDescription> descriptions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product")
-    private final List<ProductMedia> media = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product")
     private final List<ProductOption> options = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    private final List<ProductSpecification> specifications = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
     private final List<ProductFeature> features = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
-    private final List<ProductSpecification> specifications = new ArrayList<>();
+    private final List<ProductMedia> media = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    private final List<ProductDescription> descriptions = new ArrayList<>();
 
     private Integer totalRatings;
 

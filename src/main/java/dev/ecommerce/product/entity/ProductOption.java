@@ -18,11 +18,11 @@ public class ProductOption {
 
     private String name;
 
-    private String value;
+    private String valueOption;
 
-    public ProductOption(Product product, String name, String value) {
+    public ProductOption(Product product, String name, String valueOption) {
         this.product = product;
         this.name = name;
-        this.value = value;
+        this.valueOption = valueOption;
     }
 }

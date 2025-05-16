@@ -18,7 +18,7 @@ public class ProductDescription {
     private Product product; // product exclusive description
 
     @Enumerated(EnumType.STRING)
-    private DescriptionType descriptionType; // TEXT, IMAGE, VIDEO
+    private ContentType contentType; // TEXT, IMAGE, VIDEO
 
     // text or image_url or video_url
     private String content;
@@ -26,9 +26,9 @@ public class ProductDescription {
     // to know which description to display first
     private Integer sortOrder;
 
-    public ProductDescription(Product product, DescriptionType descriptionType, String content, Integer sortOrder) {
+    public ProductDescription(Product product, ContentType contentType, String content, Integer sortOrder) {
         this.product = product;
-        this.descriptionType = descriptionType;
+        this.contentType = contentType;
         this.content = content;
         this.sortOrder = sortOrder;
     }

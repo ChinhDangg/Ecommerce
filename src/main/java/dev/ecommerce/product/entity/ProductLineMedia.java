@@ -16,13 +16,16 @@ public class ProductLineMedia {
     @JoinColumn(name = "product_line_id")
     private ProductLine productLine;  // product-shared media
 
-    private String contentURL;
+    private ContentType contentType; // IMAGE, VIDEO
+
+    private String content;
 
     private Integer sortOrder;
 
-    public ProductLineMedia(ProductLine productLine, String contentURL, Integer sortOrder) {
+    public ProductLineMedia(ProductLine productLine, ContentType contentType, String content, Integer sortOrder) {
         this.productLine = productLine;
-        this.contentURL = contentURL;
+        this.contentType = contentType;
+        this.content = content;
         this.sortOrder = sortOrder;
     }
 }

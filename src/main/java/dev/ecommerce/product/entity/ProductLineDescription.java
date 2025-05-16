@@ -17,7 +17,7 @@ public class ProductLineDescription {
     private ProductLine productLine;  // product-shared descriptions
 
     @Enumerated(EnumType.STRING)
-    private DescriptionType descriptionType; // TEXT, IMAGE, VIDEO
+    private ContentType contentType; // TEXT, IMAGE, VIDEO
 
     // text or image_url or video_url
     private String content;
@@ -25,10 +25,10 @@ public class ProductLineDescription {
     // to know which description to display first
     private Integer sortOrder;
 
-    public ProductLineDescription(ProductLine productLine, DescriptionType descriptionType,
+    public ProductLineDescription(ProductLine productLine, ContentType contentType,
                                   String content, Integer sortOrder) {
         this.productLine = productLine;
-        this.descriptionType = descriptionType;
+        this.contentType = contentType;
         this.content = content;
         this.sortOrder = sortOrder;
     }

@@ -17,12 +17,15 @@ public class ProductMedia {
     @JoinColumn(name = "product_id")
     private Product product; // product exclusive media
 
+    private ContentType contentType;
+
     private String contentURL;
 
     private Integer sortOrder;
 
-    public ProductMedia(Product product, String contentURL, Integer sortOrder) {
+    public ProductMedia(Product product, ContentType contentType, String contentURL, Integer sortOrder) {
         this.product = product;
+        this.contentType = contentType;
         this.contentURL = contentURL;
         this.sortOrder = sortOrder;
     }

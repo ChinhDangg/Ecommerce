@@ -12,17 +12,17 @@ public class ProductSpecification {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
     private String name;
 
-    private String value;
+    private String valueOption;
 
-    public ProductSpecification(Product product, String name, String value) {
+    public ProductSpecification(Product product, String name, String valueOption) {
         this.product = product;
         this.name = name;
-        this.value = value;
+        this.valueOption = valueOption;
     }
 }
