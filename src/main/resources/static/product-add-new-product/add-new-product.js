@@ -1,5 +1,6 @@
+/* Product line section */
 const productLineImageInput = document.getElementById('add-line-image-input');
-let data_productLineImages = []
+export let data_productLineImages = []
 
 document.getElementById('add-line-image-btn').addEventListener('click', function () {
     productLineImageInput.click();
@@ -67,7 +68,7 @@ function getChildIndex(child) {
     return index;
 }
 
-const data_productLineDescriptionImages = []
+export const data_productLineDescriptionImages = []
 
 document.getElementById('add-line-description-btn').addEventListener('click', function () {
     const productLineDescriptionContainer = document.getElementById('product-line-descriptions');
@@ -112,7 +113,11 @@ function initializeDescriptionButtons(descriptionContainer, dataImageArray) {
 }
 
 
-/* product category section */
+/* Product category section */
+/* Subcategories element is either in a subcategories class or in category-item (id - top),
+in sub then is sub of the sub, else direct sub of a top cate,
+must be only one sub in either top or another sub
+Top-category should be in top-categories class */
 const categoryContainer = document.getElementById('category-list');
 const subcategoryContainer = document.getElementById('subcategory-list');
 let currentCategory = null, currentCategoryButton = null;
@@ -253,18 +258,12 @@ document.getElementById('category-back-button').addEventListener('click', functi
 
 
 
-/* Subcategories element is either in a subcategories class or in category-item (id - top),
-in sub then is sub of the sub, else direct sub of a top cate,
-must be only one sub in either top or another sub
-Top-category should be in top-categories class */
-
-
 /* Product Options Section */
 const optionValueContainer = document.getElementById('option-values-container');
 const optionHeaderWrapper = document.getElementById('option-header-tr');
-const optionBodyContainer = document.getElementById('options-body');
+export const optionBodyContainer = document.getElementById('options-body');
 const optionMap = new Map();
-let products = [0];
+export let products = [0];
 
 document.getElementById('add-option-btn').addEventListener('click', function () {
     const key = prompt('Enter a new option name:');
@@ -341,9 +340,6 @@ document.getElementById('add-product-btn').addEventListener('click', async funct
     addProductForOption(newProductId);
     addProductForSpec(newProductId);
     addNewProductGroupTemplate(newProductId);
-
-    // const [name, images, descriptions] = await getProductLineInfo();
-    // await postProductLineInfo(name, images, descriptions);
 });
 
 function addProductForOption(productId) {
@@ -402,7 +398,7 @@ function removeProductItemFromOption(productId) {
 
 /* Product Specifications Section */
 const specHeaderWrapper = document.getElementById('spec-header-tr');
-const specBodyContainer = document.getElementById('spec-body');
+export const specBodyContainer = document.getElementById('spec-body');
 const specMap = new Map();
 
 document.getElementById('add-spec-btn').addEventListener('click', function () {
@@ -416,7 +412,7 @@ document.getElementById('add-spec-btn').addEventListener('click', function () {
         specValueContainer.appendChild(specValueItem);
         initializeSpecValueButtons(specValueItem, key);
         const specHeaderItem = specHeaderWrapper.querySelector('.spec-header-th').cloneNode(true);
-        specHeaderItem.dataset.specId = `spec-id-${key}`;
+        specHeaderItem.dataset.specId = key;
         specHeaderItem.innerHTML = key;
         specHeaderWrapper.appendChild(specHeaderItem);
         addProductSpecSelection(key);
@@ -483,9 +479,9 @@ function removeProductItemFromSpec(productId) {
 
 
 /* Product Group section */
-const productGroupContainer = document.getElementById('product-group-container');
-const data_allProductImages = new Map();
-const data_allProductDescriptionImages = new Map();
+export const productGroupContainer = document.getElementById('product-group-container');
+export const data_allProductImages = new Map();
+export const data_allProductDescriptionImages = new Map();
 
 function addNewProductGroupTemplate(productId) {
     const productGroupItem = productGroupContainer.querySelector('.product-group-template').cloneNode(true);
@@ -555,221 +551,3 @@ function deleteProductData(productId) {
     console.log(data_allProductImages);
     console.log(data_allProductDescriptionImages);
 }
-
-
-/* POST */
-// product line POST
-async function getProductLineInfo() {
-    const productLineNameInput = document.getElementById('product-line-name-input');
-    const productLineName = productLineNameInput.value.trim();
-    if (!productLineName)
-        return null;
-    const productLineImageNames = data_productLineImages.length > 0 ? await uploadImages(data_productLineImages) : [];
-    const allDescriptionEntries =
-        Array.from(document.getElementById('product-line-descriptions').querySelectorAll('.description-entry')).slice(1);
-    const descriptionContent = await getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries);
-    return {
-        name: productLineName,
-        imageNames: productLineImageNames,
-        descriptions: descriptionContent
-    };
-}
-
-async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
-    const descriptionImageNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
-    const descriptionTexts = [];
-    allDescriptionEntries.forEach(descriptionEntry => {
-        const image = descriptionEntry.querySelector('img');
-        if (image.src && image.alt !== "empty") {
-            descriptionTexts.push(
-                {
-                    type: "IMAGE",
-                    content: descriptionImageNames.shift()
-                }
-            );
-        }
-        else {
-            const descriptionTextValue = descriptionEntry.querySelector('textarea').value.trim();
-            if (descriptionTextValue) {
-                descriptionTexts.push(
-                    {
-                        type: "TEXT",
-                        content: descriptionTextValue
-                    }
-                );
-            }
-        }
-    });
-    return descriptionTexts;
-}
-
-function postProductLineInfo(productLineInfoData) {
-    const url = 'http://localhost:8080/api/product/newProductLine';
-    console.log(productLineInfoData);
-    return fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productLineInfoData)
-    })
-        .then(response => {
-            if (!response.ok)
-                throw new Error('Fail upload product line info');
-            return response.text();
-        })
-        .then(data => {
-            console.log('Success upload product line info');
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading product line info', error);
-            return null;
-        });
-}
-
-function getProductOptionContent(productId) {
-    const productOptionItem = optionBodyContainer.querySelector(`[data-product-id="${productId}"]`);
-    if (!productOptionItem)
-        return null;
-    const optionContent = [];
-    productOptionItem.querySelectorAll('select').forEach(select => {
-        optionContent.push({
-            name: select.dataset.optionId,
-            value: select.value,
-        });
-    })
-    return optionContent.length === 0 ? [] : optionContent;
-}
-
-function getProductSpecificationContent(productId) {
-    const productSpecItem = specBodyContainer.querySelector(`[data-product-id="${productId}"]`);
-    if (!productSpecItem)
-        return null;
-    const specContent = [];
-    productSpecItem.querySelectorAll('select').forEach(select => {
-        specContent.push({
-            name: select.dataset.specId,
-            value: select.value,
-        })
-    })
-    return specContent.length === 0 ? [] : specContent;
-}
-
-// product group POST
-function postProductInfo(productInfoData) {
-    const url = 'http://localhost:8080/api/product/newProduct';
-    return fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productInfoData)
-    })
-        .then(response => {
-            if (response.status === 201) //created
-                return response.text();
-            throw new Error('Fail upload product info');
-        })
-        .then(data => {
-            console.log('Success upload product info: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading product info', error);
-            return null;
-        });
-}
-
-async function getProductInfo(productLineId, productId) {
-    const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
-    if (!productContainer)
-        return null;
-    if (!checkProductInfoFilled(productId))
-        return null;
-    const productFeatures = [];
-    productContainer.querySelectorAll('.product-feature-input').forEach(input => {
-        const featureContent = input.value.trim();
-        if (featureContent)
-            productFeatures.push(featureContent);
-    });
-    const productImageNames = data_allProductImages.get(productId).length > 0 ?
-        await uploadImages(data_allProductImages.get(productId)) : [];
-    const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
-    const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries);
-    return {
-        productLineId: productLineId,
-        name: productContainer.querySelector('.product-name-input').value,
-        brand: productContainer.querySelector('.product-brand-input').value,
-        manufacturerId: productContainer.querySelector('.product-manufacturer-part-number-input').value,
-        quantity: productContainer.querySelector('.product-quantity-input').value,
-        conditionType: productContainer.querySelector('.product-condition-select').value,
-        categoryId: document.querySelector('input[name="category"]:checked')?.id.replace("category-", ""),
-        regularPrice: productContainer.querySelector('.product-regular-price-input').value,
-        salePrice: productContainer.querySelector('.product-sale-price-input').value,
-        saleEndDate: productContainer.querySelector('.product-sale-end-date-input').value,
-        options: getProductOptionContent(productId),
-        specifications: getProductSpecificationContent(productId),
-        features: productFeatures,
-        imageNames: productImageNames,
-        descriptions: productDescriptionContent
-    };
-}
-
-function checkProductInfoFilled(productId) {
-    const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
-    if (!productContainer.querySelector('.product-name-input').value) {
-        alert('Product name is required');
-        return false;
-    } else if (!productContainer.querySelector('.product-brand-input').value) {
-        alert('Product brand is required');
-        return false;
-    } else if (!productContainer.querySelector('.product-manufacturer-part-number-input').value) {
-        alert('Product manufacturer is required');
-        return false;
-    } else if (!productContainer.querySelector('.product-quantity-input').value) {
-        alert('Product quantity is required');
-        return false;
-    } else if (!productContainer.querySelector('.product-condition-select').value) {
-        alert('Product condition is required');
-        return false;
-    } else if (!document.querySelector('input[name="category"]:checked')?.id.replace("category-", "")) {
-        alert('Product category is required');
-        return false;
-    } else if (!productContainer.querySelector('.product-regular-price-input').value) {
-        alert('Product price is required');
-        return false;
-    }
-    return true;
-}
-
-function uploadImages(dataImageArray) {
-    const formData = new FormData();
-    dataImageArray.forEach(image => {
-        formData.append('images', image);
-    })
-    return fetch('http://localhost:8080/api/product/uploadImages', {
-        method: 'POST',
-        body: formData,
-    })
-        .then(response => {
-            if (response.status === 201) // created
-                return response.json(); // return list of image names
-            throw new Error('Fail upload images');
-        })
-        .then(data => {
-            console.log('Success upload images: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading files: ', error);
-            return null;
-        })
-}
-
-document.getElementById('publish-btn').addEventListener('click', async function () {
-    const productInfo = await getProductInfo(null, products[(products.length - 1)]);
-    console.log(productInfo);
-    if (productInfo)
-        await postProductInfo(productInfo);
-});
