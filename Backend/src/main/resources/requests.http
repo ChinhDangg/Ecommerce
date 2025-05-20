@@ -1,0 +1,12 @@
+GET http://localhost:8080/admin/dashboard
+
+###
+GET http://localhost:8080/admin/dashboard/addNewProduct
+
+###
+GET http://localhost:8080/api/product/category
+
+###
+GET http://localhost:8080/api/product/search?
+    page=0&
+    search={name}

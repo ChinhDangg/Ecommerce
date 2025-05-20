@@ -1,0 +1,989 @@
+<DOCUMENT>
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>B&H Style Product Card - Admin Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+  <div class="flex min-h-screen">
+    <!-- Admin Sidebar (Fixed, Light Background, Black Text) -->
+    <div class="w-64 bg-gray-100 text-black fixed h-full overflow-y-auto">
+      <div class="p-4 border-b border-gray-300">
+        <h2 class="text-xl font-bold text-black">Admin Dashboard</h2>
+        <p class="text-gray-600 text-sm">Product Management</p>
+      </div>
+
+      <!-- Admin Tools -->
+      <nav class="mt-4">
+        <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Tools
+        </div>
+
+        <a href="#" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add New Product
+        </a>
+
+        <a href="#" class="flex items-center px-4 py-3 bg-gray-200 text-black">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+          Manage Categories
+        </a>
+
+        <a href="#" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Preview Mode
+        </a>
+
+        <a href="#" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Bulk Edit Products
+        </a>
+
+        <a href="#" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Analytics & Reports
+        </a>
+
+        <div class="px-4 py-2 mt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Product Status
+        </div>
+
+        <div class="px-4 py-2">
+          <label class="inline-flex items-center">
+            <input type="radio" class="form-radio text-blue-600" name="productStatus" value="draft" checked>
+            <span class="ml-2 text-black">Draft</span>
+          </label>
+        </div>
+
+        <div class="px-4 py-2">
+          <label class="inline-flex items-center">
+            <input type="radio" class="form-radio text-blue-600" name="productStatus" value="published">
+            <span class="ml-2 text-black">Published</span>
+          </label>
+        </div>
+
+        <div class="mt-8 px-4">
+          <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+            Save Changes
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Main Content Area (Scrollable) -->
+    <div class="flex-1 ml-64 overflow-y-auto h-screen">
+      <div class="bg-white shadow sticky top-0 z-10">
+        <div class="px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <span class="text-xl font-semibold text-gray-800">Editing Product:</span>
+            <span class="ml-2 text-gray-600">Canon EOS R6 Mark II</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Draft</span>
+            <button class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Discard</button>
+            <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Publish</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <!-- Product Line Edit Section -->
+        <div class="bg-white rounded-lg shadow mb-6">
+          <div class="border-b border-gray-200 px-4 py-4">
+            <h3 class="text-lg font-medium text-gray-800">Product Line</h3>
+          </div>
+          <div class="p-4">
+            <!-- Product Line Name -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Product Line Name</label>
+              <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="EOS R Series" placeholder="Enter product line name">
+              <p class="text-sm text-gray-500 mt-1">Group this product with others under the same product line (e.g., EOS R Series, Z Series).</p>
+            </div>
+
+            <!-- Product Line Images -->
+            <div class="mb-6">
+              <div class="flex justify-between items-center mb-4">
+                <label class="block text-sm font-medium text-gray-700">Product Line Images</label>
+                <div>
+                  <input type="file" accept="image/*" id="add-line-image-input" class="hidden" multiple>
+                  <button id="add-line-image-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
+                </div>
+              </div>
+              <div id="product-line-images" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="image-entry border-2 border-blue-600 rounded-md p-2 relative">
+                  <img src="/api/placeholder/500/500" alt="Product Line Image" class="h-40 w-full object-contain">
+                  <div class="text-xs text-center mt-2 font-medium">Main Line Image</div>
+                  <div class="absolute top-2 right-2 flex space-x-1">
+                    <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="image-entry border border-gray-200 rounded-md p-2 relative">
+                  <img src="/api/placeholder/100/80" alt="Product Line Image" class="h-40 w-full object-contain">
+                  <div class="absolute top-2 right-2 flex space-x-1">
+                    <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 mt-2">These images will be shared across all products in this product line (max 5).</p>
+            </div>
+
+            <!-- Product Line Descriptions -->
+            <div class="mb-6">
+              <h4 class="text-md font-medium text-gray-700 mb-2">Product Line Descriptions</h4>
+              <div id="product-line-descriptions" class="space-y-4">
+                <div class="description-entry flex items-start space-x-2">
+                  <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL">The EOS R Series represents Canon's cutting-edge mirrorless technology.</textarea>
+                  <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                </div>
+                <div class="description-entry flex items-start space-x-2">
+                  <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL">Featuring advanced autofocus and high-resolution sensors, this line is designed for professional photographers and videographers.</textarea>
+                  <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                </div>
+                <div class="description-entry flex items-start space-x-2">
+                  <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL">Watch the overview: https://www.youtube.com/watch?v=example</textarea>
+                  <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                </div>
+              </div>
+              <button id="add-line-description-btn" class="mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Options Section -->
+        <div class="bg-white rounded-lg shadow mb-6">
+          <div class="border-b border-gray-200 px-4 py-4">
+            <h3 class="text-lg font-medium text-gray-800">Product Options</h3>
+          </div>
+          <div class="p-4">
+            <div class="mb-4 flex space-x-4">
+              <button id="add-option-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Option</button>
+              <button id="add-product-btn" class="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">Add New Product</button>
+            </div>
+            <div id="option-values" class="mb-4"></div>
+            <div id="options-table" class="overflow-x-auto">
+              <table class="w-full text-sm text-left text-gray-700">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr id="options-header">
+                  <th class="px-4 py-2">Product</th>
+                </tr>
+                </thead>
+                <tbody id="options-body">
+                <tr data-product-id="1">
+                  <td class="px-4 py-2 font-medium">Product 1</td>
+                  <td class="px-4 py-2">
+                    <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="Color">
+                      <option value="Black" selected>Black</option>
+                      <option value="White" selected>White</option>
+                    </select>
+                  </td>
+                  <td class="px-4 py-2">
+                    <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="Lens Kit">
+                      <option value="Body Only" selected>Body Only</option>
+                      <option value="24-70mm" selected>24-70mm</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr data-product-id="2">
+                  <td class="px-4 py-2 font-medium">Product 2</td>
+                  <td class="px-4 py-2">
+                    <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="Color">
+                      <option value="Black" selected>Black</option>
+                      <option value="White">White</option>
+                    </select>
+                  </td>
+                  <td class="px-4 py-2">
+                    <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="Lens Kit">
+                      <option value="Body Only" selected>Body Only</option>
+                      <option value="24-70mm">24-70mm</option>
+                    </select>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Group Container -->
+        <div id="product-groups">
+          <!-- Product 1 Group -->
+          <div class="bg-white rounded-lg shadow mb-6 product-group" data-product-id="1">
+            <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-800">Product 1</h3>
+              <div class="flex items-center space-x-2">
+                <button class="delete-product-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete Product</button>
+                <button class="toggle-collapse text-gray-600 hover:text-gray-800 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 product-details">
+              <!-- Basic Information -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Basic Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="Canon EOS R6 Mark II Mirrorless Digital Camera (Body Only)">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                    <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                      <option selected>Canon</option>
+                      <option>Nikon</option>
+                      <option>Sony</option>
+                      <option>Fujifilm</option>
+                      <option>Panasonic</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part Number</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="4082C002">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="15">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pricing -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Pricing</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="2699.00">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($)</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="2499.00">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sale End Date</label>
+                    <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="2025-03-17">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product Images -->
+              <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="text-md font-medium text-gray-700">Product Images</h4>
+                  <div>
+                    <input type="file" accept="image/*" class="add-product-image-input hidden" multiple>
+                    <button class="add-product-image-btn px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
+                  </div>
+                </div>
+                <div class="product-images grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div class="image-entry border-2 border-blue-600 rounded-md p-2 relative">
+                    <img src="/api/placeholder/500/500" alt="Product" class="h-40 w-full object-contain">
+                    <div class="text-xs text-center mt-2 font-medium">Main Image</div>
+                    <div class="absolute top-2 right-2 flex space-x-1">
+                      <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="image-entry border border-gray-200 rounded-md p-2 relative">
+                    <img src="/api/placeholder/100/80" alt="Product" class="h-40 w-full object-contain">
+                    <div class="absolute top-2 right-2 flex space-x-1">
+                      <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="image-entry border border-gray-200 rounded-md p-2 relative">
+                    <img src="/api/placeholder/100/120" alt="Product" class="h-40 w-full object-contain">
+                    <div class="absolute top-2 right-2 flex space-x-1">
+                      <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product Descriptions -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Product Descriptions</h4>
+                <div class="product-descriptions space-y-4">
+                  <div class="description-entry flex items-start space-x-2">
+                    <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL">Full-frame mirrorless camera with 24.2MP sensor.</textarea>
+                    <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
+                  <div class="description-entry flex items-start space-x-2">
+                    <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL">Supports 4K video recording at 60fps.</textarea>
+                    <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
+                </div>
+                <button class="add-product-description-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product 2 Group -->
+          <div class="bg-white rounded-lg shadow mb-6 product-group" data-product-id="2">
+            <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-800">Product 2</h3>
+              <div class="flex items-center space-x-2">
+                <button class="delete-product-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete Product</button>
+                <button class="toggle-collapse text-gray-600 hover:text-gray-800 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 product-details">
+              <!-- Basic Information -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Basic Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="Canon EOS R6 Mark II Mirrorless Digital Camera (Body Only, Black)">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                    <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                      <option selected>Canon</option>
+                      <option>Nikon</option>
+                      <option>Sony</option>
+                      <option>Fujifilm</option>
+                      <option>Panasonic</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part Number</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="4082C003">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="10">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pricing -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Pricing</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="2599.00">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($)</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="2399.00">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sale End Date</label>
+                    <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="2025-03-17">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product Images -->
+              <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="text-md font-medium text-gray-700">Product Images</h4>
+                  <div>
+                    <input type="file" accept="image/*" class="add-product-image-input hidden" multiple>
+                    <button class="add-product-image-btn px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
+                  </div>
+                </div>
+                <div class="product-images grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div class="image-entry border-2 border-blue-600 rounded-md p-2 relative">
+                    <img src="/api/placeholder/500/500" alt="Product" class="h-40 w-full object-contain">
+                    <div class="text-xs text-center mt-2 font-medium">Main Image</div>
+                    <div class="absolute top-2 right-2 flex space-x-1">
+                      <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product Descriptions -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Product Descriptions</h4>
+                <div class="product-descriptions space-y-4">
+                  <div class="description-entry flex items-start space-x-2">
+                    <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL">Full-frame mirrorless camera with 24.2MP sensor.</textarea>
+                    <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
+                </div>
+                <button class="add-product-description-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed Cloudflare Script -->
+        <script>
+          (function() {
+            function c() {
+              var b = a.contentDocument || a.contentWindow.document;
+              if (b) {
+                var d = b.createElement('script');
+                d.innerHTML = "window.__CF$cv$params={r:'920781759c20450d',t:'MTc0MTk5NDQ2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+                b.getElementsByTagName('head')[0].appendChild(d);
+              }
+            }
+            if (document.body) {
+              var a = document.createElement('iframe');
+              a.height = 1;
+              a.width = 1;
+              a.style.position = 'absolute';
+              a.style.top = 0;
+              a.style.left = 0;
+              a.style.border = 'none';
+              a.style.visibility = 'hidden';
+              document.body.appendChild(a);
+              if ('loading' !== document.readyState) c();
+              else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+              else {
+                var e = document.onreadystatechange || function() {};
+                document.onreadystatechange = function(b) {
+                  e(b);
+                  'loading' !== document.readyState && (document.onreadystatechange = e, c());
+                }
+              }
+            }
+          })();
+        </script>
+
+        <!-- JavaScript for Dynamic Functionality -->
+        <script>
+          // Add Product Line Description
+          document.getElementById('add-line-description-btn').addEventListener('click', function() {
+            const descriptionsContainer = document.getElementById('product-line-descriptions');
+            const newDescription = document.createElement('div');
+            newDescription.className = 'description-entry flex items-start space-x-2';
+            newDescription.innerHTML = `
+                    <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL"></textarea>
+                    <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  `;
+            descriptionsContainer.appendChild(newDescription);
+            newDescription.querySelector('.delete-description-btn').addEventListener('click', function() {
+              newDescription.remove();
+            });
+          });
+
+          // Add Product Description (for existing Products)
+          document.querySelectorAll('.add-product-description-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              const descriptionsContainer = this.previousElementSibling;
+              const newDescription = document.createElement('div');
+              newDescription.className = 'description-entry flex items-start space-x-2';
+              newDescription.innerHTML = `
+                      <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL"></textarea>
+                      <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                    `;
+              descriptionsContainer.appendChild(newDescription);
+              newDescription.querySelector('.delete-description-btn').addEventListener('click', function() {
+                newDescription.remove();
+              });
+            });
+          });
+
+          // Delete Existing Descriptions
+          document.querySelectorAll('.delete-description-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              this.parentElement.remove();
+            });
+          });
+
+          // Delete Existing Products
+          document.querySelectorAll('.delete-product-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              const productGroup = this.closest('.product-group');
+              const productId = productGroup.getAttribute('data-product-id');
+              document.querySelector(`#options-body tr[data-product-id="${productId}"]`).remove();
+              productGroup.remove();
+            });
+          });
+
+          // Image Deletion and Movement
+          function initializeImageControls(container) {
+            container.querySelectorAll('.delete-image-btn').forEach(button => {
+              button.addEventListener('click', function() {
+                this.closest('.image-entry').remove();
+              });
+            });
+            container.querySelectorAll('.move-left-btn').forEach(button => {
+              button.addEventListener('click', function() {
+                const imageEntry = this.closest('.image-entry');
+                const previousSibling = imageEntry.previousElementSibling;
+                if (previousSibling && previousSibling.classList.contains('image-entry')) {
+                  imageEntry.parentNode.insertBefore(imageEntry, previousSibling);
+                }
+              });
+            });
+            container.querySelectorAll('.move-right-btn').forEach(button => {
+              button.addEventListener('click', function() {
+                const imageEntry = this.closest('.image-entry');
+                const nextSibling = imageEntry.nextElementSibling;
+                if (nextSibling && nextSibling.classList.contains('image-entry')) {
+                  imageEntry.parentNode.insertBefore(nextSibling, imageEntry);
+                }
+              });
+            });
+          }
+
+          // Add Image Functionality with Max 5 Limit
+          function addImages(container, fileInput) {
+            const currentCount = container.querySelectorAll('.image-entry').length;
+            const files = Array.from(fileInput.files);
+            const availableSlots = 5 - currentCount;
+
+            if (availableSlots <= 0) {
+              alert('Maximum of 5 images reached.');
+              return;
+            }
+
+            const filesToAdd = files.slice(0, availableSlots);
+            filesToAdd.forEach(file => {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                const newImageEntry = document.createElement('div');
+                newImageEntry.className = 'image-entry border border-gray-200 rounded-md p-2 relative';
+                newImageEntry.innerHTML = `
+                        <img src="${e.target.result}" alt="Uploaded Image" class="h-40 w-full object-contain">
+                        <div class="absolute top-2 right-2 flex space-x-1">
+                          <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                          <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      `;
+                container.appendChild(newImageEntry);
+                initializeImageControls(container);
+              };
+              reader.readAsDataURL(file);
+            });
+            fileInput.value = '';
+          }
+
+          // Product Line Images - Add Images
+          const lineImageBtn = document.getElementById('add-line-image-btn');
+          const lineImageInput = document.getElementById('add-line-image-input');
+          lineImageBtn.addEventListener('click', function() {
+            lineImageInput.click();
+          });
+          lineImageInput.addEventListener('change', function() {
+            addImages(document.getElementById('product-line-images'), lineImageInput);
+          });
+
+          // Product Images - Add Images
+          document.querySelectorAll('.add-product-image-btn').forEach(button => {
+            const fileInput = button.previousElementSibling;
+            button.addEventListener('click', function() {
+              fileInput.click();
+            });
+            fileInput.addEventListener('change', function() {
+              addImages(button.closest('.mb-6').querySelector('.product-images'), fileInput);
+            });
+          });
+
+          // Initialize controls for existing images
+          initializeImageControls(document.getElementById('product-line-images'));
+          document.querySelectorAll('.product-images').forEach(initializeImageControls);
+
+          // Product Options Logic
+          const optionsHeader = document.getElementById('options-header');
+          const optionsBody = document.getElementById('options-body');
+          const optionValuesContainer = document.getElementById('option-values');
+          let optionKeys = ['Color', 'Lens Kit'];
+          let optionValues = {
+            'Color': ['Black', 'White'],
+            'Lens Kit': ['Body Only', '24-70mm']
+          };
+
+          function updateOptionsUI() {
+            optionValuesContainer.innerHTML = '';
+            optionKeys.forEach(key => {
+              const div = document.createElement('div');
+              div.className = 'flex items-center space-x-2 mb-2';
+              div.innerHTML = `
+                      <button class="add-value-btn px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700" data-key="${key}">Add Value</button>
+                      <span class="font-medium">${key}:</span>
+                      <span>${optionValues[key].join(', ')}</span>
+                      <button class="remove-option-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700" data-key="${key}">Remove</button>
+                    `;
+              optionValuesContainer.appendChild(div);
+            });
+
+            // Add Value Event Listeners
+            document.querySelectorAll('.add-value-btn').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const key = this.getAttribute('data-key');
+                const value = prompt(`Enter a new value for ${key}:`);
+                if (value && !optionValues[key].includes(value)) {
+                  optionValues[key].push(value);
+                  updateOptionsUI();
+                  updateOptionsTable();
+                }
+              });
+            });
+
+            // Remove Option Event Listeners
+            document.querySelectorAll('.remove-option-btn').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const key = this.getAttribute('data-key');
+                if (confirm(`Are you sure you want to remove the option "${key}"?`)) {
+                  const index = optionKeys.indexOf(key);
+                  if (index > -1) {
+                    optionKeys.splice(index, 1);
+                    delete optionValues[key];
+                    updateOptionsUI();
+                    updateOptionsTable();
+                  }
+                }
+              });
+            });
+          }
+
+          function updateOptionsTable() {
+            optionsHeader.innerHTML = '<th class="px-4 py-2">Product</th>';
+            optionKeys.forEach(key => {
+              const th = document.createElement('th');
+              th.className = 'px-4 py-2';
+              th.textContent = key;
+              optionsHeader.appendChild(th);
+            });
+
+            optionsBody.querySelectorAll('tr').forEach(row => {
+              const productId = row.getAttribute('data-product-id');
+              const existingCells = row.querySelectorAll('td');
+              const newCells = ['<td class="px-4 py-2 font-medium">Product ' + productId + '</td>'];
+              optionKeys.forEach(key => {
+                const existingCell = Array.from(existingCells).find(cell => cell.querySelector(`select[data-option="${key}"]`));
+                if (existingCell) {
+                  const select = existingCell.querySelector('select');
+                  const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
+                  select.innerHTML = '';
+                  optionValues[key].forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    if (selectedValues.includes(value)) option.selected = true;
+                    select.appendChild(option);
+                  });
+                  newCells.push(existingCell.outerHTML);
+                } else {
+                  newCells.push(`
+                          <td class="px-4 py-2">
+                            <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}">
+                              ${optionValues[key].map(value => `<option value="${value}">${value}</option>`).join('')}
+                            </select>
+                          </td>
+                        `);
+                }
+              });
+              row.innerHTML = newCells.join('');
+            });
+          }
+
+          document.getElementById('add-option-btn').addEventListener('click', function() {
+            const key = prompt('Enter a new option name:');
+            if (key && !optionKeys.includes(key)) {
+              optionKeys.push(key);
+              optionValues[key] = [];
+              updateOptionsUI();
+              optionsBody.querySelectorAll('tr').forEach(row => {
+                const td = document.createElement('td');
+                td.className = 'px-4 py-2';
+                td.innerHTML = `<select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}"></select>`;
+                row.appendChild(td);
+              });
+              updateOptionsTable();
+            }
+          });
+
+          document.getElementById('add-product-btn').addEventListener('click', function() {
+            const productCount = optionsBody.children.length + 1;
+            const productId = productCount;
+
+            // Add to options table
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-product-id', productId);
+            newRow.innerHTML = `<td class="px-4 py-2 font-medium">Product ${productCount}</td>`;
+            optionKeys.forEach(key => {
+              newRow.innerHTML += `
+                      <td class="px-4 py-2">
+                        <select multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" data-option="${key}">
+                          ${optionValues[key].map(value => `<option value="${value}">${value}</option>`).join('')}
+                        </select>
+                      </td>
+                    `;
+            });
+            optionsBody.appendChild(newRow);
+
+            // Add product form
+            const productGroups = document.getElementById('product-groups');
+            const newProductGroup = document.createElement('div');
+            newProductGroup.className = 'bg-white rounded-lg shadow mb-6 product-group';
+            newProductGroup.setAttribute('data-product-id', productId);
+            newProductGroup.innerHTML = `
+                    <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+                      <h3 class="text-lg font-medium text-gray-800">Product ${productCount}</h3>
+                      <div class="flex items-center space-x-2">
+                        <button class="delete-product-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete Product</button>
+                        <button class="toggle-collapse text-gray-600 hover:text-gray-800 focus:outline-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-4 product-details">
+                      <div class="mb-6">
+                        <h4 class="text-md font-medium text-gray-700 mb-2">Basic Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                            <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                            <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                              <option>Canon</option>
+                              <option>Nikon</option>
+                              <option>Sony</option>
+                              <option>Fujifilm</option>
+                              <option>Panasonic</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part Number</label>
+                            <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                            <input type="number" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="0">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="mb-6">
+                        <h4 class="text-md font-medium text-gray-700 mb-2">Pricing</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                            <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($)</label>
+                            <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sale End Date</label>
+                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" value="">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                          <h4 class="text-md font-medium text-gray-700">Product Images</h4>
+                          <div>
+                            <input type="file" accept="image/*" class="add-product-image-input hidden" multiple>
+                            <button class="add-product-image-btn px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images</button>
+                          </div>
+                        </div>
+                        <div class="product-images grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div class="image-entry border border-gray-200 rounded-md p-2 relative">
+                            <img src="/api/placeholder/100/100" alt="Product" class="h-40 w-full object-contain">
+                            <div class="absolute top-2 right-2 flex space-x-1">
+                              <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Left">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                              </button>
+                              <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600" title="Move Right">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                              </button>
+                              <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700" title="Delete Image">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="mb-6">
+                        <h4 class="text-md font-medium text-gray-700 mb-2">Product Descriptions</h4>
+                        <div class="product-descriptions space-y-4">
+                          <div class="description-entry flex items-start space-x-2">
+                            <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL"></textarea>
+                            <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                          </div>
+                        </div>
+                        <button class="add-product-description-btn mt-4 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Description</button>
+                      </div>
+                    </div>
+                  `;
+            productGroups.appendChild(newProductGroup);
+            addCollapseListener(newProductGroup.querySelector('.toggle-collapse'));
+            newProductGroup.querySelector('.add-product-description-btn').addEventListener('click', function() {
+              const descriptionsContainer = this.previousElementSibling;
+              const newDescription = document.createElement('div');
+              newDescription.className = 'description-entry flex items-start space-x-2';
+              newDescription.innerHTML = `
+                      <textarea class="flex-1 h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Enter paragraph, image URL, or video URL"></textarea>
+                      <button class="delete-description-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                    `;
+              descriptionsContainer.appendChild(newDescription);
+              newDescription.querySelector('.delete-description-btn').addEventListener('click', function() {
+                newDescription.remove();
+              });
+            });
+            newProductGroup.querySelector('.delete-description-btn').addEventListener('click', function() {
+              this.parentElement.remove();
+            });
+            newProductGroup.querySelector('.delete-product-btn').addEventListener('click', function() {
+              const productId = newProductGroup.getAttribute('data-product-id');
+              document.querySelector(`#options-body tr[data-product-id="${productId}"]`).remove();
+              newProductGroup.remove();
+            });
+            const newProductImageBtn = newProductGroup.querySelector('.add-product-image-btn');
+            const newProductImageInput = newProductGroup.querySelector('.add-product-image-input');
+            newProductImageBtn.addEventListener('click', function() {
+              newProductImageInput.click();
+            });
+            newProductImageInput.addEventListener('change', function() {
+              addImages(newProductGroup.querySelector('.product-images'), newProductImageInput);
+            });
+            initializeImageControls(newProductGroup.querySelector('.product-images'));
+          });
+
+          // Initialize Options UI
+          updateOptionsUI();
+          updateOptionsTable();
+
+          // Collapse/Expand Functionality
+          function addCollapseListener(button) {
+            button.addEventListener('click', function() {
+              const details = this.parentElement.nextElementSibling;
+              details.classList.toggle('hidden');
+              const svg = this.querySelector('svg');
+              svg.classList.toggle('rotate-180');
+            });
+          }
+
+          // Initialize collapse listeners for existing products
+          document.querySelectorAll('.toggle-collapse').forEach(addCollapseListener);
+        </script>
+      </div>
+    </div>
+  </div>
+  </body>
+  </html>
+</DOCUMENT>

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B&H Style Product Card - Admin Mode</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="flex min-h-screen">
+  <!-- Admin Sidebar (Fixed, Light Background, Black Text) -->
+  <div class="w-64 bg-gray-100 text-black fixed h-full overflow-y-auto">
+    <div class="p-4 border-b border-gray-300">
+      <h2 class="text-xl font-bold text-black">Admin Dashboard</h2>
+      <p class="text-gray-600 text-sm">Product Management</p>
+    </div>
+
+    <!-- Admin Tools -->
+    <nav class="mt-4">
+      <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        Tools
+      </div>
+
+      <a href="#" id="add-category-link" class="flex items-center px-4 py-3 text-black hover:bg-gray-200 hover:text-black">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+        </svg>
+        Add New Product Category
+      </a>
+
+      <div class="mt-8 px-4">
+        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+          Save Changes
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content Area (Scrollable) -->
+  <div class="flex-1 ml-64 overflow-y-auto h-screen">
+    <div class="bg-white shadow sticky top-0 z-10">
+      <div class="px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center">
+          <span class="text-xl font-semibold text-gray-800">Category Management</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6" id="main-content">
+      <!-- Placeholder content -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="p-4 text-gray-800">Select "Add New Product Category" to begin managing categories.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Category Management -->
+<script>
+  // Track collapse state and subcategory data using Maps
+  const collapseState = new Map();
+  const subcategoryCache = new Map(); // Cache subcategories by parent ID
+  const originalContent = document.getElementById('main-content').innerHTML;
+
+  // Switch to Category Management
+  document.getElementById('add-category-link').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+          <div class="bg-white rounded-lg shadow mb-6">
+            <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-800">Add New Product Category</h3>
+              <button id="add-top-category-btn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Top Category</button>
+            </div>
+            <div class="p-4" id="category-tree"></div>
+          </div>
+        `;
+
+    // Attach event listener to the newly created button
+    document.getElementById('add-top-category-btn').addEventListener('click', async function() {
+      const name = prompt('Enter the name of the new top-level category:');
+      if (name) {
+        const newCategory = await addCategory(null, name);
+        if (newCategory) {
+          await fetchTopCategories(); // Refresh the tree
+        }
+      }
+    });
+
+    await fetchTopCategories();
+  });
+
+  // Fetch top-level categories from API
+  async function fetchTopCategories() {
+    try {
+      const response = await fetch('http://localhost:8080/api/product/category');
+      const categories = await response.json(); // Expecting [{id, name}, ...]
+      updateCategoryTree(categories);
+    } catch (error) {
+      console.error('Error fetching top categories:', error);
+      document.getElementById('category-tree').innerHTML = 'Failed to load categories.';
+    }
+  }
+
+  // Add a new category via POST request
+  async function addCategory(parentId, name) {
+    try {
+      const response = await fetch('http://localhost:8080/api/product/category/new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: parentId, name }),
+      });
+      if (!response.ok) throw new Error('Failed to add category');
+      return await response.json(); // Assuming the API returns the new category {id, name}
+    } catch (error) {
+      console.error('Error adding category:', error);
+      alert('Failed to add category. Please try again.');
+      return null;
+    }
+  }
+
+  function updateCategoryTree(categories) {
+    const treeContainer = document.getElementById('category-tree');
+    treeContainer.innerHTML = '';
+    categories.forEach((category, index) => {
+      const path = `${index}`;
+      if (!collapseState.has(path)) collapseState.set(path, true);
+      const isCollapsed = collapseState.get(path);
+      const categoryDiv = document.createElement('div');
+      categoryDiv.className = 'mb-2';
+      categoryDiv.innerHTML = `
+            <div class="flex items-center h-10">
+              <div class="w-10 flex justify-center flex-shrink-0">
+                <button class="toggle-subcategories text-gray-600 hover:text-gray-800 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+              <div class="flex-1 font-medium text-gray-800">${category.name}</div>
+              <div class="w-40 flex justify-end flex-shrink-0">
+                <button class="add-subcategory-btn px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700" data-id="${category.id}">Add Subcategory</button>
+              </div>
+            </div>
+            <div class="subcategories ml-10 ${isCollapsed ? 'hidden' : ''}"></div>
+          `;
+      treeContainer.appendChild(categoryDiv);
+      const subcategoriesDiv = categoryDiv.querySelector('.subcategories');
+
+      if (subcategoryCache.has(category.id) && !isCollapsed) {
+        renderSubcategories(subcategoryCache.get(category.id), subcategoriesDiv, path);
+      }
+
+      categoryDiv.querySelector('.toggle-subcategories').addEventListener('click', async function() {
+        const svg = this.querySelector('svg');
+        const willBeCollapsed = !subcategoriesDiv.classList.contains('hidden');
+
+        if (!willBeCollapsed && !subcategoryCache.has(category.id)) {
+          await fetchSubcategories(category.id, subcategoriesDiv, path);
+        }
+
+        const hasSubcategories = subcategoryCache.has(category.id) && subcategoryCache.get(category.id).length > 0;
+        if (hasSubcategories || !subcategoryCache.has(category.id)) {
+          subcategoriesDiv.classList.toggle('hidden');
+        }
+
+        svg.classList.toggle('rotate-180');
+        collapseState.set(path, subcategoriesDiv.classList.contains('hidden'));
+      });
+
+      categoryDiv.querySelector('.add-subcategory-btn').addEventListener('click', async function() {
+        const parentId = this.getAttribute('data-id');
+        const name = prompt(`Enter the name of the new subcategory under ${category.name}:`);
+        if (name) {
+          const newCategory = await addCategory(parentId, name);
+          if (newCategory) {
+            if (subcategoryCache.has(parentId)) {
+              subcategoryCache.get(parentId).push(newCategory);
+              if (!isCollapsed) {
+                renderSubcategories(subcategoryCache.get(parentId), subcategoriesDiv, path);
+              }
+            } else {
+              if (!isCollapsed) {
+                await fetchSubcategories(parentId, subcategoriesDiv, path);
+              }
+            }
+          }
+        }
+      });
+    });
+  }
+
+  async function fetchSubcategories(parentId, container, parentPath) {
+    try {
+      const response = await fetch(`http://localhost:8080/api/product/category/${parentId}`);
+      const subcategories = await response.json(); // Expecting [{id, name}, ...]
+      subcategoryCache.set(parentId, subcategories);
+      if (subcategories.length > 0) {
+        renderSubcategories(subcategories, container, parentPath);
+      }
+    } catch (error) {
+      console.error(`Error fetching subcategories for ID ${parentId}:`, error);
+      container.innerHTML = 'Failed to load subcategories.';
+    }
+  }
+
+  function renderSubcategories(subcategories, container, parentPath) {
+    subcategories.forEach((subcat, index) => {
+      const path = `${parentPath}.${index}`;
+      if (!collapseState.has(path)) collapseState.set(path, true);
+      const isCollapsed = collapseState.get(path);
+      const subcatDiv = document.createElement('div');
+      subcatDiv.className = 'mb-2';
+      subcatDiv.innerHTML = `
+            <div class="flex items-center h-10">
+              <div class="w-10 flex justify-center flex-shrink-0">
+                <button class="toggle-subcategories text-gray-600 hover:text-gray-800 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+              <div class="flex-1 text-gray-700">${subcat.name}</div>
+              <div class="w-40 flex justify-end flex-shrink-0">
+                <button class="add-subcategory-btn px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700" data-id="${subcat.id}">Add Subcategory</button>
+              </div>
+            </div>
+            <div class="subcategories ml-10 ${isCollapsed ? 'hidden' : ''}"></div>
+          `;
+      container.appendChild(subcatDiv);
+      const subSubcategoriesDiv = subcatDiv.querySelector('.subcategories');
+
+      if (subcategoryCache.has(subcat.id) && !isCollapsed) {
+        renderSubcategories(subcategoryCache.get(subcat.id), subSubcategoriesDiv, path);
+      }
+
+      subcatDiv.querySelector('.toggle-subcategories').addEventListener('click', async function() {
+        const svg = this.querySelector('svg');
+        const willBeCollapsed = !subSubcategoriesDiv.classList.contains('hidden');
+
+        if (!willBeCollapsed && !subcategoryCache.has(subcat.id)) {
+          await fetchSubcategories(subcat.id, subSubcategoriesDiv, path);
+        }
+
+        const hasSubcategories = subcategoryCache.has(subcat.id) && subcategoryCache.get(subcat.id).length > 0;
+        if (hasSubcategories || !subcategoryCache.has(subcat.id)) {
+          subSubcategoriesDiv.classList.toggle('hidden');
+        }
+
+        svg.classList.toggle('rotate-180');
+        collapseState.set(path, subSubcategoriesDiv.classList.contains('hidden'));
+      });
+
+      subcatDiv.querySelector('.add-subcategory-btn').addEventListener('click', async function() {
+        const parentId = this.getAttribute('data-id');
+        const name = prompt(`Enter the name of the new subcategory under ${subcat.name}:`);
+        if (name) {
+          const newCategory = await addCategory(parentId, name);
+          if (newCategory) {
+            if (subcategoryCache.has(parentId)) {
+              subcategoryCache.get(parentId).push(newCategory);
+              if (!isCollapsed) {
+                renderSubcategories(subcategoryCache.get(parentId), subSubcategoriesDiv, path);
+              }
+            } else {
+              if (!isCollapsed) {
+                await fetchSubcategories(parentId, subSubcategoriesDiv, path);
+              }
+            }
+          }
+        }
+      });
+    });
+  }
+</script>
+</body>
+</html>
