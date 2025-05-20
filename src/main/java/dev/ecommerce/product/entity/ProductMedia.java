@@ -19,14 +19,14 @@ public class ProductMedia {
 
     private ContentType contentType;
 
-    private String contentURL;
+    private String content;
 
     private Integer sortOrder;
 
-    public ProductMedia(Product product, ContentType contentType, String contentURL, Integer sortOrder) {
+    public ProductMedia(Product product, ContentType contentType, String content, Integer sortOrder) {
         this.product = product;
         this.contentType = contentType;
-        this.contentURL = contentURL;
+        this.content = content;
         this.sortOrder = sortOrder;
     }
 }

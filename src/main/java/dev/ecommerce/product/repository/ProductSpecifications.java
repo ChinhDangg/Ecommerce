@@ -7,14 +7,14 @@ import org.springframework.data.jpa.domain.Specification;
 public class ProductSpecifications {
 
     public static Specification<Product> nameContainsWords(String search) {
+        if (search == null) {
+            return null;
+        }
+        String refined = search.replaceAll("[^a-zA-Z0-9 ]", "");
+        if (refined.isEmpty()) {
+            return null;
+        }
         return (root, query, cb) -> {
-            if (search == null) {
-                return cb.conjunction();
-            }
-            String refined = search.replaceAll("[^a-zA-Z0-9 ]", "");
-            if (refined.isEmpty()) {
-                return cb.conjunction();
-            }
             String[] words = refined.toLowerCase().split("\\s+");
             Predicate[] predicates = new Predicate[words.length];
             for (int i = 0; i < words.length; i++) {

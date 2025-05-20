@@ -80,6 +80,7 @@ public class Product {
     private final List<ProductFeature> features = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
+    @OrderBy("sortOrder ASC")
     private final List<ProductMedia> media = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
@@ -91,4 +92,15 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private final List<ProductReview> reviews = new ArrayList<>();
+
+    public Product(Long id, String manufacturerId, String name,
+                   Integer quantity, BigDecimal price, BigDecimal salePrice, LocalDate saleEndDate) {
+        this.id = id;
+        this.manufacturerId = manufacturerId;
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+        this.salePrice = salePrice;
+        this.saleEndDate = saleEndDate;
+    }
 }

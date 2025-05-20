@@ -16,12 +16,17 @@ public class ProductOption {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @ManyToOne
+    @JoinColumn(name = "product_line_id")
+    private ProductLine productLine;
+
     private String name;
 
     private String valueOption;
 
-    public ProductOption(Product product, String name, String valueOption) {
+    public ProductOption(Product product, ProductLine productLine, String name, String valueOption) {
         this.product = product;
+        this.productLine = productLine;
         this.name = name;
         this.valueOption = valueOption;
     }
