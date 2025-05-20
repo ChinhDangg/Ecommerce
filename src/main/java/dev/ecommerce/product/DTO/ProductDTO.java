@@ -7,12 +7,15 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import java.time.LocalDate;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
 public class ProductDTO {
 
     private Integer productLineId;
+
+    private Long id;
 
     @NotNull(message = "Manufacturer id is required")
     private String manufacturerId;
@@ -38,16 +41,16 @@ public class ProductDTO {
     private String salePrice;
     private LocalDate saleEndDate;
 
-    private OptionDTO[] options;
+    private List<OptionDTO> options;
 
-    private OptionDTO[] specifications;
+    private List<OptionDTO> specifications;
 
     @Size(max = 10, message = "Max of 10 features only")
-    private String[] features;
+    private List<String> features;
 
     @Size(max = 5, message = "Max of 5 media only")
-    private ContentDTO[] media;
+    private List<ContentDTO> media;
 
     @Size(max = 10, message = "Max of 10 descriptions only")
-    private ContentDTO[] descriptions;
+    private List<ContentDTO> descriptions;
 }
