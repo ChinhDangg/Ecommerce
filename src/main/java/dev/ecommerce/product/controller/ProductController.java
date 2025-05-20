@@ -3,6 +3,7 @@ package dev.ecommerce.product.controller;
 import dev.ecommerce.product.DTO.ProductCategoryDTO;
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
+import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -43,10 +44,18 @@ public class ProductController {
         return productService.findProductLineById(productLineId);
     }
 
-    @GetMapping("/search/product")
-    public Page<ProductDTO> getProducts(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "") String search) {
+    @GetMapping("/search")
+    public Page<ShortProductDTO> searchProducts(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "") String search) {
         return productService.findProductsByName(search, page);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable long id) {
+        ProductDTO productDTO = productService.findProductById(id);
+        if (productDTO == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
     @PostMapping("/category/new")
@@ -82,7 +91,7 @@ public class ProductController {
                             Path path = Paths.get("/static/images" + fileName);
                             Files.createDirectories(path.getParent()); // Ensure directory exists
                             Files.write(path, file.getBytes());
-                            return fileName;
+                            return path.getFileName().toString();
                         } catch (IOException e) {
                             throw new RuntimeException("Failed to store file: " + file.getOriginalFilename(), e);
                         }
