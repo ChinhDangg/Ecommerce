@@ -86,11 +86,15 @@
         <div id="product-search-container">
             <div class="search-entry bg-white rounded-lg shadow mx-4 mt-4 p-3">
                 <div class="flex gap-2">
-                    <div class="image-container w-24 h-24 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer hover:opacity-75">
-                        <img class="product-image w-full h-full object-cover" src="product-image.jpg" alt="Product Image" onerror="this.style.display='none'">
-                    </div>
+                    <a href="" class="product-image-anchor">
+                        <div class="image-container w-24 h-24 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer hover:opacity-75">
+                            <img class="product-image w-full h-full object-cover" src="" alt="Product Image" onerror="this.style.display='none'">
+                        </div>
+                    </a>
                     <div class="flex-grow">
-                        <h3 class="text-sm font-semibold mb-2 product-name cursor-pointer hover:text-blue-600">Sample Product</h3>
+                        <a href="" class="product-name-anchor">
+                            <h3 class="product-name text-sm font-semibold mb-2 cursor-pointer hover:text-blue-600">Sample Product</h3>
+                        </a>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <p class="text-gray-600 text-xs">Product ID: <span class="product-id">12345</span></p>
@@ -364,7 +368,7 @@
                                 <td class="spec-product-selection px-4 py-2">
                                     <select multiple
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                                            data-spec="">
+                                            data-spec-id="">
                                         <option class="hidden" value="value2">Some value</option>
                                     </select>
                                 </td>
