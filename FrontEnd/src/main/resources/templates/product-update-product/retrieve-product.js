@@ -1,17 +1,120 @@
 import {
+    addProductLineDescription,
+    addImageEntry,
+    addProductFeature,
+    updateDescriptionImage,
+    addProductDescription,
+    addOptionKey,
+    addOptionValue,
+    addSpecificationKey,
+    addSpecificationValue,
+    addNewProductEntry,
     data_productLineImages,
-    data_productLineDescriptionImages,
     data_allProductImages,
     data_allProductDescriptionImages,
+    data_productLineDescriptionImages,
     products,
-    addProductForSpec,
-    addProductForOption,
-    addNewProductGroupTemplate,
-    initializeImageButtons,
-    addProductLineDescription
-} from "./add-new-product.js";
+} from './add-new-product.js';
 
-async function fetchProductLine(productLineId) {
+import {
+    updateProductQuery,
+} from './admin-navigation.js';
+
+document.getElementById('search-bar-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const searchInput = document.getElementById('search-input');
+    console.log('Search input: ', searchInput.value);
+    searchProduct(searchInput.value);
+});
+
+async function searchProduct(productNameSearch) {
+    try {
+        // const page = 0;
+        // const baseUrl = 'http://localhost:8080/api/product/search';
+        // const queryParams = new URLSearchParams({
+        //     page: page.toString(),
+        //     search: productNameSearch
+        // });
+        // const url = `${baseUrl}?${queryParams.toString()}`;
+        // const response = await fetch(url);
+        // const searchResult = await response.json();
+        const searchResult = {
+            content: [
+                {
+                    productLineId: 1,
+                    id: 1,
+                    manufacturerId: 1,
+                    name: 'Some product name to show',
+                    quality: 50,
+                    price: 50.5,
+                    features: [],
+                    imageName: "/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    discountPrice: '',
+                }
+            ]
+        };
+        displaySearchResult(searchResult.content);
+    } catch (error) {
+        console.error('Error searching for product:', error);
+    }
+}
+
+function displaySearchResult(content) {
+    const productSearchContainer = document.getElementById('product-search-container');
+    const allSearchEntries = productSearchContainer.querySelectorAll('.search-entry');
+    Array.from(allSearchEntries).slice(1).forEach(item => item.remove()); // remove all item except first one
+    content.forEach(result => {
+        const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode(true);
+        productSearchContainer.appendChild(searchEntry);
+        searchEntry.classList.remove('hidden');
+        searchEntry.querySelector('.product-name').innerHTML = result.name;
+        searchEntry.querySelector('.product-image').src = result.imageName;
+        searchEntry.querySelector('.product-id').innerHTML = result.id;
+        searchEntry.querySelector('.manufacturer-id').innerHTML = result.manufacturerId;
+        searchEntry.querySelector('.product-quantity').innerHTML = result.quantity;
+        searchEntry.querySelector('.product-price').innerHTML = result.price;
+        searchEntry.querySelector('.product-discounted-price').innerHTML = result.discountedPrice;
+
+        const searchImageAnchor = searchEntry.querySelector('.product-image-anchor');
+        setProductLink(searchImageAnchor, result.id);
+        searchImageAnchor.addEventListener('click', function(e) {
+            clickOnProductResult(e, this, result.id, result.productLineId);
+        });
+        const searchNameAnchor = searchEntry.querySelector('.product-name-anchor');
+        setProductLink(searchNameAnchor, result.id);
+        searchNameAnchor.addEventListener('click', function(e) {
+            clickOnProductResult(e, this, result.id, result.productLineId);
+        });
+    });
+}
+
+function setProductLink(anchor, productId) {
+    anchor.href = `/admin/dashboard?query=${updateProductQuery}&product=${productId}`;
+}
+
+async function clickOnProductResult(e, anchor, productId, productLineId) {
+    e.preventDefault();
+    // const newUrl = `/admin/dashboard?query=${updateProductQuery}&product=${productId}`;
+    // anchor.href = newUrl;
+    // const currentUrl = window.location.pathname + window.location.search;
+    // const query = `${updateProductQuery}P${productId}`;
+    // if (currentUrl !== newUrl) {
+    //     history.pushState({ query }, "", newUrl);
+    // }
+    if (!products[productId]) {
+        if (productLineId) {
+            const productLineInfo = await fetchProductLineInfo(productLineId);
+            displayProductLineInfo(productLineInfo);
+            productLineInfo.productIdList.forEach(productId => {
+                addProductEntry(productId);
+            });
+        } else {
+            addProductEntry(productId);
+        }
+    }
+}
+
+async function fetchProductLineInfo(productLineId) {
     try {
         // const response = await fetch('http://localhost:8080/api/product/productLine/' + productLineId);
         // return await response.json();
@@ -36,6 +139,9 @@ async function fetchProductLine(productLineId) {
                     contentType: "TEXT",
                     content: "Some description about the product line"
                 }
+            ],
+            productIdList: [
+                1, 2
             ]
         }
     } catch (error) {
@@ -47,91 +153,40 @@ async function fetchProductLine(productLineId) {
 function displayProductLineInfo(productLineInfo) {
     document.getElementById('product-line-name-input').value = productLineInfo.name;
     const productLineImageContainer = document.getElementById('product-line-images');
-    const imageEntryTemplate = document.querySelector('#image-entry-template').cloneNode(true);
-    imageEntryTemplate.classList.remove('hidden');
     productLineInfo.media.forEach(media => {
-        const newImageEntry = imageEntryTemplate.cloneNode(true);
-        newImageEntry.querySelector('.image-entry-img').src = media.content;
-        productLineImageContainer.appendChild(newImageEntry);
-        data_productLineImages.push(media.content);
-        initializeImageButtons(productLineImageContainer, newImageEntry, data_productLineImages);
+        addImageEntry(data_productLineImages, productLineImageContainer, null, media.content);
     });
     productLineInfo.descriptions.forEach(description => {
-        addProductLineDescription(description);
-    });
-}
-
-async function searchProduct(productNameSearch) {
-    try {
-        const page = 0;
-        const baseUrl = 'http://localhost:8080/api/product/search';
-        const queryParams = new URLSearchParams({
-            page: page.toString(),
-            search: productNameSearch
-        });
-        const url = `${baseUrl}?${queryParams.toString()}`;
-        const response = await fetch(url);
-        const searchResult = await response.json();
-        displaySearchResult(searchResult.content);
-    } catch (error) {
-        console.error('Error searching for product:', error);
-    }
-}
-
-function displaySearchResult(content) {
-    const productSearchContainer = document.getElementById('product-search-container');
-    const allSearchEntries = productSearchContainer.querySelectorAll('.search-entry');
-    Array.from(allSearchEntries).slice(1).forEach(item => item.remove()); // remove all item except first one
-    content.forEach(result => {
-        const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode(true);
-        productSearchContainer.appendChild(searchEntry);
-        searchEntry.classList.remove('hidden');
-        const productName = searchEntry.querySelector('.product-name');
-        productName.innerHTML = result.name;
-        searchEntry.querySelector('.product-image').src = result.imageName;
-        searchEntry.querySelector('.product-id').innerHTML = result.id;
-        searchEntry.querySelector('.manufacturer-id').innerHTML = result.manufacturerId;
-        searchEntry.querySelector('.product-quantity').innerHTML = result.quantity;
-        searchEntry.querySelector('.product-price').innerHTML = result.price;
-        searchEntry.querySelector('.product-discounted-price').innerHTML = result.discountedPrice;
-        productName.addEventListener('click', function() {
-            console.log(result.id);
-            getProductInfo(result.id);
-        });
-        searchEntry.querySelector('.image-container').addEventListener('click', function() {
-            console.log(result.id);
-            getProductInfo(result.id);
-        })
-    });
-}
-
-document.getElementById('search-bar-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const searchInput = document.getElementById('search-input');
-    console.log('Search input: ', searchInput.value);
-    searchProduct(searchInput.value);
-});
-
-async function getProductInfo(productId) {
-    try {
-        const url = `http://localhost:8080/api/product/${productId}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Failed to get product with id: ${productId}`);
+        const descriptionItem = addProductLineDescription();
+        const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
+        if (description.contentType === "TEXT") {
+            descriptionTextArea.innerHTML = description.content;
+        } else if (description.contentType === "IMAGE") {
+            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, description.content);
         }
+    });
+}
+
+async function fetchProductInfo(productId) {
+    try {
+        // const url = `http://localhost:8080/api/product/${productId}`;
+        // const response = await fetch(url);
+        // if (!response.ok) {
+        //     throw new Error(`Failed to get product with id: ${productId}`);
+        // }
         //const result = await response.json();
-        const result = {
+        return {
             productLineId: 1,
             id: 1,
             manufacturerId: 'Manu 2',
             name: 'Product name with something',
             brand: 'Brand name',
             quantity: 45,
-            conditionType: 'NEW',
+            conditionType: 'USED',
             categoryId: 1,
             price: '20.5',
             salePrice: '10.5',
-            saleEndDate: '05-20-2025',
+            saleEndDate: '2025-05-19',
             options: [
                 {
                     name: 'Option 1',
@@ -176,19 +231,69 @@ async function getProductInfo(productId) {
                 }
             ]
         }
-        displayProductInfo(result);
     } catch (error) {
         console.error('Error fetching for product:', error);
     }
 }
 
-function displayProductInfo(content) {
-    console.log(content);
-    const optionItem = addProductForOption(content.id);
+const retrieved_product = [];
+function addProductEntry(productId) {
+    const [productOptionItem, productSpecItem, productItem] = addNewProductEntry(productId,true);
+    productItem.querySelector('.toggle-collapse').addEventListener('click', async () => {
+        if (retrieved_product.includes(productId))
+            return;
+        retrieved_product.push(productId);
+        console.log(retrieved_product);
+        const productInfo = await fetchProductInfo(productId);
+        productInfo.options.forEach((option) => {
+            const optionItem = addOptionKey(option.name);
+            addOptionValue(optionItem, option.name, option.value);
+            productOptionItem.querySelector(`select[data-option-id="${option.name}"]`).value = option.value;
+        });
+        productInfo.specifications.forEach((spec) => {
+            const specItem = addSpecificationKey(spec.name);
+            addSpecificationValue(specItem, spec.name, spec.value);
+            productSpecItem.querySelector(`select[data-spec-id="${spec.name}"]`).value = spec.value;
+        });
+        displayProductInfo(productItem, productInfo);
+    });
+}
 
-    const specItem = addProductForSpec(content.id);
-    const productItem = addNewProductGroupTemplate(content.id);
+function displayProductInfo(productItem, content) {
+    console.log(content);
+    productItem.querySelector('.product-name-input').value = content.name;
+    productItem.querySelector('.product-brand-input').value = content.brand;
+    productItem.querySelector('.product-manufacturer-part-number-input').value = content.manufacturerId;
+    productItem.querySelector('.product-quantity-input').value = content.quantity;
+    productItem.querySelector('.product-condition-select').value = content.conditionType;
+    productItem.querySelector('.product-regular-price-input').value = content.price;
+    productItem.querySelector('.product-sale-price-input').value = content.salePrice;
+    productItem.querySelector('.product-sale-end-date-input').value = content.saleEndDate;
+    content.features.forEach(feature => {
+        const featureEntry = addProductFeature(productItem);
+        featureEntry.querySelector('.product-feature-input').value = feature;
+    });
+    content.media.forEach(media => {
+        if (media.contentType === 'IMAGE')
+            addImageEntry(
+                data_allProductImages.get(content.id),
+                productItem.querySelector('.product-images'),
+                null, media.content
+            );
+    });
+    content.descriptions.forEach(description => {
+        const descriptionItem = addProductDescription(productItem, content.id);
+        const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
+        if (description.contentType === "TEXT") {
+            descriptionTextArea.innerHTML = description.content;
+        } else if (description.contentType === "IMAGE") {
+            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), description.content);
+        }
+    });
 }
 
 // const productLineInfo = await fetchProductLine();
 // displayProductLineInfo(productLineInfo);
+
+// const productInfo = await fetchProductInfo();
+// displayProductInfo(productInfo);

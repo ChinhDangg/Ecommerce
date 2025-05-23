@@ -1,34 +1,72 @@
 const mainContentArea = document.getElementById('main-content-area');
 
-const addNewQuery = 'addNew'
+const addNewQuery = 'addProduct'
 document.getElementById('add-product-link').addEventListener('click', async function(e) {
     e.preventDefault();
     const newUrl = `/admin/dashboard?query=${addNewQuery}`;
     this.href = newUrl;
-
     const currentUrl = window.location.pathname + window.location.search;
     if (currentUrl !== newUrl) {
         history.pushState({ addNewQuery }, "", newUrl);
     }
-
     await getAddNewProductTemplate();
 });
 
+export const updateProductQuery = 'updateProduct';
+document.getElementById('update-product-link').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const newUrl = `/admin/dashboard?query=${updateProductQuery}`;
+    this.href = newUrl;
+    const currentUrl = window.location.pathname + window.location.search;
+    if (currentUrl !== newUrl) {
+        history.pushState({ updateProductQuery }, "", newUrl);
+    }
+    await getUpdateProductTemplate()
+})
+
 async function getAddNewProductTemplate() {
-    const content = await fetch('/admin/dashboard/addNewProduct', {
+    await getAdminProductTemplate('/admin/dashboard/addNewProduct');
+}
+
+async function getUpdateProductTemplate() {
+    await getAdminProductTemplate('/admin/dashboard/updateProduct');
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("popstate", (event) => {
+        const query = new URLSearchParams(window.location.search).get("query");
+        if (query === addNewQuery) {
+            getAddNewProductTemplate();
+        } else if (query === updateProductQuery) {
+            getUpdateProductTemplate();
+        } else {
+            mainContentArea.innerHTML = '';
+        }
+    });
+
+    const initQuery = new URLSearchParams(window.location.search).get("query");
+    if (initQuery === addNewQuery) {
+        getAddNewProductTemplate();
+    } else if (initQuery === updateProductQuery) {
+        getUpdateProductTemplate();
+    }
+});
+
+async function getAdminProductTemplate(endPoint) {
+    const content = await fetch(endPoint, {
         method: 'GET',
     })
         .then(response => {
             if (response.ok) // created
                 return response.text();
-            throw new Error('Fail to get add new product content');
+            throw new Error('Fail to get product content template');
         })
         .then(data => {
-            console.log('Success getting add new product content');
+            console.log('Success getting product content template');
             return data;
         })
         .catch(error => {
-            console.error('Error getting add new product content');
+            console.error('Error getting add product content template');
             return null;
         });
     const tempDiv = document.createElement('div');
@@ -49,20 +87,3 @@ async function getAddNewProductTemplate() {
     })
     mainContentArea.innerHTML = content;
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    window.addEventListener("popstate", (event) => {
-        const query = new URLSearchParams(window.location.search).get("query");
-        if (query === addNewQuery) {
-            getAddNewProductTemplate();
-        } else {
-            mainContentArea.innerHTML = '';
-        }
-    });
-
-    const initQuery = new URLSearchParams(window.location.search).get("query");
-    if (initQuery === addNewQuery) {
-        getAddNewProductTemplate();
-    }
-});

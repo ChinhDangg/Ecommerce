@@ -1,6 +1,6 @@
 /* Product line section */
 const productLineImageInput = document.getElementById('add-line-image-input');
-export let data_productLineImages = []
+export const data_productLineImages = []
 
 document.getElementById('add-line-image-btn').addEventListener('click', function () {
     productLineImageInput.click();
@@ -8,30 +8,41 @@ document.getElementById('add-line-image-btn').addEventListener('click', function
 
 productLineImageInput.addEventListener('change', function () {
     const productLineImageContainer = document.getElementById('product-line-images');
-    setInputChangeListener(productLineImageInput, data_productLineImages, productLineImageContainer);
+    setInputImageChangeListener(productLineImageInput, data_productLineImages, productLineImageContainer);
 });
 
-function  setInputChangeListener(input, dataImageArray, allImageContainer) {
+function  setInputImageChangeListener(input, dataImageArray, allImageContainer) {
     const inputImageFiles = Array.from(input.files);
-    const imageEntryTemplate = document.querySelector('#image-entry-template').cloneNode(true);
-    imageEntryTemplate.classList.remove('hidden');
+    // const imageEntryTemplate = document.querySelector('#image-entry-template').cloneNode(true);
+    // imageEntryTemplate.classList.remove('hidden');
     let max = 5 - dataImageArray.length;
     inputImageFiles.some(file => {
         if (max <= 0)
             return true;
-        dataImageArray.push(file);
         const reader = new FileReader();
         reader.onload = function (e) {
-            const newImageEntry = imageEntryTemplate.cloneNode(true);
-            newImageEntry.querySelector('.image-entry-img').src = e.target.result;
-            initializeImageButtons(allImageContainer, newImageEntry, dataImageArray);
-            allImageContainer.appendChild(newImageEntry);
+            // dataImageArray.push(file);
+            // const newImageEntry = imageEntryTemplate.cloneNode(true);
+            // newImageEntry.querySelector('.image-entry-img').src = e.target.result;
+            // initializeImageButtons(allImageContainer, newImageEntry, dataImageArray);
+            // allImageContainer.appendChild(newImageEntry);
+            addImageEntry(dataImageArray, allImageContainer, file, e.target.result);
         }
         reader.readAsDataURL(file); // start the reading process which trigger the onload
         max--;
     });
     input.value = null;
     console.log(dataImageArray);
+}
+
+export function addImageEntry(dataImageArray, allImageContainer, imageFile, imageSrc) {
+    const imageEntryTemplate = document.querySelector('#image-entry-template').cloneNode(true);
+    imageEntryTemplate.classList.remove('hidden');
+    dataImageArray.push(imageFile == null ? imageSrc : imageFile);
+    const newImageEntry = imageEntryTemplate.cloneNode(true);
+    newImageEntry.querySelector('.image-entry-img').src = imageSrc;
+    initializeImageButtons(allImageContainer, newImageEntry, dataImageArray);
+    allImageContainer.appendChild(newImageEntry);
 }
 
 export function initializeImageButtons(allImageContainer, imageContainer, dataImageArray) {
@@ -74,24 +85,21 @@ document.getElementById('add-line-description-btn').addEventListener('click', fu
     addProductLineDescription();
 });
 
-export function addProductLineDescription(description = null) {
+export function addProductLineDescription() {
     const productLineDescriptionContainer = document.getElementById('product-line-descriptions');
-    if (productLineDescriptionContainer.children.length > 10) {
+    return addDescription(productLineDescriptionContainer, data_productLineDescriptionImages);
+}
+
+function addDescription(descriptionContainer, dataDescriptionImageArray) {
+    if (descriptionContainer.children.length > 10) {
         alert('Max of 10 descriptions only');
         return;
     }
-    const newDescription = productLineDescriptionContainer.querySelector('.description-entry').cloneNode(true);
+    const newDescription = descriptionContainer.querySelector('.description-entry').cloneNode(true);
     newDescription.classList.remove('hidden');
-    initializeDescriptionButtons(newDescription, data_productLineDescriptionImages);
-    productLineDescriptionContainer.appendChild(newDescription);
-    if (description == null)
-        return;
-    const descriptionTextArea = newDescription.querySelector('.description-textarea-entry');
-    if (description.contentType === "TEXT") {
-        descriptionTextArea.innerHTML = description.content;
-    } else if (description.contentType === "IMAGE") {
-        updateDescriptionImage(newDescription, data_productLineDescriptionImages, description.content);
-    }
+    initializeDescriptionButtons(newDescription, dataDescriptionImageArray);
+    descriptionContainer.appendChild(newDescription);
+    return newDescription;
 }
 
 function initializeDescriptionButtons(descriptionContainer, dataImageArray) {
@@ -116,7 +124,7 @@ function initializeDescriptionButtons(descriptionContainer, dataImageArray) {
     });
 }
 
-function updateDescriptionImage(descriptionContainer, dataImageArray, imageContent) {
+export function updateDescriptionImage(descriptionContainer, dataImageArray, imageContent) {
     const index = getChildIndex(descriptionContainer);
     dataImageArray[index] = imageContent;
     console.log(dataImageArray);
@@ -287,7 +295,7 @@ document.getElementById('add-option-btn').addEventListener('click', function () 
     addOptionKey(key);
 });
 
-function addOptionKey(key) {
+export function addOptionKey(key) {
     if (key && !optionMap.has(key)) {
         optionMap.set(key, []);
         const optionValueItem = optionValueContainer.querySelector('.option-value-item').cloneNode(true);
@@ -300,23 +308,30 @@ function addOptionKey(key) {
         optionHeaderItem.innerHTML = key;
         optionHeaderWrapper.appendChild(optionHeaderItem);
         addProductOptionSelection(key);
+        return optionValueItem;
     }
+    return null;
+}
+
+export function addOptionValue(optionValueItem, optionKey, value) {
+    if (value && !optionMap.get(optionKey).includes(value)) {
+        optionMap.get(optionKey).push(value);
+        optionValueItem.querySelector('.option-values').innerHTML = optionMap.get(optionKey).join(', ');
+        updateProductOptionSelectionValue(optionKey);
+    }
+    console.log(optionMap);
 }
 
 function initializeOptionValueButtons(optionValueItem, optionKey) {
-    const optionValues = optionValueItem.querySelector('.option-values');
+    //const optionValues = optionValueItem.querySelector('.option-values');
     optionValueItem.querySelector('.add-value-btn').addEventListener('click', function () {
         const value = prompt(`Enter a new value for: ${optionKey}`);
-        if (value && !optionMap.get(optionKey).includes(value)) {
-            optionMap.get(optionKey).push(value);
-            optionValues.innerHTML = optionMap.get(optionKey).join(', ');
-            updateProductOptionSelectionValue(optionKey);
-        }
+        addOptionValue(optionValueItem, optionKey, value);
         console.log(optionMap);
     });
     optionValueItem.querySelector('.pop-value-btn').addEventListener('click', function () {
         optionMap.get(optionKey).pop();
-        optionValues.innerHTML = optionMap.get(optionKey).join(', ');
+        optionValueItem.querySelector('.option-values').innerHTML = optionMap.get(optionKey).join(', ');
         updateProductOptionSelectionValue(optionKey);
         console.log(optionMap);
     });
@@ -356,14 +371,20 @@ function updateProductOptionSelectionValue(optionKey) {
 }
 
 document.getElementById('add-product-btn').addEventListener('click', async function () {
-    const newProductId = products[products.length - 1] + 1;
-    products.push(newProductId);
-    addProductForOption(newProductId);
-    addProductForSpec(newProductId);
-    addNewProductGroupTemplate(newProductId);
+    addNewProductEntry();
 });
 
-export function addProductForOption(productId) {
+export function addNewProductEntry(productId = null, collapsed = false) {
+    const newProductId = productId == null ? products[products.length - 1] + 1 : productId;
+    products.push(newProductId);
+    return [
+        addProductForOption(newProductId),
+        addProductForSpec(newProductId),
+        addNewProductGroupTemplate(newProductId, collapsed)
+    ];
+}
+
+function addProductForOption(productId) {
     const optionProductItem = optionBodyContainer.querySelector('.option-product-item').cloneNode();
     optionProductItem.dataset.productId = productId;
     optionProductItem.classList.remove('hidden');
@@ -383,7 +404,7 @@ export function addProductForOption(productId) {
     return optionProductItem;
 }
 
-export function addProductForSpec(productId) {
+function addProductForSpec(productId) {
     const specProductItem = specBodyContainer.querySelector('.spec-product-item').cloneNode();
     specProductItem.dataset.productId = productId;
     specProductItem.classList.remove('hidden');
@@ -426,23 +447,10 @@ const specMap = new Map();
 
 document.getElementById('add-spec-btn').addEventListener('click', function () {
     const key = prompt('Enter a new spec name:');
-    if (key && !specMap.has(key)) {
-        specMap.set(key, []);
-        const specValueContainer = document.getElementById('spec-values-container');
-        const specValueItem = specValueContainer.querySelector('.spec-value-item').cloneNode(true);
-        specValueItem.classList.remove('hidden');
-        specValueItem.querySelector('.spec-key').innerHTML = `${key}:`;
-        specValueContainer.appendChild(specValueItem);
-        initializeSpecValueButtons(specValueItem, key);
-        const specHeaderItem = specHeaderWrapper.querySelector('.spec-header-th').cloneNode(true);
-        specHeaderItem.dataset.specId = key;
-        specHeaderItem.innerHTML = key;
-        specHeaderWrapper.appendChild(specHeaderItem);
-        addProductSpecSelection(key);
-    }
+    addSpecificationKey(key);
 });
 
-function addSpecificationKey(key) {
+export function addSpecificationKey(key) {
     if (key && !specMap.has(key)) {
         specMap.set(key, []);
         const specValueContainer = document.getElementById('spec-values-container');
@@ -456,23 +464,28 @@ function addSpecificationKey(key) {
         specHeaderItem.innerHTML = key;
         specHeaderWrapper.appendChild(specHeaderItem);
         addProductSpecSelection(key);
+        return specValueItem;
     }
+    return null;
+}
+
+export function addSpecificationValue(specValueItem, specKey, value) {
+    if (value && !specMap.get(specKey).includes(value)) {
+        specMap.get(specKey).push(value);
+        specValueItem.querySelector('.spec-values').innerHTML = specMap.get(specKey).join(', ');
+        updateProductSpecSelectionValue(specKey);
+    }
+    console.log(specMap);
 }
 
 function initializeSpecValueButtons(specValueItem, specKey) {
-    const specValues = specValueItem.querySelector('.spec-values');
     specValueItem.querySelector('.add-value-btn').addEventListener('click', function () {
         const value = prompt(`Enter a new value for: ${specKey}`);
-        if (value && !specMap.get(specKey).includes(value)) {
-            specMap.get(specKey).push(value);
-            specValues.innerHTML = specMap.get(specKey).join(', ');
-            updateProductSpecSelectionValue(specKey);
-        }
-        console.log(specMap);
+        addSpecificationValue(specValueItem, specKey, value);
     });
     specValueItem.querySelector('.pop-value-btn').addEventListener('click', function () {
         specMap.get(specKey).pop();
-        specValues.innerHTML = specMap.get(specKey).join(', ');
+        specValueItem.querySelector('.spec-values').innerHTML = specMap.get(specKey).join(', ');
         updateProductSpecSelectionValue(specKey);
         console.log(specMap);
     });
@@ -523,7 +536,7 @@ export const productGroupContainer = document.getElementById('product-group-cont
 export const data_allProductImages = new Map();
 export const data_allProductDescriptionImages = new Map();
 
-export function addNewProductGroupTemplate(productId) {
+function addNewProductGroupTemplate(productId, collapsed) {
     const productGroupItem = productGroupContainer.querySelector('.product-group-template').cloneNode(true);
     productGroupItem.classList.remove('hidden');
     productGroupItem.dataset.productId = productId;
@@ -542,21 +555,14 @@ export function addNewProductGroupTemplate(productId) {
     productGroupItem.querySelector('.toggle-collapse').addEventListener('click', function() {
         productGroupItem.querySelector('.product-details').classList.toggle('hidden');
     });
+    if (collapsed)
+        productGroupItem.querySelector('.toggle-collapse').click();
     productGroupItem.querySelector('.add-feature-btn').addEventListener('click', function () {
-        const productFeatureContainer = productGroupItem.querySelector('.product-features');
-        if (productFeatureContainer.children.length > 10) {
-            alert('Max of 10 features only');
-            return;
-        }
-        const featureEntry = productGroupContainer.querySelector('.feature-entry').cloneNode(true);
-        productFeatureContainer.appendChild(featureEntry);
-        featureEntry.querySelector('.delete-feature-btn').addEventListener('click', function () {
-            featureEntry.remove();
-        })
+        addProductFeature(productGroupItem);
     });
     const addProductImageInput = productGroupItem.querySelector('.add-product-image-input');
     addProductImageInput.addEventListener('change', function () {
-        setInputChangeListener(
+        setInputImageChangeListener(
             addProductImageInput,
             data_allProductImages.get(productId),
             productGroupItem.querySelector('.product-images')
@@ -566,17 +572,28 @@ export function addNewProductGroupTemplate(productId) {
         addProductImageInput.click();
     });
     productGroupItem.querySelector('.add-product-description-btn').addEventListener('click', function () {
-        const productDescriptionContainer = productGroupItem.querySelector('.product-descriptions');
-        if (productDescriptionContainer.children.length > 10) {
-            alert('Max of 10 descriptions only');
-            return;
-        }
-        const descriptionItem = productGroupContainer.querySelector('.description-entry').cloneNode(true);
-        descriptionItem.classList.remove('hidden');
-        productDescriptionContainer.appendChild(descriptionItem);
-        initializeDescriptionButtons(descriptionItem, data_allProductDescriptionImages.get(productId));
+        addProductDescription(productGroupItem, productId);
     });
     return productGroupItem;
+}
+
+export function addProductFeature(productGroupItem) {
+    const productFeatureContainer = productGroupItem.querySelector('.product-features');
+    if (productFeatureContainer.children.length > 10) {
+        alert('Max of 10 features only');
+        return;
+    }
+    const featureEntry = productGroupContainer.querySelector('.feature-entry').cloneNode(true);
+    productFeatureContainer.appendChild(featureEntry);
+    featureEntry.querySelector('.delete-feature-btn').addEventListener('click', function () {
+        featureEntry.remove();
+    });
+    return featureEntry;
+}
+
+export function addProductDescription(productGroupItem, productId) {
+    const productDescriptionContainer = productGroupItem.querySelector('.product-descriptions');
+    return addDescription(productDescriptionContainer, data_allProductDescriptionImages.get(productId));
 }
 
 function deleteProductData(productId) {
