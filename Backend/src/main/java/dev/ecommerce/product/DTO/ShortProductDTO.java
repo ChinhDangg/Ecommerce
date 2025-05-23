@@ -9,6 +9,9 @@ import java.util.List;
 @Getter
 public class ShortProductDTO {
 
+    @Setter
+    private Integer productLineId;
+
     private final Long id;
 
     private final String manufacturerId;
