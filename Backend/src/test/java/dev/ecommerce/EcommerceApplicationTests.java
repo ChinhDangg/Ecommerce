@@ -69,7 +69,7 @@ class EcommerceApplicationTests {
         productLine.getDescriptions().add(description);
         productLine.getMedia().add(media);
 
-        ProductLineDTO productLineDTO = productMapper.toDTO(productLine);
+        ProductLineDTO productLineDTO = productMapper.toProductLineDTO(productLine);
         Assertions.assertEquals(productLine.getName(), productLineDTO.getName());
         Assertions.assertEquals(productLine.getDescriptions().size(), productLineDTO.getDescriptions().size());
         Assertions.assertEquals(productLine.getMedia().size(), productLineDTO.getMedia().size());
