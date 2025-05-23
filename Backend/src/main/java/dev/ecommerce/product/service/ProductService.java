@@ -87,7 +87,10 @@ public class ProductService {
         productLine.getDescriptions().size();
         productLine.getMedia().size();
 
-        return productMapper.toProductLineDTO(productLine);
+        ProductLineDTO productLineDTO = productMapper.toProductLineDTO(productLine);
+        productLineDTO.setProductIdList(productRepository.findAllIdByProductLineId(id).orElse(null));
+
+        return productLineDTO;
     }
 
     @Transactional(readOnly = true)
@@ -125,6 +128,7 @@ public class ProductService {
         for (Product product : resultList) {
             product.getMedia().size();
             ShortProductDTO current = productMapper.toShortProductWithoutFeaturesDTO(product);
+            current.setProductLineId(product.getProductLine().getId());
             current.setImageName(product.getMedia().isEmpty() ? null : product.getMedia().getFirst().getContent());
             current.setDiscountedPrice(
                     product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null

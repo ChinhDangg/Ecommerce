@@ -18,4 +18,9 @@ public class AdminDashboardController {
         return "/product-add-new-product/add-new-product :: add-new-product-template";
     }
 
+    @GetMapping("/updateProduct")
+    public String getUpdateProductContent() {
+        return "";
+    }
+
 }

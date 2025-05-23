@@ -27,8 +27,8 @@ public class EcommerceApplication {
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
-            ProductService productService
-            ) {
+            ProductService productService,
+            ProductLineRepository productLineRepository) {
         return _ -> {
             ProductCategory electronics = new ProductCategory("Electronics", null);
             ProductCategory computers = new ProductCategory("Computers", electronics);
@@ -44,6 +44,8 @@ public class EcommerceApplication {
             System.out.println(parentProductCategories.getFirst().getId());
             System.out.println(parentProductCategories.getFirst().getName());
 
+            ProductLine savedProductLine = productLineRepository.save(new ProductLine("Product line name"));
+
             Product newProduct = new Product(
                     "Man 2",
                     "Some name with many different words for testing the search functionality",
@@ -54,7 +56,7 @@ public class EcommerceApplication {
                     new BigDecimal("100"),
                     null,
                     null,
-                    null,
+                    savedProductLine,
                     electronics
             );
 
