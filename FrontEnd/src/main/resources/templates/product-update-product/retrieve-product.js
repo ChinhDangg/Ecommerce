@@ -9,6 +9,7 @@ import {
     addSpecificationKey,
     addSpecificationValue,
     addNewProductEntry,
+    removeProductInfo,
     data_productLineImages,
     data_allProductImages,
     data_allProductDescriptionImages,
@@ -24,7 +25,12 @@ document.getElementById('search-bar-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const searchInput = document.getElementById('search-input');
     console.log('Search input: ', searchInput.value);
-    searchProduct(searchInput.value);
+    if (searchInput.value)
+        searchProduct(searchInput.value);
+    else {
+        document.getElementById('main-content').classList.add('hidden');
+        clearSearchEntry();
+    }
 });
 
 async function searchProduct(productNameSearch) {
@@ -59,10 +65,9 @@ async function searchProduct(productNameSearch) {
     }
 }
 
+const productSearchContainer = document.getElementById('product-search-container');
 function displaySearchResult(content) {
-    const productSearchContainer = document.getElementById('product-search-container');
-    const allSearchEntries = productSearchContainer.querySelectorAll('.search-entry');
-    Array.from(allSearchEntries).slice(1).forEach(item => item.remove()); // remove all item except first one
+    clearSearchEntry();
     content.forEach(result => {
         const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode(true);
         productSearchContainer.appendChild(searchEntry);
@@ -88,6 +93,11 @@ function displaySearchResult(content) {
     });
 }
 
+function clearSearchEntry() {
+    const allSearchEntries = productSearchContainer.querySelectorAll('.search-entry');
+    Array.from(allSearchEntries).slice(1).forEach(item => item.remove()); // remove all item except first one
+}
+
 function setProductLink(anchor, productId) {
     anchor.href = `/admin/dashboard?query=${updateProductQuery}&product=${productId}`;
 }
@@ -101,6 +111,10 @@ async function clickOnProductResult(e, anchor, productId, productLineId) {
     // if (currentUrl !== newUrl) {
     //     history.pushState({ query }, "", newUrl);
     // }
+    clearSearchEntry();
+    clearProductLineSection();
+    clearAllProductInfo();
+    document.getElementById('main-content').classList.remove('hidden');
     if (!products[productId]) {
         if (productLineId) {
             const productLineInfo = await fetchProductLineInfo(productLineId);
@@ -148,6 +162,18 @@ async function fetchProductLineInfo(productLineId) {
         console.error('Error fetching product line:', error);
         return null;
     }
+}
+
+function clearProductLineSection() {
+    data_productLineImages.length = 0;
+    data_productLineDescriptionImages.length = 0;
+    console.log(data_productLineImages);
+    console.log(data_productLineDescriptionImages);
+    document.getElementById('product-line-name-input').value = '';
+    document.getElementById('product-line-images').innerHTML = '';
+    // Remove all description entries except the first one
+    Array.from(document.getElementById('product-line-descriptions')
+        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
 }
 
 function displayProductLineInfo(productLineInfo) {
@@ -259,6 +285,13 @@ function addProductEntry(productId) {
     });
 }
 
+function clearAllProductInfo() {
+    for (let i = 1; i < products.length; i++) {
+        removeProductInfo(products[i]);
+        i--;
+    }
+}
+
 function displayProductInfo(productItem, content) {
     console.log(content);
     productItem.querySelector('.product-name-input').value = content.name;
@@ -291,6 +324,10 @@ function displayProductInfo(productItem, content) {
         }
     });
 }
+
+document.getElementById('publish-btn').addEventListener('click', (e) => {
+    clearAllProductInfo();
+});
 
 // const productLineInfo = await fetchProductLine();
 // displayProductLineInfo(productLineInfo);

@@ -32,7 +32,6 @@ function  setInputImageChangeListener(input, dataImageArray, allImageContainer) 
         max--;
     });
     input.value = null;
-    console.log(dataImageArray);
 }
 
 export function addImageEntry(dataImageArray, allImageContainer, imageFile, imageSrc) {
@@ -43,6 +42,7 @@ export function addImageEntry(dataImageArray, allImageContainer, imageFile, imag
     newImageEntry.querySelector('.image-entry-img').src = imageSrc;
     initializeImageButtons(allImageContainer, newImageEntry, dataImageArray);
     allImageContainer.appendChild(newImageEntry);
+    console.log(dataImageArray);
 }
 
 export function initializeImageButtons(allImageContainer, imageContainer, dataImageArray) {
@@ -547,10 +547,7 @@ function addNewProductGroupTemplate(productId, collapsed) {
     data_allProductDescriptionImages.set(productId, []);
 
     productGroupItem.querySelector('.delete-product-btn').addEventListener('click', function() {
-        deleteProductData(productId);
-        productGroupItem.remove();
-        removeProductItemFromOption(productId);
-        removeProductItemFromSpec(productId);
+        removeProductInfo(productId);
     });
     productGroupItem.querySelector('.toggle-collapse').addEventListener('click', function() {
         productGroupItem.querySelector('.product-details').classList.toggle('hidden');
@@ -575,6 +572,13 @@ function addNewProductGroupTemplate(productId, collapsed) {
         addProductDescription(productGroupItem, productId);
     });
     return productGroupItem;
+}
+
+export function removeProductInfo(productId) {
+    deleteProductData(productId);
+    productGroupContainer.querySelector(`[data-product-id="${productId}"]`).remove();
+    removeProductItemFromOption(productId);
+    removeProductItemFromSpec(productId);
 }
 
 export function addProductFeature(productGroupItem) {
