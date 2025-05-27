@@ -5,10 +5,7 @@ document.getElementById('add-product-link').addEventListener('click', async func
     e.preventDefault();
     const newUrl = `/admin/dashboard?query=${addNewQuery}`;
     this.href = newUrl;
-    const currentUrl = window.location.pathname + window.location.search;
-    if (currentUrl !== newUrl) {
-        history.pushState({ addNewQuery }, "", newUrl);
-    }
+    updatePageUrl(newUrl, addNewQuery);
     await getAddNewProductTemplate();
 });
 
@@ -17,44 +14,69 @@ document.getElementById('update-product-link').addEventListener('click', async f
     e.preventDefault();
     const newUrl = `/admin/dashboard?query=${updateProductQuery}`;
     this.href = newUrl;
-    const currentUrl = window.location.pathname + window.location.search;
-    if (currentUrl !== newUrl) {
-        history.pushState({ updateProductQuery }, "", newUrl);
-    }
+    updatePageUrl(newUrl, updateProductQuery);
     await getUpdateProductTemplate()
-})
+});
 
 async function getAddNewProductTemplate() {
-    await getAdminProductTemplate('/admin/dashboard/addNewProduct');
+    await getAdminProductTemplate('/admin/dashboard/addNewProduct', mainContentArea);
+    import('./add-new-product.js')
+        .then((module) => {
+            // You can use `module` here
+            module.initializeAdd();
+        });
 }
 
 async function getUpdateProductTemplate() {
-    await getAdminProductTemplate('/admin/dashboard/updateProduct');
+    await getAdminProductTemplate('/admin/dashboard/updateProduct', mainContentArea);
+    import('./retrieve-product.js')
+        .then((module) => {
+            // You can use `module` here
+            module.initializeUpdate();
+        });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    window.addEventListener("popstate", (event) => {
-        const query = new URLSearchParams(window.location.search).get("query");
-        if (query === addNewQuery) {
-            getAddNewProductTemplate();
-        } else if (query === updateProductQuery) {
-            getUpdateProductTemplate();
-        } else {
-            mainContentArea.innerHTML = '';
-        }
+document.addEventListener("DOMContentLoaded", async () => {
+    window.addEventListener("popstate", async (event) => {
+        updateTemplateOnQueryPath();
     });
-
-    const initQuery = new URLSearchParams(window.location.search).get("query");
-    if (initQuery === addNewQuery) {
-        getAddNewProductTemplate();
-    } else if (initQuery === updateProductQuery) {
-        getUpdateProductTemplate();
-    }
+    updateTemplateOnQueryPath();
 });
 
-async function getAdminProductTemplate(endPoint) {
+async function updateTemplateOnQueryPath() {
+    const query = new URLSearchParams(window.location.search).get("query");
+    console.log('query: ', query);
+    if (query === addNewQuery) {
+        await getAddNewProductTemplate();
+    } else if (query === updateProductQuery) {
+        await getUpdateProductTemplate();
+    } else {
+        mainContentArea.innerHTML = '';
+    }
+}
+
+export function updatePageUrl(newUrl, query) {
+    const currentUrl = window.location.pathname + window.location.search;
+    if (currentUrl !== newUrl) {
+        history.pushState({ query }, "", newUrl);
+        console.log('newUrl', newUrl);
+    }
+}
+
+function removeDynamicScript() {
+    const scripts = document.getElementsByTagName('script');
+    Array.from(scripts).forEach(script => {
+        if (script.src && script.src.includes('?_ts=')) {
+            console.log(script.src);
+            script.remove();
+        }
+    });
+}
+
+async function getAdminProductTemplate(endPoint, container) {
     const content = await fetch(endPoint, {
         method: 'GET',
+        cache: 'no-store'
     })
         .then(response => {
             if (response.ok) // created
@@ -72,18 +94,21 @@ async function getAdminProductTemplate(endPoint) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = content;
     const innerScripts = tempDiv.querySelectorAll('script');
+    const newScripts = [];
     innerScripts.forEach(innerScript => {
-        const existingScript = Array.from(document.body.querySelectorAll('script')).find(script => {
-            if (!script.src) return false;
-            return script.src.includes(innerScript.src);
-        });
+        const existingScript = Array.from(document.body.querySelectorAll('script')).find(
+            s => s.src && innerScript.src && s.src.includes(innerScript.src)
+        ) || null;
+        innerScript.remove();
         if (existingScript)
-            return;
+            existingScript.remove();
         const script = document.createElement('script');
         script.type = 'module';
         script.src = innerScript.src;
+        newScripts.push(script);
+    });
+    container.innerHTML = tempDiv.innerHTML;
+    newScripts.forEach(script => {
         document.body.appendChild(script);
-        innerScript.remove();
-    })
-    mainContentArea.innerHTML = content;
+    });
 }

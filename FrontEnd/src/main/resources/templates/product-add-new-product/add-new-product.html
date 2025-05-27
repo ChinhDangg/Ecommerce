@@ -5,6 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div th:fragment="add-new-product-template">
@@ -23,7 +24,7 @@
             </div>
         </div>
 
-        <div class="p-6" id="add-new-product-content">
+        <div class="p-6" id="add-new-product-content" th:fragment="add-new-product-content">
             <!-- Product Line Section -->
             <div class="bg-white rounded-lg shadow mb-6" id="product-line-section">
                 <div class="border-b border-gray-200 px-4 py-4">
@@ -36,7 +37,8 @@
                         <input id="product-line-name-input" type="text"
                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                                placeholder="Enter product line name">
-                        <p class="text-sm text-gray-500 mt-1">Group this product with others under the same product line (e.g.,
+                        <p class="text-sm text-gray-500 mt-1">Group this product with others under the same product line
+                            (e.g.,
                             EOS R Series, Z Series).</p>
                     </div>
 
@@ -47,13 +49,14 @@
                             <div>
                                 <input type="file" accept="image/*" id="add-line-image-input" class="hidden" multiple>
                                 <button id="add-line-image-btn"
-                                        class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Images
+                                        class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                    Add Images
                                 </button>
                             </div>
                         </div>
                         <div id="product-line-images" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-                        <p class="text-sm text-gray-500 mt-2">These images will be shared across all products in this product
-                            line
+                        <p class="text-sm text-gray-500 mt-2">These images will be shared across all products in this
+                            product line
                             (max 5).</p>
                     </div>
 
@@ -63,9 +66,9 @@
                         <div id="product-line-descriptions" class="space-y-4">
                             <div class="description-entry flex items-start space-x-2 hidden">
                                 <div class="flex-1 description-content">
-                    <textarea
-                            class="description-textarea-entry w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                            placeholder="Enter paragraph or URL"></textarea>
+                                            <textarea
+                                                    class="description-textarea-entry w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                                                    placeholder="Enter paragraph or URL"></textarea>
                                     <div class="description-image-entry border border-gray-200 rounded-md p-2 hidden">
                                         <img src="" alt="empty" class="h-40 w-full object-contain">
                                     </div>
@@ -98,16 +101,24 @@
                 <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
                     <h3 class="text-lg font-medium text-gray-800">Product Category</h3>
                     <button id="category-back-button"
-                            class="text-blue-600 hover:text-blue-800 focus:outline-none text-sm font-medium">
+                            class="hidden text-blue-600 hover:text-blue-800 focus:outline-none text-sm font-medium">
                         ← Back
+                    </button>
+                    <button class="toggle-collapse text-gray-600 hover:text-gray-800 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-5 w-5 transform transition-transform duration-200"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"/>
+                        </svg>
                     </button>
                 </div>
 
                 <!-- Description -->
-                <div class="p-4">
+                <div class="category-description p-4 hidden">
                     <p class="text-sm text-gray-500 mb-4">
-                        Select one category for the product. Choose a category or click the arrow to view its subcategories on
-                        the
+                        Select one category for the product. Choose a category or click the arrow to view its
+                        subcategories on the
                         right.
                     </p>
 
@@ -121,7 +132,8 @@
                                     <div
                                             class="flex justify-between items-center p-2 rounded hover:bg-gray-50 has-[:checked]:bg-blue-50">
                                         <div class="flex items-center pr-2">
-                                            <input type="radio" name="category" id="category-input" value="category-value"
+                                            <input type="radio" name="category" id="category-input"
+                                                   value="category-value"
                                                    class="appearance-none h-4 w-4 border-2 border-gray-300 rounded-sm checked:border-blue-600 checked:bg-blue-100 focus:ring-blue-500"/>
                                             <label for="category-input"
                                                    class="ml-2 text-sm font-medium text-gray-700 flex-1 cursor-pointer">
@@ -151,7 +163,8 @@
                                 <div class="subcategory-item hidden">
                                     <div class="flex justify-between items-center p-2 rounded hover:bg-gray-50 has-[:checked]:bg-blue-50">
                                         <div class="flex items-center pr-2">
-                                            <input type="radio" name="category" id="category-input" value="subcategory-value"
+                                            <input type="radio" name="category" id="category-input"
+                                                   value="subcategory-value"
                                                    class="appearance-none h-4 w-4 border-2 border-gray-300 rounded-sm checked:border-blue-600 checked:bg-blue-100 focus:ring-blue-500"/>
                                             <label for="category-input"
                                                    class="ml-2 text-sm text-gray-700 flex-1 cursor-pointer">
@@ -189,7 +202,8 @@
                                 class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Option
                         </button>
                         <button id="add-product-btn"
-                                class="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">Add New Product
+                                class="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">Add New
+                            Product
                         </button>
                     </div>
                     <div id="option-values-container" class="mb-4">
@@ -241,7 +255,8 @@
                 <div class="p-4">
                     <div class="mb-4 flex space-x-4">
                         <button id="add-spec-btn"
-                                class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Specification
+                                class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Add
+                            Specification
                         </button>
                     </div>
                     <div id="spec-values-container" class="mb-4">
@@ -273,7 +288,7 @@
                                 <td class="spec-product-selection px-4 py-2">
                                     <select multiple
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                                            data-spec="">
+                                            data-spec-id="">
                                         <option class="hidden" value="value2">Some value</option>
                                     </select>
                                 </td>
@@ -299,7 +314,8 @@
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      class="h-5 w-5 transform transition-transform duration-200"
                                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </button>
                         </div>
@@ -323,7 +339,8 @@
                                            value="">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part Number</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer Part
+                                        Number</label>
                                     <input type="text"
                                            class="product-manufacturer-part-number-input w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                                            value="">
@@ -351,7 +368,8 @@
                             <h4 class="text-md font-medium text-gray-700 mb-2">Pricing</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price
+                                        ($)</label>
                                     <input type="number" min="0"
                                            class="product-regular-price-input w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                                            value="">
@@ -413,9 +431,9 @@
                             <div class="product-descriptions space-y-4">
                                 <div class="description-entry flex items-start space-x-2 hidden">
                                     <div class="flex-1 description-content">
-                    <textarea
-                            class="description-textarea-entry w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                            placeholder="Enter paragraph or URL"></textarea>
+                            <textarea
+                                    class="description-textarea-entry w-full h-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                                    placeholder="Enter paragraph or URL"></textarea>
                                         <div class="description-image-entry border border-gray-200 rounded-md p-2 hidden">
                                             <img src="" alt="empty" class="h-40 w-full object-contain">
                                         </div>
@@ -446,7 +464,8 @@
                                 <div class="absolute top-2 right-2 flex space-x-1">
                                     <button class="move-left-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600"
                                             title="Move Left">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                             viewBox="0 0 24 24"
                                              stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M15 19l-7-7 7-7"/>
@@ -454,7 +473,8 @@
                                     </button>
                                     <button class="move-right-btn p-1 bg-gray-500 text-white rounded hover:bg-gray-600"
                                             title="Move Right">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                             viewBox="0 0 24 24"
                                              stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M9 5l7 7-7 7"/>
@@ -462,7 +482,8 @@
                                     </button>
                                     <button class="delete-image-btn p-1 bg-red-600 text-white rounded hover:bg-red-700"
                                             title="Delete Image">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                             viewBox="0 0 24 24"
                                              stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M6 18L18 6M6 6l12 12"/>
@@ -474,11 +495,11 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- JavaScript -->
-        <script type="module" src="/js/admin-dashboard/add-new-product.js"></script>
-        <script type="module" src="/js/admin-dashboard/post-new-product.js"></script>
+            <!-- JavaScript -->
+            <script type="module" src="/js/admin-dashboard/add-new-product.js"></script>
+            <script type="module" src="/js/admin-dashboard/post-new-product.js"></script>
+        </div>
     </div>
 </body>
 </html>

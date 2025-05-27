@@ -15,23 +15,42 @@ import {
     data_allProductDescriptionImages,
     data_productLineDescriptionImages,
     products,
+    initializeAdd
 } from './add-new-product.js';
 
 import {
+    updatePageUrl,
     updateProductQuery,
 } from './admin-navigation.js';
 
-document.getElementById('search-bar-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const searchInput = document.getElementById('search-input');
-    console.log('Search input: ', searchInput.value);
-    if (searchInput.value)
-        searchProduct(searchInput.value);
-    else {
-        document.getElementById('main-content').classList.add('hidden');
-        clearSearchEntry();
-    }
-});
+export function initializeUpdate() {
+
+    data_productLineImages.length = 0;
+    data_productLineDescriptionImages.length = 0;
+    data_allProductImages.clear();
+    data_allProductDescriptionImages.clear();
+    products.splice(1);
+    retrieved_product.length = 0;
+
+    document.getElementById('search-bar-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const searchInput = document.getElementById('search-input');
+        console.log('Search input: ', searchInput.value);
+        if (searchInput.value)
+            await searchProduct(searchInput.value);
+        else {
+            document.getElementById('main-content').classList.add('hidden');
+            clearSearchEntry();
+        }
+    });
+
+    document.getElementById('publish-btn').addEventListener('click', (e) => {
+        clearAllProductInfo();
+    });
+
+    initializeAdd(); // initialize add new product
+}
+
 
 async function searchProduct(productNameSearch) {
     try {
@@ -54,7 +73,7 @@ async function searchProduct(productNameSearch) {
                     quality: 50,
                     price: 50.5,
                     features: [],
-                    imageName: "/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    imageName: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
                     discountPrice: '',
                 }
             ]
@@ -65,10 +84,10 @@ async function searchProduct(productNameSearch) {
     }
 }
 
-const productSearchContainer = document.getElementById('product-search-container');
 function displaySearchResult(content) {
     clearSearchEntry();
     content.forEach(result => {
+        const productSearchContainer = document.getElementById('product-search-container');
         const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode(true);
         productSearchContainer.appendChild(searchEntry);
         searchEntry.classList.remove('hidden');
@@ -82,18 +101,19 @@ function displaySearchResult(content) {
 
         const searchImageAnchor = searchEntry.querySelector('.product-image-anchor');
         setProductLink(searchImageAnchor, result.id);
-        searchImageAnchor.addEventListener('click', function(e) {
-            clickOnProductResult(e, this, result.id, result.productLineId);
+        searchImageAnchor.addEventListener('click', async function(e) {
+            await clickOnProductResult(e, this, result.id, result.productLineId);
         });
         const searchNameAnchor = searchEntry.querySelector('.product-name-anchor');
         setProductLink(searchNameAnchor, result.id);
-        searchNameAnchor.addEventListener('click', function(e) {
-            clickOnProductResult(e, this, result.id, result.productLineId);
+        searchNameAnchor.addEventListener('click', async function(e) {
+            await clickOnProductResult(e, this, result.id, result.productLineId);
         });
     });
 }
 
 function clearSearchEntry() {
+    const productSearchContainer = document.getElementById('product-search-container');
     const allSearchEntries = productSearchContainer.querySelectorAll('.search-entry');
     Array.from(allSearchEntries).slice(1).forEach(item => item.remove()); // remove all item except first one
 }
@@ -104,27 +124,23 @@ function setProductLink(anchor, productId) {
 
 async function clickOnProductResult(e, anchor, productId, productLineId) {
     e.preventDefault();
-    // const newUrl = `/admin/dashboard?query=${updateProductQuery}&product=${productId}`;
-    // anchor.href = newUrl;
-    // const currentUrl = window.location.pathname + window.location.search;
-    // const query = `${updateProductQuery}P${productId}`;
-    // if (currentUrl !== newUrl) {
-    //     history.pushState({ query }, "", newUrl);
-    // }
+    const newUrl = `/admin/dashboard?query=${updateProductQuery}&product=${productId}`;
+    anchor.href = newUrl;
+    const query = `${updateProductQuery}P${productId}`;
+    updatePageUrl(newUrl, query);
     clearSearchEntry();
     clearProductLineSection();
     clearAllProductInfo();
     document.getElementById('main-content').classList.remove('hidden');
-    if (!products[productId]) {
-        if (productLineId) {
-            const productLineInfo = await fetchProductLineInfo(productLineId);
-            displayProductLineInfo(productLineInfo);
-            productLineInfo.productIdList.forEach(productId => {
-                addProductEntry(productId);
-            });
-        } else {
+    if (productLineId) {
+        const productLineInfo = await fetchProductLineInfo(productLineId);
+        displayProductLineInfo(productLineInfo);
+        productLineInfo.productIdList.forEach(productId => {
+            console.log('adding product entry: ', productId);
             addProductEntry(productId);
-        }
+        });
+    } else {
+        addProductEntry(productId);
     }
 }
 
@@ -137,17 +153,17 @@ async function fetchProductLineInfo(productLineId) {
             media: [
                 {
                     contentType: "IMAGE",
-                    content: "/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
+                    content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
                 },
                 {
                     contentType: "IMAGE",
-                    content: "/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
+                    content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
                 }
             ],
             descriptions: [
                 {
                     contentType: "IMAGE",
-                    content: "/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
+                    content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
                 },
                 {
                     contentType: "TEXT",
@@ -239,17 +255,17 @@ async function fetchProductInfo(productId) {
             media: [
                 {
                     contentType: 'IMAGE',
-                    content: '/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
+                    content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
                 },
                 {
                     contentType: 'IMAGE',
-                    content: '/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
+                    content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
                 }
             ],
             descriptions: [
                 {
                     contentType: 'IMAGE',
-                    content: '/static/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
+                    content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
                 },
                 {
                     contentType: 'TEXT',
@@ -286,10 +302,10 @@ function addProductEntry(productId) {
 }
 
 function clearAllProductInfo() {
-    for (let i = 1; i < products.length; i++) {
-        removeProductInfo(products[i]);
-        i--;
-    }
+    products.forEach(productId => {
+        if (productId !== 0)
+            removeProductInfo(productId);
+    });
 }
 
 function displayProductInfo(productItem, content) {
@@ -324,13 +340,3 @@ function displayProductInfo(productItem, content) {
         }
     });
 }
-
-document.getElementById('publish-btn').addEventListener('click', (e) => {
-    clearAllProductInfo();
-});
-
-// const productLineInfo = await fetchProductLine();
-// displayProductLineInfo(productLineInfo);
-
-// const productInfo = await fetchProductInfo();
-// displayProductInfo(productInfo);

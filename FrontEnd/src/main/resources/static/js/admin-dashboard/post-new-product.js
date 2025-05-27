@@ -4,10 +4,7 @@ import {
     data_productLineDescriptionImages,
     data_allProductImages,
     data_allProductDescriptionImages,
-    optionBodyContainer,
-    specBodyContainer,
     products,
-    productGroupContainer,
 } from "./add-new-product.js";
 
 function uploadImages(dataImageArray) {
@@ -137,6 +134,7 @@ function postProductInfo(productInfoData) {
 }
 
 async function getProductInfo(productLineId, productId) {
+    const productGroupContainer = document.getElementById('product-group-container');
     const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productContainer)
         return null;
@@ -178,6 +176,7 @@ async function getProductInfo(productLineId, productId) {
 }
 
 function checkProductInfoFilled(productId) {
+    const productGroupContainer = document.getElementById('product-group-container');
     const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productContainer.querySelector('.product-name-input').value) {
         alert('Product name is required');
@@ -205,6 +204,7 @@ function checkProductInfoFilled(productId) {
 }
 
 function getProductOptionContent(productId) {
+    const optionBodyContainer = document.getElementById('options-body');
     const productOptionItem = optionBodyContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productOptionItem)
         return null;
@@ -219,6 +219,7 @@ function getProductOptionContent(productId) {
 }
 
 function getProductSpecificationContent(productId) {
+    const specBodyContainer = document.getElementById('spec-body');
     const productSpecItem = specBodyContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productSpecItem)
         return null;
@@ -232,21 +233,24 @@ function getProductSpecificationContent(productId) {
     return specContent.length === 0 ? [] : specContent;
 }
 
-
-document.getElementById('publish-btn').addEventListener('click', async function () {
-    const productLineInfo = await getProductLineInfo();
-    let productLineId = null;
-    console.log('Product line info: ', productLineInfo);
-    if (productLineInfo)
-        productLineId = await postProductLineInfo(productLineInfo);
-    async function processProducts() {
-        for (const productId of products) {
-            const productInfo = await getProductInfo(productLineId, productId);
-            console.log(`Product info for ${productId}: `, productInfo);
-            if (productInfo) {
-                await postProductInfo(productInfo);
+function initializeEventListeners() {
+    document.getElementById('publish-btn').addEventListener('click', async function () {
+        const productLineInfo = await getProductLineInfo();
+        let productLineId = null;
+        console.log('Product line info: ', productLineInfo);
+        if (productLineInfo)
+            productLineId = await postProductLineInfo(productLineInfo);
+        async function processProducts() {
+            for (const productId of products) {
+                const productInfo = await getProductInfo(productLineId, productId);
+                console.log(`Product info for ${productId}: `, productInfo);
+                if (productInfo) {
+                    await postProductInfo(productInfo);
+                } else {
+                    break;
+                }
             }
         }
-    }
-    await processProducts();
-});
+        await processProducts();
+    });
+}

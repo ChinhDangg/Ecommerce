@@ -14,13 +14,13 @@ public class AdminDashboardController {
     }
 
     @GetMapping("/addNewProduct")
-    public String getAddNewProductContent() {
+    public String getAddNewProductTemplate() {
         return "/product-add-new-product/add-new-product :: add-new-product-template";
     }
 
     @GetMapping("/updateProduct")
     public String getUpdateProductContent() {
-        return "";
+        return "/product-update-product/update-product :: update-product-template";
     }
 
 }

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div th:fragment="update-product-template">
+        <!-- Sticky top bar -->
+        <div class="bg-white shadow sticky top-0 z-10">
+            <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-xl font-semibold text-gray-800">Admin Panel</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Draft</span>
+                    <button class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Discard
+                    </button>
+                    <button id="publish-btn"
+                            class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Update
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="bg-white shadow-md p-4 mx-4 mt-4 rounded-lg">
+            <form accept-charset="utf-8" method="GET" id="search-bar-form">
+                <div class="flex items-center space-x-4">
+                    <button id="search-button" type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Search
+                    </button>
+                    <input id="search-input" type="text" placeholder="Search products..." autocomplete="off"
+                           class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </form>
+        </div>
+
+        <div id="product-search-container">
+            <div class="hidden search-entry bg-white rounded-lg shadow mx-4 mt-4 p-3">
+                <div class="flex gap-2">
+                    <a href="" class="product-image-anchor">
+                        <div class="image-container w-24 h-24 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer hover:opacity-75">
+                            <img class="product-image w-full h-full object-cover" src="" alt="Product Image" onerror="this.style.display='none'">
+                        </div>
+                    </a>
+                    <div class="flex-grow">
+                        <a href="" class="product-name-anchor">
+                            <h3 class="product-name text-sm font-semibold mb-2 cursor-pointer hover:text-blue-600">Sample Product</h3>
+                        </a>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600 text-xs">Product ID: <span class="product-id">12345</span></p>
+                                <p class="text-gray-600 text-xs">Manufacturer ID: <span class="manufacturer-id">MFG-789</span></p>
+                                <p class="text-gray-600 text-xs">Quantity: <span class="product-quantity">50</span></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-xs">Price: $<span class="product-price">99.99</span></p>
+                                <p class="text-gray-600 text-xs">Discounted Price: $<span class="product-discounted-price">89.99</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 hidden" id="main-content" th:insert="~{product-add-new-product/add-new-product :: add-new-product-content}">
+
+        </div>
+
+        <script type="module" src="/js/admin-dashboard/retrieve-product.js"></script>
+    </div>
+
+</body>
+</html>
