@@ -1,5 +1,6 @@
 package dev.ecommerce.product.service;
 
+import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
@@ -9,6 +10,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -146,9 +150,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDTO findProductById(Long id) {
-        Product foundProduct = productRepository.findById(id).orElse(null);
-        if (foundProduct == null)
-            return null;
+        Product foundProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         foundProduct.getProductLine();
         foundProduct.getOptions().size();
         foundProduct.getSpecifications().size();
@@ -181,7 +184,7 @@ public class ProductService {
     @Transactional
     public Integer saveProductLine(ProductLineDTO productLineDTO) {
         if (productLineDTO.getName() == null)
-            throw new IllegalStateException("Product line name is null");
+            throw new DataIntegrityViolationException("Product line name is null");
         ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getName()));
 
         List<ProductLineMedia> mediaList = new ArrayList<>();
@@ -211,7 +214,8 @@ public class ProductService {
     @Transactional
     public Long saveProduct(ProductDTO productDTO) {
         if (productDTO.getName() == null)
-            throw new IllegalStateException("Product name is null");
+            throw new DataIntegrityViolationException("Product name is null");
+
         ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId()).orElse(null);
         ProductLine productLine = productDTO.getProductLineId() == null
                 ? null : productLineRepository.findById(productDTO.getProductLineId()).orElse(null);
@@ -276,4 +280,53 @@ public class ProductService {
 
         return savedProduct.getId();
     }
+
+    @Transactional // will leverage entity manager to update by retrieving the entity itself
+    public Integer updateProductLine(int productLineId, ProductLineDTO productLineDTO) {
+        ProductLine productLine = productLineRepository.findById(productLineId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product line id not found"));
+
+        productLine.setName(productLineDTO.getName());
+
+        List<ProductLineMedia> currentMedia = productLine.getMedia();
+        Map<Long, ProductLineMedia> currentMediaMap = currentMedia.stream() // to get existing media entity by id quickly
+                .filter(m -> m.getId() != null)
+                .collect(Collectors.toMap(ProductLineMedia::getId, m -> m));
+
+        List<ProductLineMedia> updatedMediaList = new ArrayList<>();
+        int order = 0;
+        for (ContentDTO contentDTO : productLineDTO.getMedia()) {
+            if (contentDTO.id() != null && currentMediaMap.containsKey(contentDTO.id())) {
+                // update existing
+                ProductLineMedia media = currentMediaMap.get(contentDTO.id());
+                if (contentDTO.contentType() != (media.getContentType()))
+                    media.setContentType(contentDTO.contentType());
+                if (!contentDTO.content().equals(media.getContent()))
+                    media.setContent(media.getContent());
+                if (media.getSortOrder() != order)
+                    media.setSortOrder(order);
+                updatedMediaList.add(media);
+            } else {
+                // create new media
+                ProductLineMedia newMedia = new ProductLineMedia(
+                        productLine,
+                        contentDTO.contentType(),
+                        contentDTO.content(),
+                        order
+                );
+                updatedMediaList.add(newMedia);
+            }
+            order++;
+        }
+
+        productLine.getMedia().clear();
+        productLine.getMedia().addAll(updatedMediaList);
+
+        return productLineRepository.save(productLine).getId();
+    }
+
+//    @Transactional
+//    public Long updateProduct(ProductDTO productDTO) {
+//
+//    }
 }

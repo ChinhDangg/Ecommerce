@@ -53,8 +53,6 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable long id) {
         ProductDTO productDTO = productService.findProductById(id);
-        if (productDTO == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
@@ -67,8 +65,6 @@ public class ProductController {
     @PostMapping("/newProductLine")
     public ResponseEntity<Integer> addProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
         Integer savedProductLineId = productService.saveProductLine(productLineDTO);
-        if (savedProductLineId == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
     }
 
@@ -77,6 +73,18 @@ public class ProductController {
         Long savedProductId = productService.saveProduct(productDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
+
+    @PutMapping("/put/productLine/{id}")
+    public ResponseEntity<Integer> updateProductLine(@PathVariable int id, @Valid @RequestBody ProductLineDTO productLineDTO) {
+        Integer updatedProductLineId = productService.updateProductLine(id, productLineDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
+    }
+
+
+//    @PutMapping("/put/{id}")
+//    public ResponseEntity<Long> updateProduct(@PathVariable long id, @Valid @RequestBody ProductDTO productDTO) {
+//
+//    }
 
     @PostMapping("/uploadImages")
     public ResponseEntity<List<String>> handleFileUpload(@RequestParam("images") MultipartFile[] images) {
@@ -88,7 +96,7 @@ public class ProductController {
                         try {
                             // Save file to a directory (e.g., uploads/)
                             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                            Path path = Paths.get("/static/images" + fileName);
+                            Path path = Paths.get("C:\\Users\\admin\\IdeaProjects\\Ecommerce\\FrontEnd\\src\\main\\resources\\static\\images\\" + fileName);
                             Files.createDirectories(path.getParent()); // Ensure directory exists
                             Files.write(path, file.getBytes());
                             return path.getFileName().toString();
