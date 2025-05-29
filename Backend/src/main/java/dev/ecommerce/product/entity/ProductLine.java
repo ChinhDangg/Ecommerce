@@ -3,6 +3,7 @@ package dev.ecommerce.product.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +16,14 @@ public class ProductLine {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Setter
     private String name;
 
-    @OneToMany(mappedBy = "productLine")
+    @OneToMany(mappedBy = "productLine", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private final List<ProductLineMedia> media = new ArrayList<>();
 
-    @OneToMany(mappedBy = "productLine")
+    @OneToMany(mappedBy = "productLine", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private final List<ProductLineDescription> descriptions = new ArrayList<>();
 

@@ -40,32 +40,32 @@ public class EcommerceApplication {
 
             productCategoryRepository.saveAll(List.of(electronics, computers, laptops, gamingLaptops, macs, computerComponent, graphicsCard));
 
-            List<ProductCategoryDTO> parentProductCategories = productCategoryRepository.findAllTopParentCategory();
-            System.out.println(parentProductCategories.getFirst().getId());
-            System.out.println(parentProductCategories.getFirst().getName());
+//            List<ProductCategoryDTO> parentProductCategories = productCategoryRepository.findAllTopParentCategory();
+//            System.out.println(parentProductCategories.getFirst().getId());
+//            System.out.println(parentProductCategories.getFirst().getName());
 
-            ProductLine savedProductLine = productLineRepository.save(new ProductLine("Product line name"));
+//            ProductLine savedProductLine = productLineRepository.save(new ProductLine("Product line name"));
+//
+//            Product newProduct = new Product(
+//                    "Man 2",
+//                    "Some name with many different words for testing the search functionality",
+//                    "brand",
+//                    5,
+//                    ConditionType.NEW,
+//                    LocalDate.now(),
+//                    new BigDecimal("100"),
+//                    null,
+//                    null,
+//                    savedProductLine,
+//                    electronics
+//            );
+//
+//            productRepository.save(newProduct);
+//
+//            Page<ShortProductDTO> shortP = productService.findProductsByName("name many",0);
+//            System.out.println(shortP.getTotalElements());
+//            System.out.println(shortP.getContent().getFirst().getName());
 
-            Product newProduct = new Product(
-                    "Man 2",
-                    "Some name with many different words for testing the search functionality",
-                    "brand",
-                    5,
-                    ConditionType.NEW,
-                    LocalDate.now(),
-                    new BigDecimal("100"),
-                    null,
-                    null,
-                    savedProductLine,
-                    electronics
-            );
-
-            Product saved = productRepository.save(newProduct);
-            System.out.println(saved.getName());
-
-            Page<ShortProductDTO> shortP = productService.findProductsByName("name many",0);
-            System.out.println(shortP.getTotalElements());
-            System.out.println(shortP.getContent().getFirst().getName());
         };
     }
 

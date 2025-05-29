@@ -17,6 +17,7 @@ public class ProductMedia {
     @JoinColumn(name = "product_id")
     private Product product; // product exclusive media
 
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;
 
     private String content;
