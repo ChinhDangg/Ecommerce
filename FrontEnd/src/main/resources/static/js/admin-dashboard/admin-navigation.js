@@ -1,5 +1,13 @@
 const mainContentArea = document.getElementById('main-content-area');
 
+document.getElementById('admin-dashboard-top-header-link').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const newUrl = `/admin/dashboard`;
+    this.href = newUrl;
+    updatePageUrl(newUrl, 'admin-dashboard');
+    await updateTemplateOnQueryPath();
+});
+
 const addNewQuery = 'addProduct'
 document.getElementById('add-product-link').addEventListener('click', async function(e) {
     e.preventDefault();
@@ -22,8 +30,11 @@ async function getAddNewProductTemplate() {
     await getAdminProductTemplate('/admin/dashboard/addNewProduct', mainContentArea);
     import('./add-new-product.js')
         .then((module) => {
-            // You can use `module` here
             module.initializeAdd();
+        });
+    import('post-new-product')
+        .then((module) => {
+            module.initializePost();
         });
 }
 
@@ -33,18 +44,22 @@ async function getUpdateProductTemplate() {
         .then((module) => {
             // You can use `module` here
             module.initializeUpdate();
+            const product = new URLSearchParams(window.location.search).get('product');
+            const productLine = new URLSearchParams(window.location.search).get('line');
+            if (product)
+                module.handleProductResult(product, productLine);
         });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    window.addEventListener("popstate", async (event) => {
+    window.addEventListener("popstate", async () => {
         updateTemplateOnQueryPath();
     });
     updateTemplateOnQueryPath();
 });
 
 async function updateTemplateOnQueryPath() {
-    const query = new URLSearchParams(window.location.search).get("query");
+    const query = new URLSearchParams(window.location.search).get('query');
     console.log('query: ', query);
     if (query === addNewQuery) {
         await getAddNewProductTemplate();
@@ -61,16 +76,6 @@ export function updatePageUrl(newUrl, query) {
         history.pushState({ query }, "", newUrl);
         console.log('newUrl', newUrl);
     }
-}
-
-function removeDynamicScript() {
-    const scripts = document.getElementsByTagName('script');
-    Array.from(scripts).forEach(script => {
-        if (script.src && script.src.includes('?_ts=')) {
-            console.log(script.src);
-            script.remove();
-        }
-    });
 }
 
 async function getAdminProductTemplate(endPoint, container) {

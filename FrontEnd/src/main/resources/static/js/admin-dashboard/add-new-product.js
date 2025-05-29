@@ -1,5 +1,11 @@
 export function initializeAdd() {
 
+    data_productLineImages.length = 0;
+    data_productLineDescriptionImages.length = 0;
+    data_allProductImages.clear();
+    data_allProductDescriptionImages.clear();
+    products.splice(1);
+
     // product line
     document.getElementById('add-line-image-btn').addEventListener('click', function () {
         productLineImageInput.click();
@@ -84,11 +90,12 @@ export function addImageEntry(dataImageArray, allImageContainer, imageFile, imag
     const imageEntryTemplate = document.querySelector('#image-entry-template').cloneNode(true);
     imageEntryTemplate.classList.remove('hidden');
     dataImageArray.push(imageFile == null ? imageSrc : imageFile);
-    const newImageEntry = imageEntryTemplate.cloneNode(true);
+    const newImageEntry = imageEntryTemplate.querySelector('.image-entry');
     newImageEntry.querySelector('.image-entry-img').src = imageSrc;
     initializeImageButtons(allImageContainer, newImageEntry, dataImageArray);
     allImageContainer.appendChild(newImageEntry);
     console.log(dataImageArray);
+    return newImageEntry;
 }
 
 export function initializeImageButtons(allImageContainer, imageContainer, dataImageArray) {

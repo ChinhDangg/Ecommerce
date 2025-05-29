@@ -7,32 +7,50 @@ import {
     products,
 } from "./add-new-product.js";
 
-function uploadImages(dataImageArray) {
+async function uploadImages(dataImageArray) {
+    if (dataImageArray.length === 0)
+        return dataImageArray;
+
     const formData = new FormData();
-    dataImageArray.forEach(image => {
-        formData.append('images', image);
-    })
-    return fetch('http://localhost:8080/api/product/uploadImages', {
-        method: 'POST',
-        body: formData,
-    })
-        .then(response => {
-            if (response.status === 201) // created
-                return response.json(); // return list of image names
+    // Store indexes of image Files to update later
+    const fileIndexes = [];
+
+    dataImageArray.forEach((image, index) => {
+        if (image instanceof File) {
+            formData.append('images', image);
+            fileIndexes.push(index);
+        }
+    });
+
+    if (fileIndexes.length === 0) {
+        return dataImageArray;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8080/api/product/uploadImages', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.status !== 201) {
             throw new Error('Fail upload images');
-        })
-        .then(data => {
-            console.log('Success upload images: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading files: ', error);
-            return null;
-        })
+        }
+        const uploadedNames = await response.json(); // array of image names
+        // Replace File entries in original array with returned image names
+        fileIndexes.forEach((fileIndex, i) => {
+            dataImageArray[fileIndex] = uploadedNames[i];
+        });
+        return dataImageArray;
+
+    } catch (error) {
+        console.error('Error uploading files:', error);
+        return null;
+    }
 }
 
+
 // product line POST
-function postProductLineInfo(productLineInfoData) {
+export function postProductLineInfo(productLineInfoData) {
     const url = 'http://localhost:8080/api/product/newProductLine';
     return fetch(url, {
         method: 'POST',
@@ -56,7 +74,7 @@ function postProductLineInfo(productLineInfoData) {
         });
 }
 
-async function getProductLineInfo() {
+export async function getProductLineInfo() {
     const productLineNameInput = document.getElementById('product-line-name-input');
     const productLineName = productLineNameInput.value.trim();
     if (!productLineName)
@@ -82,13 +100,14 @@ async function getProductLineInfo() {
 async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
     const descriptionImageNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
     const descriptionTexts = [];
+    const filteredDescriptionImages = descriptionImageNames.filter(item => item !== undefined && item !== null);
     allDescriptionEntries.forEach(descriptionEntry => {
         const image = descriptionEntry.querySelector('img');
         if (image.src && image.alt !== "empty") {
             descriptionTexts.push(
                 {
-                    type: "IMAGE",
-                    content: descriptionImageNames.shift()
+                    contentType: 'IMAGE',
+                    content: filteredDescriptionImages.shift()
                 }
             );
         }
@@ -97,7 +116,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
             if (descriptionTextValue) {
                 descriptionTexts.push(
                     {
-                        type: "TEXT",
+                        contentType: 'TEXT',
                         content: descriptionTextValue
                     }
                 );
@@ -233,7 +252,7 @@ function getProductSpecificationContent(productId) {
     return specContent.length === 0 ? [] : specContent;
 }
 
-function initializeEventListeners() {
+export function initializePost() {
     document.getElementById('publish-btn').addEventListener('click', async function () {
         const productLineInfo = await getProductLineInfo();
         let productLineId = null;
