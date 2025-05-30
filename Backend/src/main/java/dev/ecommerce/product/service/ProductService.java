@@ -31,8 +31,6 @@ public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductLineRepository productLineRepository;
-    private final ProductLineMediaRepository productLineMediaRepository;
-    private final ProductLineDescriptionRepository productLineDescriptionRepository;
     private final ProductRepository productRepository;
     private final ProductFeatureRepository productFeatureRepository;
     private final ProductMediaRepository productMediaRepository;
@@ -40,14 +38,11 @@ public class ProductService {
     private final ProductOptionRepository productOptionRepository;
     private final ProductSpecificationRepository productSpecificationRepository;
     private final ProductMapper productMapper;
-
     private final EntityManager entityManager;
 
     public ProductService(
             ProductCategoryRepository productCategoryRepository,
             ProductLineRepository productLineRepository,
-            ProductLineMediaRepository productLineMediaRepository,
-            ProductLineDescriptionRepository productLineDescriptionRepository,
             ProductRepository productRepository,
             ProductFeatureRepository productFeatureRepository,
             ProductMediaRepository productMediaRepository,
@@ -59,8 +54,6 @@ public class ProductService {
     ) {
         this.productCategoryRepository = productCategoryRepository;
         this.productLineRepository = productLineRepository;
-        this.productLineMediaRepository = productLineMediaRepository;
-        this.productLineDescriptionRepository = productLineDescriptionRepository;
         this.productRepository = productRepository;
         this.productFeatureRepository = productFeatureRepository;
         this.productMediaRepository = productMediaRepository;
@@ -83,18 +76,10 @@ public class ProductService {
         return productMapper.toProductCategoryDTOList(category.getSubcategories());
     }
 
-    @Transactional(readOnly = true)
-    public ProductLineDTO findProductLineById(Integer id) {
-        ProductLine productLine = productLineRepository.findById(id).orElse(null);
-        if (productLine == null)
-            return null;
-        productLine.getDescriptions().size();
-        productLine.getMedia().size();
-
-        ProductLineDTO productLineDTO = productMapper.toProductLineDTO(productLine);
-        productLineDTO.setProductIdList(productRepository.findAllIdByProductLineId(id).orElse(null));
-
-        return productLineDTO;
+    public void findProductGroupedOptions(Integer productLineId) {
+        if (productLineId == null)
+            throw new IllegalStateException("Passing null Product line id");
+        List<ProductOptionGroupProjection> groupedOptions = productOptionRepository.findProductOptionByProductLine(productLineId);
     }
 
     @Transactional(readOnly = true)
@@ -161,12 +146,6 @@ public class ProductService {
         return productMapper.toProductDTO(foundProduct);
     }
 
-    public void findProductGroupedOptions(Integer productLineId) {
-        if (productLineId == null)
-            throw new IllegalStateException("Passing null Product line id");
-        List<ProductOptionGroupProjection> groupedOptions = productOptionRepository.findProductOptionByProductLine(productLineId);
-    }
-
     @Transactional
     public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
         Integer id = productCategoryDTO.getId();
@@ -179,36 +158,6 @@ public class ProductService {
 
         ProductCategory createdCategory = productCategoryRepository.save(newCategory);
         return new ProductCategoryDTO(createdCategory.getId(), createdCategory.getName());
-    }
-
-    @Transactional
-    public Integer saveProductLine(ProductLineDTO productLineDTO) {
-        if (productLineDTO.getName() == null)
-            throw new DataIntegrityViolationException("Product line name is null");
-        ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getName()));
-
-        List<ProductLineMedia> mediaList = new ArrayList<>();
-        for (int j = 0; j < productLineDTO.getMedia().size(); j++) {
-            mediaList.add(new ProductLineMedia(
-                    savedProductLine,
-                    productLineDTO.getMedia().get(j).contentType(),
-                    productLineDTO.getMedia().get(j).content(),
-                    j
-            ));
-        }
-        productLineMediaRepository.saveAll(mediaList);
-
-        List<ProductLineDescription> descriptionList = new ArrayList<>();
-        for (int j = 0; j < productLineDTO.getDescriptions().size(); j++) {
-            descriptionList.add(new ProductLineDescription(
-                    savedProductLine,
-                    productLineDTO.getDescriptions().get(j).contentType(),
-                    productLineDTO.getDescriptions().get(j).content(),
-                    j
-            ));
-        }
-        productLineDescriptionRepository.saveAll(descriptionList);
-        return savedProductLine.getId();
     }
 
     @Transactional
@@ -281,49 +230,6 @@ public class ProductService {
         return savedProduct.getId();
     }
 
-    @Transactional // will leverage entity manager to update by retrieving the entity itself
-    public Integer updateProductLine(int productLineId, ProductLineDTO productLineDTO) {
-        ProductLine productLine = productLineRepository.findById(productLineId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product line id not found"));
-
-        productLine.setName(productLineDTO.getName());
-
-        List<ProductLineMedia> currentMedia = productLine.getMedia();
-        Map<Long, ProductLineMedia> currentMediaMap = currentMedia.stream() // to get existing media entity by id quickly
-                .filter(m -> m.getId() != null)
-                .collect(Collectors.toMap(ProductLineMedia::getId, m -> m));
-
-        List<ProductLineMedia> updatedMediaList = new ArrayList<>();
-        int order = 0;
-        for (ContentDTO contentDTO : productLineDTO.getMedia()) {
-            if (contentDTO.id() != null && currentMediaMap.containsKey(contentDTO.id())) {
-                // update existing
-                ProductLineMedia media = currentMediaMap.get(contentDTO.id());
-                if (contentDTO.contentType() != (media.getContentType()))
-                    media.setContentType(contentDTO.contentType());
-                if (!contentDTO.content().equals(media.getContent()))
-                    media.setContent(media.getContent());
-                if (media.getSortOrder() != order)
-                    media.setSortOrder(order);
-                updatedMediaList.add(media);
-            } else {
-                // create new media
-                ProductLineMedia newMedia = new ProductLineMedia(
-                        productLine,
-                        contentDTO.contentType(),
-                        contentDTO.content(),
-                        order
-                );
-                updatedMediaList.add(newMedia);
-            }
-            order++;
-        }
-
-        productLine.getMedia().clear();
-        productLine.getMedia().addAll(updatedMediaList);
-
-        return productLineRepository.save(productLine).getId();
-    }
 
 //    @Transactional
 //    public Long updateProduct(ProductDTO productDTO) {

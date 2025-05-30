@@ -39,10 +39,12 @@ public class ProductController {
         return productService.findAllSubCategoryOf(id);
     }
 
-    @GetMapping("/productLine/{productLineId}")
-    public ProductLineDTO getProductLine(@PathVariable int productLineId) {
-        return productService.findProductLineById(productLineId);
+    @PostMapping("/category/new")
+    public ResponseEntity<ProductCategoryDTO> addCategory(@RequestBody ProductCategoryDTO categoryDTO) {
+        ProductCategoryDTO cat = productService.saveProductCategory(categoryDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cat);
     }
+
 
     @GetMapping("/search")
     public Page<ShortProductDTO> searchProducts(@RequestParam(defaultValue = "0") int page,
@@ -56,30 +58,11 @@ public class ProductController {
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
-    @PostMapping("/category/new")
-    public ResponseEntity<ProductCategoryDTO> addCategory(@RequestBody ProductCategoryDTO categoryDTO) {
-        ProductCategoryDTO cat = productService.saveProductCategory(categoryDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cat);
-    }
-
-    @PostMapping("/newProductLine")
-    public ResponseEntity<Integer> addProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer savedProductLineId = productService.saveProductLine(productLineDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
-    }
-
-    @PostMapping("/newProduct")
+    @PostMapping("/new")
     public ResponseEntity<Long> addProduct(@Valid @RequestBody ProductDTO productDTO) {
         Long savedProductId = productService.saveProduct(productDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
-
-    @PutMapping("/put/productLine/{id}")
-    public ResponseEntity<Integer> updateProductLine(@PathVariable int id, @Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer updatedProductLineId = productService.updateProductLine(id, productLineDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
-    }
-
 
 //    @PutMapping("/put/{id}")
 //    public ResponseEntity<Long> updateProduct(@PathVariable long id, @Valid @RequestBody ProductDTO productDTO) {
