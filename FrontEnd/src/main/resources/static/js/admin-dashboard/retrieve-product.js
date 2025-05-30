@@ -53,10 +53,38 @@ export function initializeUpdate() {
     document.getElementById('update-btn').addEventListener('click', async () => {
         const productLineInfo = await getProductLineInfo();
         console.log(productLineInfo);
-        await postProductLineInfo(productLineInfo);
+        const productLineId = new URLSearchParams(window.location.search).get('line');
+        console.log(productLineId);
+        if (productLineId) {
+            await updateProductLineInfo(productLineId, productLineInfo);
+        }
     });
 
     initializeAdd(); // initialize add new product
+}
+
+function updateProductLineInfo(productLineId, productLineInfoData) {
+    const url = 'http://localhost:8080/api/product/put/productLine/' + productLineId;
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productLineInfoData)
+    })
+        .then(response => {
+            if (response.status === 200) // ok
+                return response.text();
+            throw new Error('Fail update product line info');
+        })
+        .then(data => {
+            console.log('Success update product line info: ', data);
+            return data;
+        })
+        .catch(error => {
+            console.error('Error updating product line info', error);
+            return null;
+        });
 }
 
 async function searchProduct(productNameSearch) {

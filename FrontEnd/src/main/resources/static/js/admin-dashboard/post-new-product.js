@@ -51,7 +51,7 @@ async function uploadImages(dataImageArray) {
 
 // product line POST
 export function postProductLineInfo(productLineInfoData) {
-    const url = 'http://localhost:8080/api/product/newProductLine';
+    const url = 'http://localhost:8080/api/productLine/new';
     return fetch(url, {
         method: 'POST',
         headers: {
@@ -79,14 +79,8 @@ export async function getProductLineInfo() {
     const productLineName = productLineNameInput.value.trim();
     if (!productLineName)
         return null;
-    const productLineImageNames = data_productLineImages.length > 0 ? await uploadImages(data_productLineImages) : [];
-    const productLineImageContents = [];
-    productLineImageNames.forEach(name => {
-        productLineImageContents.push({
-            contentType: 'IMAGE',
-            content: name,
-        });
-    })
+    const allMediaEntries = document.getElementById('product-line-images').querySelectorAll('.image-entry');
+    const productLineImageContents = await getMediaContent(data_productLineImages, allMediaEntries);
     const allDescriptionEntries =
         Array.from(document.getElementById('product-line-descriptions').querySelectorAll('.description-entry')).slice(1);
     const descriptionContent = await getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries);
@@ -95,6 +89,21 @@ export async function getProductLineInfo() {
         media: productLineImageContents,
         descriptions: descriptionContent
     };
+}
+
+async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
+    const mediaNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
+    const mediaContent = [];
+    allMediaTemplateEntries.forEach((entry, index) => {
+        mediaContent.push(
+            {
+                id: entry.dataset.lineMediaId,
+                contentType: 'IMAGE',
+                content: mediaNames[index]
+            }
+        );
+    });
+    return mediaContent;
 }
 
 async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
@@ -106,6 +115,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
         if (image.src && image.alt !== "empty") {
             descriptionTexts.push(
                 {
+                    id: descriptionEntry.dataset.lineDescriptionId,
                     contentType: 'IMAGE',
                     content: filteredDescriptionImages.shift()
                 }
@@ -116,6 +126,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
             if (descriptionTextValue) {
                 descriptionTexts.push(
                     {
+                        id: descriptionEntry.dataset.lineDescriptionId,
                         contentType: 'TEXT',
                         content: descriptionTextValue
                     }
@@ -129,7 +140,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
 
 // product group POST
 function postProductInfo(productInfoData) {
-    const url = 'http://localhost:8080/api/product/newProduct';
+    const url = 'http://localhost:8080/api/product/new';
     return fetch(url, {
         method: 'POST',
         headers: {
@@ -140,14 +151,14 @@ function postProductInfo(productInfoData) {
         .then(response => {
             if (response.status === 201) //created
                 return response.text();
-            throw new Error('Fail upload product info');
+            throw new Error('Fail upload product line info');
         })
         .then(data => {
-            console.log('Success upload product info: ', data);
+            console.log('Success upload product line info: ', data);
             return data;
         })
         .catch(error => {
-            console.error('Error uploading product info', error);
+            console.error('Error uploading product line info', error);
             return null;
         });
 }
