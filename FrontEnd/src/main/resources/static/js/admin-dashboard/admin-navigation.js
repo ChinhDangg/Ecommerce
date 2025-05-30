@@ -32,7 +32,7 @@ async function getAddNewProductTemplate() {
         .then((module) => {
             module.initializeAdd();
         });
-    import('post-new-product')
+    import('./post-new-product.js')
         .then((module) => {
             module.initializePost();
         });
