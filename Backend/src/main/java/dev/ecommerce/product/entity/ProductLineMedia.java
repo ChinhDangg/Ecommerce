@@ -14,7 +14,7 @@ public class ProductLineMedia {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_line_id")
+    @JoinColumn(name = "product_line_id", nullable = false)
     private ProductLine productLine;  // product-shared media
 
     @Setter
