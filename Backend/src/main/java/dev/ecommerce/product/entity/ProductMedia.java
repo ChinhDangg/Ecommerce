@@ -8,21 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Table(name = "product_media")
-public class ProductMedia {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ProductMedia extends BaseContent {
 
-    // can have either media for one product or the whole product line
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product product; // product exclusive media
-
-    @Enumerated(EnumType.STRING)
-    private ContentType contentType;
-
-    private String content;
-
-    private Integer sortOrder;
+    private Product product;
 
     public ProductMedia(Product product, ContentType contentType, String content, Integer sortOrder) {
         this.product = product;
