@@ -7,10 +7,7 @@ import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.entity.ProductLine;
 import dev.ecommerce.product.entity.ProductLineDescription;
 import dev.ecommerce.product.entity.ProductLineMedia;
-import dev.ecommerce.product.repository.ProductLineDescriptionRepository;
-import dev.ecommerce.product.repository.ProductLineMediaRepository;
-import dev.ecommerce.product.repository.ProductLineRepository;
-import dev.ecommerce.product.repository.ProductRepository;
+import dev.ecommerce.product.repository.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +24,7 @@ public class ProductLineService {
     private final ProductLineMediaRepository productLineMediaRepository;
     private final ProductLineDescriptionRepository productLineDescriptionRepository;
     private final ProductRepository productRepository;
+    private final ProductOptionRepository productOptionRepository;
     private final ProductMapper productMapper;
 
     public ProductLineService(
@@ -34,20 +32,34 @@ public class ProductLineService {
             ProductLineMediaRepository productLineMediaRepository,
             ProductLineDescriptionRepository productLineDescriptionRepository,
             ProductRepository productRepository,
+            ProductOptionRepository productOptionRepository,
             ProductMapper productMapper
     ) {
         this.productLineRepository = productLineRepository;
         this.productLineMediaRepository = productLineMediaRepository;
         this.productLineDescriptionRepository = productLineDescriptionRepository;
         this.productRepository = productRepository;
+        this.productOptionRepository = productOptionRepository;
         this.productMapper = productMapper;
+    }
+
+    public void findProductGroupedOptions(Integer productLineId) {
+        if (productLineId == null)
+            throw new IllegalStateException("Passing null Product line id");
+        List<ProductOptionGroupProjection> groupedOptions = productOptionRepository.findProductOptionByProductLine(productLineId);
+    }
+
+    private ProductLine getProductLineById(Integer id) {
+        if (id == null)
+            throw new IllegalArgumentException("Product line id is null");
+        return productLineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product line not found with id: " + id));
     }
 
     @Transactional(readOnly = true)
     public ProductLineDTO findProductLineById(Integer id) {
-        ProductLine productLine = productLineRepository.findById(id).orElse(null);
-        if (productLine == null)
-            return null;
+        ProductLine productLine = getProductLineById(id);
+
         productLine.getDescriptions().size();
         productLine.getMedia().size();
 
@@ -88,77 +100,35 @@ public class ProductLineService {
     }
 
     @Transactional // will leverage entity manager to update by retrieving the entity itself
-    public Integer updateProductLine(int productLineId, ProductLineDTO productLineDTO) {
-        ProductLine productLine = productLineRepository.findById(productLineId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product line id not found"));
+    public Integer updateProductLineInfo(int productLineId, ProductLineDTO productLineDTO) {
+        ProductLine productLine = getProductLineById(productLineId);
 
         productLine.setName(productLineDTO.getName());
 
-        List<ProductLineMedia> currentMedia = productLine.getMedia();
-        Map<Long, ProductLineMedia> currentMediaMap = currentMedia.stream() // to get existing media entity by id quickly
-                .filter(m -> m.getId() != null)
+        // update media
+        Map<Long, ProductLineMedia> currentMediaMap = productLine.getMedia().stream() // to get existing media entity by id quickly
                 .collect(Collectors.toMap(ProductLineMedia::getId, m -> m));
-
-        List<ProductLineMedia> updatedMediaList = new ArrayList<>();
-        int order = 0;
-        for (ContentDTO contentDTO : productLineDTO.getMedia()) {
-            if (contentDTO.id() != null && currentMediaMap.containsKey(contentDTO.id())) {
-                // update existing
-                ProductLineMedia media = currentMediaMap.get(contentDTO.id());
-                if (contentDTO.contentType() != (media.getContentType()))
-                    media.setContentType(contentDTO.contentType());
-                if (!contentDTO.content().equals(media.getContent()))
-                    media.setContent(contentDTO.content());
-                if (media.getSortOrder() != order)
-                    media.setSortOrder(order);
-                updatedMediaList.add(media);
-            } else {
-                // create new media
-                ProductLineMedia newMedia = new ProductLineMedia(
-                        productLine,
-                        contentDTO.contentType(),
-                        contentDTO.content(),
-                        order
-                );
-                updatedMediaList.add(newMedia);
-            }
-            order++;
-        }
+        List<ProductLineMedia> updatedMediaList = ProductService.buildUpdatedMediaList(
+                productLineDTO.getMedia(),
+                currentMediaMap,
+                (dto, sortOrder) -> new ProductLineMedia(productLine, dto.contentType(), dto.content(), sortOrder)
+        );
         productLine.getMedia().clear();
         productLine.getMedia().addAll(updatedMediaList);
 
-        List<ProductLineDescription> currentDescription = productLine.getDescriptions();
-        Map<Long, ProductLineDescription> currentDescriptionMap = currentDescription.stream()
-                .filter(d -> d.getId() != null)
+        // update description
+        Map<Long, ProductLineDescription> currentDescriptionMap = productLine.getDescriptions().stream()
                 .collect(Collectors.toMap(ProductLineDescription::getId, m -> m));
-
-        List<ProductLineDescription> updatedDescriptionList = new ArrayList<>();
-        int desOrder = 0;
-        for (ContentDTO contentDTO : productLineDTO.getDescriptions()) {
-            if (contentDTO.id() != null && currentDescriptionMap.containsKey(contentDTO.id())) {
-                ProductLineDescription description = currentDescriptionMap.get(contentDTO.id());
-                // update existing
-                if (contentDTO.contentType() != (description.getContentType()))
-                    description.setContentType(contentDTO.contentType());
-                if (!contentDTO.content().equals(description.getContent()))
-                    description.setContent(contentDTO.content());
-                if (description.getSortOrder() != desOrder)
-                    description.setSortOrder(desOrder);
-                updatedDescriptionList.add(description);
-            } else {
-                ProductLineDescription newDescription = new ProductLineDescription(
-                        productLine,
-                        contentDTO.contentType(),
-                        contentDTO.content(),
-                        desOrder
-                );
-                updatedDescriptionList.add(newDescription);
-            }
-            desOrder++;
-        }
+        List<ProductLineDescription> updatedDescriptionList = ProductService.buildUpdatedMediaList(
+                productLineDTO.getDescriptions(),
+                currentDescriptionMap,
+                (dto, sortOrder) -> new ProductLineDescription(productLine, dto.contentType(), dto.content(), sortOrder)
+        );
         productLine.getDescriptions().clear();
         productLine.getDescriptions().addAll(updatedDescriptionList);
 
         return productLineRepository.save(productLine).getId();
     }
+
 }
+

@@ -30,7 +30,7 @@ public class ProductLineController {
 
     @PutMapping("/put/{id}")
     public ResponseEntity<Integer> updateProductLine(@PathVariable int id, @Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer updatedProductLineId = productLineService.updateProductLine(id, productLineDTO);
+        Integer updatedProductLineId = productLineService.updateProductLineInfo(id, productLineDTO);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
     }
 
