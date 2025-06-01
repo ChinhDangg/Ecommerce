@@ -3,14 +3,13 @@ package dev.ecommerce.product.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "product_options")
-public class ProductOption {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ProductOption extends BaseOption {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -19,10 +18,6 @@ public class ProductOption {
     @ManyToOne
     @JoinColumn(name = "product_line_id")
     private ProductLine productLine;
-
-    private String name;
-
-    private String valueOption;
 
     public ProductOption(Product product, ProductLine productLine, String name, String valueOption) {
         this.product = product;
