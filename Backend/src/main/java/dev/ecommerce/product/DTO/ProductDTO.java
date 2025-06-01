@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,8 +39,8 @@ public class ProductDTO {
     private Integer categoryId;
 
     @NotBlank(message = "Price is required")
-    private String price;
-    private String salePrice;
+    private BigDecimal price;
+    private BigDecimal salePrice;
     private LocalDate saleEndDate;
 
     private List<OptionDTO> options;
