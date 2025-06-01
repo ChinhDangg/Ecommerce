@@ -1,8 +1,10 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,8 +14,10 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Getter
+@Setter
 @Table(name = "products")
 public class Product {
+    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -70,26 +74,33 @@ public class Product {
         this.category = category;
     }
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product")
     private final List<ProductOption> options = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product")
     private final List<ProductSpecification> specifications = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
+    @Setter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<ProductFeature> features = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product")
     @OrderBy("sortOrder ASC")
     private final List<ProductMedia> media = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product")
+    @OrderBy("sortOrder ASC")
     private final List<ProductDescription> descriptions = new ArrayList<>();
 
     private Integer totalRatings;
 
     private Integer totalReviews;
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product")
     private final List<ProductReview> reviews = new ArrayList<>();
 
