@@ -16,6 +16,10 @@ export function initializeAdd() {
 
     // product category section
     document.getElementById('product-category-section').querySelector('.toggle-collapse').addEventListener('click', async function(){
+        if (this.classList.contains('hidden')) {
+            return;
+        }
+        expandCategorySection(this);
         if (!categoryTree.length) {
             await fetchTopCategories();
         }
@@ -191,6 +195,13 @@ export function updateDescriptionImage(descriptionContainer, dataImageArray, ima
 in sub then is sub of the sub, else direct sub of a top cate,
 must be only one sub in either top or another sub
 Top-category should be in top-categories class */
+export function expandCategorySection(categoryToggleButton) {
+    categoryToggleButton.classList.add('hidden');
+    const categorySection = document.getElementById('product-category-section');
+    categorySection.querySelector('.category-description').classList.remove('hidden');
+    categorySection.querySelector('#category-back-button').classList.remove('hidden');
+}
+
 let currentCategory = null, currentCategoryButton = null;
 const categoryNavStack = [];
 const categoryTree = [];
