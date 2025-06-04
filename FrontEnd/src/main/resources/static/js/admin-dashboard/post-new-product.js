@@ -97,7 +97,7 @@ async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
     allMediaTemplateEntries.forEach((entry, index) => {
         mediaContent.push(
             {
-                id: entry.dataset.lineMediaId,
+                id: entry.dataset.mediaId,
                 contentType: 'IMAGE',
                 content: mediaNames[index]
             }
@@ -115,7 +115,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
         if (image.src && image.alt !== "empty") {
             descriptionTexts.push(
                 {
-                    id: descriptionEntry.dataset.lineDescriptionId,
+                    id: descriptionEntry.dataset.descriptionId,
                     contentType: 'IMAGE',
                     content: filteredDescriptionImages.shift()
                 }
@@ -126,7 +126,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
             if (descriptionTextValue) {
                 descriptionTexts.push(
                     {
-                        id: descriptionEntry.dataset.lineDescriptionId,
+                        id: descriptionEntry.dataset.descriptionId,
                         contentType: 'TEXT',
                         content: descriptionTextValue
                     }
@@ -139,8 +139,8 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
 
 
 // product group POST
-function postProductInfo(productInfoData) {
-    const url = 'http://localhost:8080/api/product/new';
+export function postProductInfo(productInfoData) {
+    const url = 'http://localhost:8080/api/product';
     return fetch(url, {
         method: 'POST',
         headers: {
@@ -151,19 +151,19 @@ function postProductInfo(productInfoData) {
         .then(response => {
             if (response.status === 201) //created
                 return response.text();
-            throw new Error('Fail upload product line info');
+            throw new Error('Fail upload product info');
         })
         .then(data => {
-            console.log('Success upload product line info: ', data);
+            console.log('Success upload product info: ', data);
             return data;
         })
         .catch(error => {
-            console.error('Error uploading product line info', error);
+            console.error('Error uploading product info', error);
             return null;
         });
 }
 
-async function getProductInfo(productLineId, productId) {
+export async function getProductInfo(productLineId, productId) {
     const productGroupContainer = document.getElementById('product-group-container');
     const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productContainer)
@@ -176,14 +176,10 @@ async function getProductInfo(productLineId, productId) {
         if (featureContent)
             productFeatures.push(featureContent);
     });
-    const productImageNames = data_allProductImages.get(productId).length > 0 ? await uploadImages(data_allProductImages.get(productId)) : [];
-    const productImageContents = [];
-    productImageNames.forEach(name => {
-        productImageContents.push({
-            contentType: 'IMAGE',
-            content: name,
-        });
-    })
+
+    const allMediaEntries = productContainer.querySelector('.product-images').querySelectorAll('.image-entry');
+    const productImageContents = await getMediaContent(data_allProductImages.get(productId), allMediaEntries);
+
     const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
     const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries);
     return {
@@ -194,7 +190,7 @@ async function getProductInfo(productLineId, productId) {
         quantity: productContainer.querySelector('.product-quantity-input').value,
         conditionType: productContainer.querySelector('.product-condition-select').value,
         categoryId: document.querySelector('input[name="category"]:checked')?.id.replace("category-", ""),
-        regularPrice: productContainer.querySelector('.product-regular-price-input').value,
+        price: productContainer.querySelector('.product-regular-price-input').value,
         salePrice: productContainer.querySelector('.product-sale-price-input').value,
         saleEndDate: productContainer.querySelector('.product-sale-end-date-input').value,
         options: getProductOptionContent(productId),

@@ -4,6 +4,7 @@ import {
     addProductFeature,
     updateDescriptionImage,
     addProductDescription,
+    addTopCategories,
     addOptionKey,
     addOptionValue,
     addSpecificationKey,
@@ -26,6 +27,8 @@ import {
 import {
     getProductLineInfo,
     postProductLineInfo,
+    getProductInfo,
+    postProductInfo
 } from "./post-new-product.js";
 
 
@@ -51,24 +54,26 @@ export function initializeUpdate() {
     });
 
     document.getElementById('update-btn').addEventListener('click', async () => {
-        const productLineInfo = await getProductLineInfo();
-        console.log(productLineInfo);
+        //const productLineInfo = await getProductLineInfo();
         const productLineId = new URLSearchParams(window.location.search).get('line');
-        console.log(productLineId);
-        if (productLineId) {
-            await updateProductLineInfo(productLineId, productLineInfo);
-        }
+        // if (productLineId) {
+        //     await updateProductLineInfo(productLineId, productLineInfo);
+        // }
+        const productInfo = await getProductInfo(productLineId, 1);
+        console.log(productInfo);
+        if (productInfo)
+            await updateProductInfo(1, productInfo);
     });
 
     initializeAdd(); // initialize add new product
 }
 
 function updateProductLineInfo(productLineId, productLineInfoData) {
-    const url = 'http://localhost:8080/api/product/put/productLine/' + productLineId;
+    const url = 'http://localhost:8080/api/productLine/put/' + productLineId;
     return fetch(url, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type':'application/json',
         },
         body: JSON.stringify(productLineInfoData)
     })
@@ -83,6 +88,29 @@ function updateProductLineInfo(productLineId, productLineInfoData) {
         })
         .catch(error => {
             console.error('Error updating product line info', error);
+            return null;
+        });
+}
+
+function updateProductInfo(productId, productInfoData) {
+    const url = 'http://localhost:8080/api/product/' + productId;
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productInfoData)
+    })
+        .then(response => {
+            if (response.status === 200) // ok
+                return response.text();
+            throw new Error('Fail update product info')
+        })
+        .then(data => {
+            console.log('Success update product info: ', data);
+        })
+        .catch(error => {
+            console.error('Error updating product info', error);
             return null;
         });
 }
@@ -102,6 +130,7 @@ async function searchProduct(productNameSearch) {
             content: [
                 {
                     productLineId: 1,
+                    categoryId: 1,
                     id: 1,
                     manufacturerId: 1,
                     name: 'Some product name to show',
@@ -137,12 +166,12 @@ function displaySearchResult(content) {
         const searchImageAnchor = searchEntry.querySelector('.product-image-anchor');
         searchImageAnchor.href = getProductLink(result.id, result.productLineId);
         searchImageAnchor.addEventListener('click', async function(e) {
-            await clickOnProductResult(e, result.id, result.productLineId);
+            await clickOnProductResult(e, result.id, result.productLineId, result.categoryId);
         });
         const searchNameAnchor = searchEntry.querySelector('.product-name-anchor');
         searchNameAnchor.href = getProductLink(result.id, result.productLineId);
         searchNameAnchor.addEventListener('click', async function(e) {
-            await clickOnProductResult(e, result.id, result.productLineId);
+            await clickOnProductResult(e, result.id, result.productLineId, result.categoryId);
         });
     });
 }
@@ -157,9 +186,11 @@ function getProductLink(productId, productLineId) {
     return `/admin/dashboard?query=${updateProductQuery}&product=${productId}&line=${productLineId}`;
 }
 
-async function clickOnProductResult(e, productId, productLineId) {
+async function clickOnProductResult(e, productId, productLineId, categoryId) {
     e.preventDefault();
     await handleProductResult(productId, productLineId);
+    const currentCategory = fetchProductCategory(categoryId);
+    await addTopCategories(currentCategory);
 }
 
 export async function handleProductResult(productId, productLineId) {
@@ -236,11 +267,12 @@ function displayProductLineInfo(productLineInfo) {
     const productLineImageContainer = document.getElementById('product-line-images');
     productLineInfo.media.forEach(media => {
         const imageEntry = addImageEntry(data_productLineImages, productLineImageContainer, null, media.content);
-        imageEntry.dataset.lineMediaId = media.id;
+        imageEntry.dataset.mediaId = media.id;
     });
     productLineInfo.descriptions.forEach(description => {
         const descriptionItem = addProductLineDescription();
-        descriptionItem.dataset.lineDescriptionId = description.id;
+        descriptionItem.dataset.descriptionId = description.id;
+
         const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
         if (description.contentType === "TEXT") {
             descriptionTextArea.innerHTML = description.content;
@@ -327,6 +359,23 @@ async function fetchProductInfo(productId) {
     }
 }
 
+async function fetchProductCategory(productCategoryId) {
+    try {
+        // const url = `http://localhost:8080/api/product/category/` + productCategoryId;
+        // const response = await fetch(url);
+        // if (!response.ok) {
+        //     throw new Error(`Failed to get product with id: ${productCategoryId}`);
+        // }
+        // const result = await response.json();
+        return {
+            id: 1,
+            name: 'Electronics'
+        }
+    } catch (error) {
+        console.error('Error fetching for product category:', error);
+    }
+}
+
 const retrieved_product = [];
 function addProductEntry(productId) {
     const [productOptionItem, productSpecItem, productItem] = addNewProductEntry(productId,true);
@@ -378,15 +427,19 @@ function displayProductInfo(productItem, content) {
         featureEntry.querySelector('.product-feature-input').value = feature;
     });
     content.media.forEach(media => {
-        if (media.contentType === 'IMAGE')
-            addImageEntry(
+        if (media.contentType === 'IMAGE') {
+            const imageEntry = addImageEntry(
                 data_allProductImages.get(content.id),
                 productItem.querySelector('.product-images'),
                 null, media.content
             );
+            imageEntry.dataset.mediaId = media.id;
+        }
     });
     content.descriptions.forEach(description => {
         const descriptionItem = addProductDescription(productItem, content.id);
+        descriptionItem.dataset.descriptionId = description.id;
+
         const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
         if (description.contentType === "TEXT") {
             descriptionTextArea.innerHTML = description.content;

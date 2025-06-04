@@ -210,7 +210,7 @@ async function fetchTopCategories() {
     }
 }
 
-async function addTopCategories(topCategories, categoryToToggle = null) {
+export async function addTopCategories(topCategories, categoryToToggle = null) {
     removeAllTopCategoryDisplay();
     categoryNavStack.push(topCategories);
     console.log(categoryNavStack);
@@ -396,9 +396,14 @@ function updateProductOptionSelectionValue(optionKey) {
     const optionValues = optionMap.get(optionKey);
     const optionBodyContainer = document.getElementById('options-body');
     optionBodyContainer.querySelectorAll(`select[data-option-id="${optionKey}"]`).forEach(select => {
+        const previouslySelectedValue = select.value;
         select.innerHTML = "";
         const selectOptions = getValuesAsSelectOption(optionValues);
         select.append(...selectOptions);
+        const matchingOption = Array.from(select.options).find(option => option.value === previouslySelectedValue);
+        if (matchingOption) {
+            select.value = previouslySelectedValue;
+        }
     });
 }
 
@@ -547,9 +552,14 @@ function updateProductSpecSelectionValue(specKey) {
     const specValues = specMap.get(specKey);
     const specBodyContainer = document.getElementById('spec-body');
     specBodyContainer.querySelectorAll(`select[data-spec-id="${specKey}"]`).forEach(select => {
+        const previouslySelectedValue = select.value;
         select.innerHTML = "";
         const specSelectOptions = getValuesAsSelectOption(specValues);
         select.append(...specSelectOptions);
+        const matchingOption = Array.from(select.options).find(option => option.value === previouslySelectedValue);
+        if (matchingOption) {
+            select.value = previouslySelectedValue;
+        }
     });
 }
 
