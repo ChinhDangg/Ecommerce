@@ -4,6 +4,7 @@ import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.ContentDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
+import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.entity.ProductLine;
 import dev.ecommerce.product.entity.ProductLineDescription;
 import dev.ecommerce.product.entity.ProductLineMedia;
@@ -103,7 +104,11 @@ public class ProductLineService {
     public Integer updateProductLineInfo(int productLineId, ProductLineDTO productLineDTO) {
         ProductLine productLine = getProductLineById(productLineId);
 
-        productLine.setName(productLineDTO.getName());
+        if (productLineDTO.getName().isEmpty())
+            throw new IllegalArgumentException("Product line name is empty");
+
+        if (!productLine.getName().equals(productLineDTO.getName()))
+            productLine.setName(productLineDTO.getName());
 
         // update media
         Map<Long, ProductLineMedia> currentMediaMap = productLine.getMedia().stream() // to get existing media entity by id quickly
@@ -128,6 +133,13 @@ public class ProductLineService {
         productLine.getDescriptions().addAll(updatedDescriptionList);
 
         return productLineRepository.save(productLine).getId();
+    }
+
+    @Transactional
+    public void deleteProductLineById(Integer id) {
+        ProductLine productLine = getProductLineById(id);
+        productLine.getProducts().forEach(product -> product.setProductLine(null));
+        productLineRepository.delete(productLine);
     }
 
 }

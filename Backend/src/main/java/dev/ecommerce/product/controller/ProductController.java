@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -34,6 +35,11 @@ public class ProductController {
         return productService.findAllTopCategory();
     }
 
+    @GetMapping("/category/{id}")
+    public ProductCategoryDTO getCategoryById(@PathVariable int id) {
+        return productService.findCategoryById(id);
+    }
+
     @GetMapping("/subcategory/{id}")
     public List<ProductCategoryDTO> getSubCategories(@PathVariable int id) {
         return productService.findAllSubCategoryOf(id);
@@ -45,7 +51,6 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(cat);
     }
 
-
     @GetMapping("/search")
     public Page<ShortProductDTO> searchProducts(@RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "") String search) {
@@ -53,21 +58,28 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable long id) {
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
         ProductDTO productDTO = productService.findProductById(id);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
-    @PostMapping("/new")
+    @PostMapping()
     public ResponseEntity<Long> addProduct(@Valid @RequestBody ProductDTO productDTO) {
         Long savedProductId = productService.saveProduct(productDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
 
-//    @PutMapping("/put/{id}")
-//    public ResponseEntity<Long> updateProduct(@PathVariable long id, @Valid @RequestBody ProductDTO productDTO) {
-//
-//    }
+    @PutMapping("/{id}")
+    public ResponseEntity<Long> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO productDTO) {
+        Long updatedProductId = productService.updateProductInfo(id, productDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedProductId);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+        productService.deleteProductById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 
     @PostMapping("/uploadImages")
     public ResponseEntity<List<String>> handleFileUpload(@RequestParam("images") MultipartFile[] images) {

@@ -2,6 +2,7 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.service.ProductLineService;
+import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +18,27 @@ public class ProductLineController {
         this.productLineService = productLineService;
     }
 
-    @GetMapping("/{productLineId}")
-    public ProductLineDTO getProductLine(@PathVariable int productLineId) {
-        return productLineService.findProductLineById(productLineId);
+    @GetMapping("/{id}")
+    public ProductLineDTO getProductLine(@PathVariable Integer id) {
+        return productLineService.findProductLineById(id);
     }
 
-    @PostMapping("/new")
+    @PostMapping()
     public ResponseEntity<Integer> addProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
         Integer savedProductLineId = productLineService.saveProductLine(productLineDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
     }
 
-    @PutMapping("/put/{id}")
-    public ResponseEntity<Integer> updateProductLine(@PathVariable int id, @Valid @RequestBody ProductLineDTO productLineDTO) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Integer> updateProductLine(@PathVariable Integer id, @Valid @RequestBody ProductLineDTO productLineDTO) {
         Integer updatedProductLineId = productLineService.updateProductLineInfo(id, productLineDTO);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProductLine(@PathVariable Integer id) {
+        productLineService.deleteProductLineById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 

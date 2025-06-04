@@ -19,11 +19,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,18 +66,40 @@ public class ProductService {
         return productCategoryRepository.findAllTopParentCategory();
     }
 
+    public ProductCategoryDTO findCategoryById(Integer id) {
+        ProductCategory productCategory = productCategoryRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Category not found with id: " + id)
+        );
+        return productMapper.toProductCategoryDTO(productCategory);
+    }
+
     @Transactional(readOnly = true)
     public List<ProductCategoryDTO> findAllSubCategoryOf(int id) {
-        ProductCategory category = productCategoryRepository.findById(id).orElse(null);
-        if (category == null)
-            return null;
+        ProductCategory category = productCategoryRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Category not found with id: " + id)
+        );
         return productMapper.toProductCategoryDTOList(category.getSubcategories());
     }
 
-    public void findProductGroupedOptions(Integer productLineId) {
-        if (productLineId == null)
-            throw new IllegalStateException("Passing null Product line id");
-        List<ProductOptionGroupProjection> groupedOptions = productOptionRepository.findProductOptionByProductLine(productLineId);
+    @Transactional
+    public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
+        Integer id = productCategoryDTO.getId();
+        ProductCategory parentCategory = (id == null) ? null : productCategoryRepository
+                .findById(id).orElse(null);
+        ProductCategory newCategory = new ProductCategory(
+                productCategoryDTO.getName(),
+                parentCategory
+        );
+
+        ProductCategory createdCategory = productCategoryRepository.save(newCategory);
+        return new ProductCategoryDTO(createdCategory.getId(), createdCategory.getName());
+    }
+
+    private Product getProductById(Long id) {
+        if (id == null)
+            throw new IllegalArgumentException("Product id is null");
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -117,7 +137,8 @@ public class ProductService {
         for (Product product : resultList) {
             product.getMedia().size();
             ShortProductDTO current = productMapper.toShortProductWithoutFeaturesDTO(product);
-            current.setProductLineId(product.getProductLine().getId());
+            current.setProductLineId(product.getProductLine() == null ? null : product.getProductLine().getId());
+            current.setCategoryId(product.getCategory().getId());
             current.setImageName(product.getMedia().isEmpty() ? null : product.getMedia().getFirst().getContent());
             current.setDiscountedPrice(
                     product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
@@ -135,8 +156,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDTO findProductById(Long id) {
-        Product foundProduct = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        Product foundProduct = getProductById(id);
         foundProduct.getProductLine();
         foundProduct.getOptions().size();
         foundProduct.getSpecifications().size();
@@ -144,20 +164,6 @@ public class ProductService {
         foundProduct.getMedia().size();
         foundProduct.getDescriptions().size();
         return productMapper.toProductDTO(foundProduct);
-    }
-
-    @Transactional
-    public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
-        Integer id = productCategoryDTO.getId();
-        ProductCategory parentCategory = (id == null) ? null : productCategoryRepository
-                .findById(id).orElse(null);
-        ProductCategory newCategory = new ProductCategory(
-                productCategoryDTO.getName(),
-                parentCategory
-        );
-
-        ProductCategory createdCategory = productCategoryRepository.save(newCategory);
-        return new ProductCategoryDTO(createdCategory.getId(), createdCategory.getName());
     }
 
     @Transactional
@@ -175,8 +181,8 @@ public class ProductService {
                 productDTO.getQuantity(),
                 productDTO.getConditionType(),
                 LocalDate.now(),
-                new BigDecimal(productDTO.getPrice()),
-                new BigDecimal(productDTO.getSalePrice()),
+                productDTO.getPrice(),
+                productDTO.getSalePrice(),
                 productDTO.getSaleEndDate(),
                 productLine,
                 category
@@ -230,9 +236,145 @@ public class ProductService {
         return savedProduct.getId();
     }
 
+    @Transactional
+    public Long updateProductInfo(Long productId, ProductDTO productDTO) {
+        Product product = getProductById(productId);
 
-//    @Transactional
-//    public Long updateProduct(ProductDTO productDTO) {
-//
-//    }
+        // update basic info
+        if (!productDTO.getManufacturerId().equals(product.getManufacturerId()))
+            product.setManufacturerId(productDTO.getManufacturerId());
+        if (!productDTO.getName().equals(product.getName()))
+            product.setName(productDTO.getName());
+        if (!productDTO.getBrand().equals(product.getBrand()))
+            product.setBrand(productDTO.getBrand());
+        if (!productDTO.getQuantity().equals(product.getQuantity()))
+            product.setQuantity(productDTO.getQuantity());
+        if (!productDTO.getConditionType().equals(product.getConditionType()))
+            product.setConditionType(productDTO.getConditionType());
+        if (!productDTO.getPrice().equals(product.getPrice()))
+            product.setPrice(productDTO.getPrice());
+        if (!productDTO.getSalePrice().equals(product.getSalePrice()))
+            product.setSalePrice(productDTO.getSalePrice());
+        if (!productDTO.getSaleEndDate().equals(product.getSaleEndDate()))
+            product.setSaleEndDate(productDTO.getSaleEndDate());
+        if (!product.getCategory().getId().equals(productDTO.getCategoryId())) {
+            ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product category not found"));
+            product.setCategory(category);
+        }
+
+        // updating features
+        List<ProductFeature> currentFeatures = product.getFeatures();
+        Map<String, ProductFeature> currentFeatureMap = currentFeatures.stream()
+                .collect(Collectors.toMap(ProductFeature::getContent, f -> f));
+        List<ProductFeature> updatedFeatures = new ArrayList<>();
+        // Add or reuse features
+        for (String value : productDTO.getFeatures()) {
+            ProductFeature feature = currentFeatureMap.remove(value); // remove existing ones
+            if (feature == null)
+                feature = new ProductFeature(product, value); // New feature
+            updatedFeatures.add(feature);
+        }
+        product.getFeatures().clear(); // should not take effect until flush
+        product.getFeatures().addAll(updatedFeatures); // cancels deletion of same context features if use get features
+
+        // update media
+        Map<Long, ProductMedia> currentMediaMap = product.getMedia().stream() // to get existing media entity by id quickly
+                .collect(Collectors.toMap(ProductMedia::getId, m -> m));
+        List<ProductMedia> updatedMediaList = buildUpdatedMediaList(
+                productDTO.getMedia(),
+                currentMediaMap,
+                (dto, sortOrder) -> new ProductMedia(product, dto.contentType(), dto.content(), sortOrder)
+        );
+        product.getMedia().clear();
+        product.getMedia().addAll(updatedMediaList);
+
+        // update description
+        Map<Long, ProductDescription> currentDescriptionMap = product.getDescriptions().stream() // to get existing media entity by id quickly
+                .collect(Collectors.toMap(ProductDescription::getId, d -> d));
+        List<ProductDescription> updatedDescriptionList = buildUpdatedMediaList(
+                productDTO.getDescriptions(),
+                currentDescriptionMap,
+                (dto, sortOrder) -> new ProductDescription(product, dto.contentType(), dto.content(), sortOrder)
+        );
+        product.getDescriptions().clear();
+        product.getDescriptions().addAll(updatedDescriptionList);
+
+        // update option
+        ProductLine productLine = product.getProductLine();
+
+        Map<String, ProductOption> currentOptionMap = product.getOptions().stream()
+                .collect(Collectors.toMap(ProductOption::getName, o -> o));
+        List<ProductOption> updatedOptionList = buildUpdateOptionList(
+                productDTO.getOptions(),
+                currentOptionMap,
+                (name, value) -> new ProductOption(product, productLine, name, value)
+        );
+        product.getOptions().clear();
+        product.getOptions().addAll(updatedOptionList);
+
+        Map<String, ProductSpecification> currentSpecificationMap = product.getSpecifications().stream()
+                .collect(Collectors.toMap(ProductSpecification::getName, s -> s));
+        List<ProductSpecification> updatedSpecificationList = buildUpdateOptionList(
+                productDTO.getSpecifications(),
+                currentSpecificationMap,
+                (name, value) -> new ProductSpecification(product, name, value)
+        );
+        product.getSpecifications().clear();
+        product.getSpecifications().addAll(updatedSpecificationList);
+
+        return productRepository.save(product).getId();
+    }
+
+    private <T extends BaseOption> List<T> buildUpdateOptionList(
+            List<OptionDTO> incomingDTOs,
+            Map<String, T> currentOptionMap,
+            BiFunction<String, String, T> newOptionFactory
+    ) {
+        List<T> updatedOptionList = new ArrayList<>();
+        for (OptionDTO dto : incomingDTOs) {
+            if (currentOptionMap.containsKey(dto.name())) {
+                T option = currentOptionMap.get(dto.name());
+                if (!dto.value().equals(option.getName()))
+                    option.setValueOption(dto.value());
+                updatedOptionList.add(option);
+            } else {
+                T newOption = newOptionFactory.apply(dto.name(), dto.value());
+                updatedOptionList.add(newOption);
+            }
+        }
+        return updatedOptionList;
+    }
+
+    public static <T extends BaseContent> List<T> buildUpdatedMediaList(
+            List<ContentDTO> incomingDTOs,
+            Map<Long, T> currentMediaMap,
+            BiFunction<ContentDTO, Integer, T> newMediaFactory
+    ) {
+        List<T> updatedList = new ArrayList<>();
+        int order = 0;
+        for (ContentDTO dto : incomingDTOs) {
+            if (dto.id() != null && currentMediaMap.containsKey(dto.id())) {
+                T media = currentMediaMap.get(dto.id());
+                if (dto.contentType() != media.getContentType())
+                    media.setContentType(dto.contentType());
+                if (!dto.content().equals(media.getContent()))
+                    media.setContent(dto.content());
+                if (media.getSortOrder() != order)
+                    media.setSortOrder(order);
+                updatedList.add(media);
+            } else {
+                T newMedia = newMediaFactory.apply(dto, order);
+                updatedList.add(newMedia);
+            }
+            order++;
+        }
+        return updatedList;
+    }
+
+    @Transactional
+    public void deleteProductById(Long id) {
+        Product product = getProductById(id);
+        productRepository.delete(product);
+    }
 }
