@@ -12,6 +12,9 @@ public class ShortProductDTO {
     @Setter
     private Integer productLineId;
 
+    @Setter
+    private Integer categoryId;
+
     private final Long id;
 
     private final String manufacturerId;

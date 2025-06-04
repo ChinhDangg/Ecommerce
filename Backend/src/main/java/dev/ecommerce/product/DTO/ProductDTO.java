@@ -38,7 +38,7 @@ public class ProductDTO {
     @NotNull(message = "Product category is required")
     private Integer categoryId;
 
-    @NotBlank(message = "Price is required")
+    @NotNull(message = "Price is required")
     private BigDecimal price;
     private BigDecimal salePrice;
     private LocalDate saleEndDate;
