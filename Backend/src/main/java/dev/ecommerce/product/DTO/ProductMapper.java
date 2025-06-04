@@ -16,6 +16,8 @@ public interface ProductMapper {
 
     ContentDTO mediaToContentDTO(ProductLineMedia productLineMedia);
 
+    ProductCategoryDTO toProductCategoryDTO(ProductCategory productCategory);
+
     List<ProductCategoryDTO> toProductCategoryDTOList(List<ProductCategory> productCategory);
 
     List<ProductDTO> toProductDTOList(List<Product> products);
