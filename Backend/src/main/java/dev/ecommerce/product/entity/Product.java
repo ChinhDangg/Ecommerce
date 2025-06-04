@@ -75,11 +75,11 @@ public class Product {
     }
 
     @Setter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<ProductOption> options = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<ProductSpecification> specifications = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
@@ -87,12 +87,12 @@ public class Product {
     private final List<ProductFeature> features = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private final List<ProductMedia> media = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private final List<ProductDescription> descriptions = new ArrayList<>();
 
@@ -101,7 +101,7 @@ public class Product {
     private Integer totalReviews;
 
     @Setter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<ProductReview> reviews = new ArrayList<>();
 
     public Product(Long id, String manufacturerId, String name,

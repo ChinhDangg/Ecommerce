@@ -12,7 +12,7 @@ import lombok.Setter;
 public class ProductLineDescription extends BaseContent {
 
     @ManyToOne
-    @JoinColumn(name = "product_line_id")
+    @JoinColumn(name = "product_line_id", nullable = false)
     private ProductLine productLine;  // product-shared descriptions
 
     public ProductLineDescription(ProductLine productLine, ContentType contentType,
