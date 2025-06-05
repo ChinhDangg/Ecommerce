@@ -320,7 +320,8 @@ function updateCategoryInfo(container, category) {
     const topCategoryInput = container.querySelector('#category-input');
     topCategoryInput.id = `category-${category.id}`;
     topCategoryInput.value = category.name;
-    const topCategoryLabel = container.querySelector('label[for="category-input"]');
+    topCategoryInput.checked = isChecked;
+    const topCategoryLabel = container.querySelector('.category-input-label');
     topCategoryLabel.htmlFor = `category-${category.id}`;
     topCategoryLabel.name = category.name;
     topCategoryLabel.innerHTML = category.name;
