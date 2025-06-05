@@ -316,8 +316,8 @@ function checkSameCategoryToggle(topCategory) {
     return false;
 }
 
-function updateCategoryInfo(container, category) {
-    const topCategoryInput = container.querySelector('#category-input');
+function updateCategoryInfo(container, category, isChecked = false) {
+    const topCategoryInput = container.querySelector('.category-input');
     topCategoryInput.id = `category-${category.id}`;
     topCategoryInput.value = category.name;
     topCategoryInput.checked = isChecked;
