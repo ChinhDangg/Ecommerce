@@ -16,7 +16,8 @@ import {
     data_allProductDescriptionImages,
     data_productLineDescriptionImages,
     products,
-    initializeAdd
+    initializeAdd,
+    expandCategorySection
 } from './add-new-product.js';
 
 import {
@@ -64,6 +65,8 @@ export function initializeUpdate() {
         if (productInfo)
             await updateProductInfo(1, productInfo);
     });
+
+    expandCategorySection(document.getElementById('product-category-section').querySelector('.toggle-collapse'));
 
     initializeAdd(); // initialize add new product
 }
@@ -188,18 +191,19 @@ function getProductLink(productId, productLineId) {
 
 async function clickOnProductResult(e, productId, productLineId, categoryId) {
     e.preventDefault();
-    await handleProductResult(productId, productLineId);
-    const currentCategory = fetchProductCategory(categoryId);
-    await addTopCategories(currentCategory);
+    await handleProductResult(productId, productLineId, categoryId);
 }
 
-export async function handleProductResult(productId, productLineId) {
+export async function handleProductResult(productId, productLineId, categoryId) {
     const newUrl = getProductLink(productId, productLineId);
     const query = `${updateProductQuery}P${productId}`;
     updatePageUrl(newUrl, query);
     clearSearchEntry();
     clearProductLineSection();
     clearAllProductInfo();
+    const currentCategory = await fetchProductCategory(categoryId);
+    console.log(currentCategory);
+    await addTopCategories(currentCategory, false, true);
     document.getElementById('main-content').classList.remove('hidden');
     if (productLineId) {
         const productLineInfo = await fetchProductLineInfo(productLineId);
@@ -367,10 +371,12 @@ async function fetchProductCategory(productCategoryId) {
         //     throw new Error(`Failed to get product with id: ${productCategoryId}`);
         // }
         // const result = await response.json();
-        return {
-            id: 1,
-            name: 'Electronics'
-        }
+        return [
+            {
+                id: 1,
+                name: 'Food'
+            }
+        ]
     } catch (error) {
         console.error('Error fetching for product category:', error);
     }

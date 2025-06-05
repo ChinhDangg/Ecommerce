@@ -66,15 +66,18 @@ public class ProductService {
         return productCategoryRepository.findAllTopParentCategory();
     }
 
-    public ProductCategoryDTO findCategoryById(Integer id) {
+    public List<ProductCategoryDTO> findCategorySameParentCategoriesById(Integer id) {
         ProductCategory productCategory = productCategoryRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Category not found with id: " + id)
         );
-        return productMapper.toProductCategoryDTO(productCategory);
+        ProductCategory parentCategory = productCategory.getParentProductCategory();
+        return (parentCategory == null)
+                ? productMapper.toProductCategoryDTOList(List.of(productCategory))
+                : productMapper.toProductCategoryDTOList(parentCategory.getSubcategories());
     }
 
     @Transactional(readOnly = true)
-    public List<ProductCategoryDTO> findAllSubCategoryOf(int id) {
+    public List<ProductCategoryDTO> findAllSubCategoryOf(Integer id) {
         ProductCategory category = productCategoryRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Category not found with id: " + id)
         );
@@ -201,7 +204,7 @@ public class ProductService {
                     savedProduct,
                     productDTO.getMedia().get(j).contentType(),
                     productDTO.getMedia().get(j).content(),
-                    j
+                    Integer.valueOf(j)
             ));
         }
         if (!mediaList.isEmpty())
@@ -213,7 +216,7 @@ public class ProductService {
                     savedProduct,
                     productDTO.getDescriptions().get(j).contentType(),
                     productDTO.getDescriptions().get(j).content(),
-                    j
+                    Integer.valueOf(j)
             ));
         }
         if (!descriptionList.isEmpty())
@@ -361,10 +364,10 @@ public class ProductService {
                 if (!dto.content().equals(media.getContent()))
                     media.setContent(dto.content());
                 if (media.getSortOrder() != order)
-                    media.setSortOrder(order);
+                    media.setSortOrder(Integer.valueOf(order));
                 updatedList.add(media);
             } else {
-                T newMedia = newMediaFactory.apply(dto, order);
+                T newMedia = newMediaFactory.apply(dto, Integer.valueOf(order));
                 updatedList.add(newMedia);
             }
             order++;

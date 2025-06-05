@@ -2,7 +2,6 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductCategoryDTO;
 import dev.ecommerce.product.DTO.ProductDTO;
-import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -18,7 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -36,12 +34,12 @@ public class ProductController {
     }
 
     @GetMapping("/category/{id}")
-    public ProductCategoryDTO getCategoryById(@PathVariable int id) {
-        return productService.findCategoryById(id);
+    public List<ProductCategoryDTO> getSameParentCategories(@PathVariable Integer id) {
+        return productService.findCategorySameParentCategoriesById(id);
     }
 
     @GetMapping("/subcategory/{id}")
-    public List<ProductCategoryDTO> getSubCategories(@PathVariable int id) {
+    public List<ProductCategoryDTO> getSubCategories(@PathVariable Integer id) {
         return productService.findAllSubCategoryOf(id);
     }
 
@@ -58,7 +56,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
         ProductDTO productDTO = productService.findProductById(id);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
