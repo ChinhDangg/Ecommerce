@@ -55,15 +55,38 @@ export function initializeUpdate() {
     });
 
     document.getElementById('update-btn').addEventListener('click', async () => {
-        //const productLineInfo = await getProductLineInfo();
+        const productLineInfo = await getProductLineInfo();
+        // await postProductLineInfo(productLineInfo);
+        // const productInfo = await getProductInfo(null, 1);
+        // await postProductInfo(productInfo);
         const productLineId = new URLSearchParams(window.location.search).get('line');
-        // if (productLineId) {
-        //     await updateProductLineInfo(productLineId, productLineInfo);
-        // }
-        const productInfo = await getProductInfo(productLineId, 1);
-        console.log(productInfo);
-        if (productInfo)
-            await updateProductInfo(1, productInfo);
+        if (productLineId && !productLineInfo) {
+            const confirmDeleteProductLine = confirm('Product line name is empty - marking as deletion - continue?');
+            if (!confirmDeleteProductLine)
+                return;
+            const deletedProductLine = await deleteProductLine(productLineId);
+            if (!deletedProductLine) {
+                alert('Fail deleting product line');
+                return;
+            }
+        }
+        else if (productLineId) {
+            const updatedProductLine = await updateProductLineInfo(productLineId, productLineInfo);
+            if (!updatedProductLine) {
+                alert('Fail updating product line - abort all');
+                return;
+            }
+        }
+        for (let j = 0; j < retrieved_product.length; j++) {
+            const productInfo = await getProductInfo(productLineId, retrieved_product[j]);
+            if (productInfo) {
+                const updatedProduct = await updateProductInfo(retrieved_product[j], productInfo);
+                if (!updatedProduct) {
+                    alert('Stopping update due to Fail updating product: ' + retrieved_product[j]);
+                    return;
+                }
+            }
+        }
     });
 
     expandCategorySection(document.getElementById('product-category-section').querySelector('.toggle-collapse'));
@@ -71,85 +94,6 @@ export function initializeUpdate() {
     initializeAdd(); // initialize add new product
 }
 
-function updateProductLineInfo(productLineId, productLineInfoData) {
-    const url = 'http://localhost:8080/api/productLine/put/' + productLineId;
-    return fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Content-Type':'application/json',
-        },
-        body: JSON.stringify(productLineInfoData)
-    })
-        .then(response => {
-            if (response.status === 200) // ok
-                return response.text();
-            throw new Error('Fail update product line info');
-        })
-        .then(data => {
-            console.log('Success update product line info: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error updating product line info', error);
-            return null;
-        });
-}
-
-function updateProductInfo(productId, productInfoData) {
-    const url = 'http://localhost:8080/api/product/' + productId;
-    return fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productInfoData)
-    })
-        .then(response => {
-            if (response.status === 200) // ok
-                return response.text();
-            throw new Error('Fail update product info')
-        })
-        .then(data => {
-            console.log('Success update product info: ', data);
-        })
-        .catch(error => {
-            console.error('Error updating product info', error);
-            return null;
-        });
-}
-
-async function searchProduct(productNameSearch) {
-    try {
-        // const page = 0;
-        // const baseUrl = 'http://localhost:8080/api/product/search';
-        // const queryParams = new URLSearchParams({
-        //     page: page.toString(),
-        //     search: productNameSearch
-        // });
-        // const url = `${baseUrl}?${queryParams.toString()}`;
-        // const response = await fetch(url);
-        // const searchResult = await response.json();
-        const searchResult = {
-            content: [
-                {
-                    productLineId: 1,
-                    categoryId: 1,
-                    id: 1,
-                    manufacturerId: 1,
-                    name: 'Some product name to show',
-                    quality: 50,
-                    price: 50.5,
-                    features: [],
-                    imageName: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
-                    discountPrice: '',
-                }
-            ]
-        };
-        displaySearchResult(searchResult.content);
-    } catch (error) {
-        console.error('Error searching for product:', error);
-    }
-}
 
 function displaySearchResult(content) {
     clearSearchEntry();
@@ -216,10 +160,204 @@ export async function handleProductResult(productId, productLineId, categoryId) 
     }
 }
 
+function clearProductLineSection() {
+    data_productLineImages.length = 0;
+    data_productLineDescriptionImages.length = 0;
+    document.getElementById('product-line-name-input').value = '';
+    document.getElementById('product-line-images').innerHTML = '';
+    // Remove all description entries except the first one
+    Array.from(document.getElementById('product-line-descriptions')
+        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
+}
+
+function displayProductLineInfo(productLineInfo) {
+    document.getElementById('product-line-name-input').value = productLineInfo.name;
+    const productLineImageContainer = document.getElementById('product-line-images');
+    productLineInfo.media.forEach(media => {
+        const imageEntry = addImageEntry(data_productLineImages, productLineImageContainer, null, media.content);
+        imageEntry.dataset.mediaId = media.id;
+    });
+    productLineInfo.descriptions.forEach(description => {
+        const descriptionItem = addProductLineDescription();
+        descriptionItem.dataset.descriptionId = description.id;
+
+        const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
+        if (description.contentType === "TEXT") {
+            descriptionTextArea.innerHTML = description.content;
+        } else if (description.contentType === "IMAGE") {
+            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, description.content);
+        }
+    });
+}
+
+const retrieved_product = [];
+function addProductEntry(productId) {
+    const [productOptionItem, productSpecItem, productItem] = addNewProductEntry(productId,true);
+    productItem.querySelector('.toggle-collapse').addEventListener('click', async () => {
+        if (retrieved_product.includes(productId))
+            return;
+        retrieved_product.push(productId);
+        const productInfo = await fetchProductInfo(productId);
+        productInfo.options.forEach((option) => {
+            const optionItem = addOptionKey(option.name);
+            addOptionValue(optionItem, option.name, option.value);
+            productOptionItem.querySelector(`select[data-option-id="${option.name}"]`).value = option.value;
+        });
+        productInfo.specifications.forEach((spec) => {
+            const specItem = addSpecificationKey(spec.name);
+            addSpecificationValue(specItem, spec.name, spec.value);
+            productSpecItem.querySelector(`select[data-spec-id="${spec.name}"]`).value = spec.value;
+        });
+        displayProductInfo(productItem, productInfo);
+    });
+    productItem.querySelector('.delete-product-btn').onclick = async function() {
+        const deleteConfirm = confirm("Are you sure you want to delete this product?");
+        if (!deleteConfirm)
+            return;
+        const deleted = await deleteProduct(productId);
+        if (!deleted) {
+            alert('Fail deleting product');
+            return;
+        }
+        removeProductInfo(productId);
+    };
+}
+
+function clearAllProductInfo() {
+    products.forEach(productId => {
+        if (productId !== 0)
+            removeProductInfo(productId);
+    });
+}
+
+function displayProductInfo(productItem, content) {
+    console.log(content);
+    productItem.querySelector('.product-name-input').value = content.name;
+    productItem.querySelector('.product-brand-input').value = content.brand;
+    productItem.querySelector('.product-manufacturer-part-number-input').value = content.manufacturerId;
+    productItem.querySelector('.product-quantity-input').value = content.quantity;
+    productItem.querySelector('.product-condition-select').value = content.conditionType;
+    productItem.querySelector('.product-regular-price-input').value = content.price;
+    productItem.querySelector('.product-sale-price-input').value = content.salePrice;
+    productItem.querySelector('.product-sale-end-date-input').value = content.saleEndDate;
+    content.features.forEach(feature => {
+        const featureEntry = addProductFeature(productItem);
+        featureEntry.querySelector('.product-feature-input').value = feature;
+    });
+    content.media.forEach(media => {
+        if (media.contentType === 'IMAGE') {
+            const imageEntry = addImageEntry(
+                data_allProductImages.get(content.id),
+                productItem.querySelector('.product-images'),
+                null, media.content
+            );
+            imageEntry.dataset.mediaId = media.id;
+        }
+    });
+    content.descriptions.forEach(description => {
+        const descriptionItem = addProductDescription(productItem, content.id);
+        descriptionItem.dataset.descriptionId = description.id;
+
+        const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
+        if (description.contentType === "TEXT") {
+            descriptionTextArea.innerHTML = description.content;
+        } else if (description.contentType === "IMAGE") {
+            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), description.content);
+        }
+    });
+}
+
+// CRUD operations
+
+function updateProductLineInfo(productLineId, productLineInfoData) {
+    const url = 'http://localhost:8080/api/productLine/' + productLineId;
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type':'application/json',
+        },
+        body: JSON.stringify(productLineInfoData)
+    })
+        .then(response => {
+            if (response.status === 200) // ok
+                return response.text();
+            throw new Error('Fail update product line info');
+        })
+        .then(data => {
+            console.log('Success update product line info: ', data);
+            return data;
+        })
+        .catch(error => {
+            console.error('Error updating product line info', error);
+            return null;
+        });
+}
+
+function updateProductInfo(productId, productInfoData) {
+    const url = 'http://localhost:8080/api/product/' + productId;
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productInfoData)
+    })
+        .then(response => {
+            if (response.status === 200) // ok
+                return response.text();
+            throw new Error('Fail update product info')
+        })
+        .then(data => {
+            console.log('Success update product info: ', data);
+            return data;
+        })
+        .catch(error => {
+            console.error('Error updating product info', error);
+            return null;
+        });
+}
+
+async function searchProduct(productNameSearch) {
+    try {
+        // const page = 0;
+        // const baseUrl = 'http://localhost:8080/api/product/search';
+        // const queryParams = new URLSearchParams({
+        //     page: page.toString(),
+        //     search: productNameSearch
+        // });
+        // const url = `${baseUrl}?${queryParams.toString()}`;
+        // const response = await fetch(url);
+        // const searchResult = await response.json();
+        const searchResult = {
+            content: [
+                {
+                    productLineId: 1,
+                    categoryId: 1,
+                    id: 1,
+                    manufacturerId: 1,
+                    name: 'Some product name to show',
+                    quality: 50,
+                    price: 50.5,
+                    features: [],
+                    imageName: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    discountPrice: '',
+                }
+            ]
+        };
+        displaySearchResult(searchResult.content);
+    } catch (error) {
+        console.error('Error searching for product:', error);
+    }
+}
+
 async function fetchProductLineInfo(productLineId) {
     try {
-        // const response = await fetch('http://localhost:8080/api/product/productLine/' + productLineId);
-        // return await response.json();
+        // const url = await fetch('http://localhost:8080/api/product/productLine/' + productLineId);
+        // const response = await fetch(url);
+        // if (!response.ok) {
+        //     throw new Error(`Failed to get product with id: ${productId}`);
+        // }
+        //const result = await response.json();
         return {
             name: "Product Line Name",
             media: [
@@ -256,34 +394,23 @@ async function fetchProductLineInfo(productLineId) {
     }
 }
 
-function clearProductLineSection() {
-    data_productLineImages.length = 0;
-    data_productLineDescriptionImages.length = 0;
-    document.getElementById('product-line-name-input').value = '';
-    document.getElementById('product-line-images').innerHTML = '';
-    // Remove all description entries except the first one
-    Array.from(document.getElementById('product-line-descriptions')
-        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
-}
-
-function displayProductLineInfo(productLineInfo) {
-    document.getElementById('product-line-name-input').value = productLineInfo.name;
-    const productLineImageContainer = document.getElementById('product-line-images');
-    productLineInfo.media.forEach(media => {
-        const imageEntry = addImageEntry(data_productLineImages, productLineImageContainer, null, media.content);
-        imageEntry.dataset.mediaId = media.id;
-    });
-    productLineInfo.descriptions.forEach(description => {
-        const descriptionItem = addProductLineDescription();
-        descriptionItem.dataset.descriptionId = description.id;
-
-        const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
-        if (description.contentType === "TEXT") {
-            descriptionTextArea.innerHTML = description.content;
-        } else if (description.contentType === "IMAGE") {
-            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, description.content);
-        }
-    });
+async function fetchProductCategory(productCategoryId) {
+    try {
+        // const url = `http://localhost:8080/api/product/category/` + productCategoryId;
+        // const response = await fetch(url);
+        // if (!response.ok) {
+        //     throw new Error(`Failed to get product with id: ${productCategoryId}`);
+        // }
+        // const result = await response.json();
+        return [
+            {
+                id: 1,
+                name: 'Electronics'
+            }
+        ]
+    } catch (error) {
+        console.error('Error fetching for product category:', error);
+    }
 }
 
 async function fetchProductInfo(productId) {
@@ -363,94 +490,38 @@ async function fetchProductInfo(productId) {
     }
 }
 
-async function fetchProductCategory(productCategoryId) {
-    try {
-        // const url = `http://localhost:8080/api/product/category/` + productCategoryId;
-        // const response = await fetch(url);
-        // if (!response.ok) {
-        //     throw new Error(`Failed to get product with id: ${productCategoryId}`);
-        // }
-        // const result = await response.json();
-        return [
-            {
-                id: 1,
-                name: 'Food'
+async function deleteProductLine(productLineId) {
+    const url = `http://localhost:8080/api/productLine/${productLineId}`;
+    return fetch(url, {
+        method: 'DELETE'
+    })
+        .then(response => {
+            if (response.status === 204) {// no content
+                console.log('Success deleting product line');
+                return true;
             }
-        ]
-    } catch (error) {
-        console.error('Error fetching for product category:', error);
-    }
-}
-
-const retrieved_product = [];
-function addProductEntry(productId) {
-    const [productOptionItem, productSpecItem, productItem] = addNewProductEntry(productId,true);
-    productItem.querySelector('.toggle-collapse').addEventListener('click', async () => {
-        if (retrieved_product.includes(productId))
-            return;
-        retrieved_product.push(productId);
-        console.log(retrieved_product);
-        const productInfo = await fetchProductInfo(productId);
-        productInfo.options.forEach((option) => {
-            const optionItem = addOptionKey(option.name);
-            addOptionValue(optionItem, option.name, option.value);
-            productOptionItem.querySelector(`select[data-option-id="${option.name}"]`).value = option.value;
+            throw new Error('Fail deleting product line');
+        })
+        .catch(error => {
+            console.error('Error deleting product line', error);
+            return false;
         });
-        productInfo.specifications.forEach((spec) => {
-            const specItem = addSpecificationKey(spec.name);
-            addSpecificationValue(specItem, spec.name, spec.value);
-            productSpecItem.querySelector(`select[data-spec-id="${spec.name}"]`).value = spec.value;
+}
+
+async function deleteProduct(productId) {
+    const url = `http://localhost:8080/api/product/${productId}`;
+    return fetch(url, {
+        method: 'DELETE'
+    })
+        .then(response => {
+            if (response.status === 204) { // no content
+                console.log('Success deleting product');
+                return true;
+            }
+            throw new Error('Fail deleting product');
+        })
+        .catch(error => {
+            console.error('Error deleting product', error);
+            return false;
         });
-        displayProductInfo(productItem, productInfo);
-    });
-    productItem.querySelector('.delete-product-btn').addEventListener('click', function() {
-        const deleteConfirm = confirm("Are you sure you want to delete this product?");
-        if (!deleteConfirm)
-            return;
-        // delete product here
-    });
-}
-
-function clearAllProductInfo() {
-    products.forEach(productId => {
-        if (productId !== 0)
-            removeProductInfo(productId);
-    });
-}
-
-function displayProductInfo(productItem, content) {
-    console.log(content);
-    productItem.querySelector('.product-name-input').value = content.name;
-    productItem.querySelector('.product-brand-input').value = content.brand;
-    productItem.querySelector('.product-manufacturer-part-number-input').value = content.manufacturerId;
-    productItem.querySelector('.product-quantity-input').value = content.quantity;
-    productItem.querySelector('.product-condition-select').value = content.conditionType;
-    productItem.querySelector('.product-regular-price-input').value = content.price;
-    productItem.querySelector('.product-sale-price-input').value = content.salePrice;
-    productItem.querySelector('.product-sale-end-date-input').value = content.saleEndDate;
-    content.features.forEach(feature => {
-        const featureEntry = addProductFeature(productItem);
-        featureEntry.querySelector('.product-feature-input').value = feature;
-    });
-    content.media.forEach(media => {
-        if (media.contentType === 'IMAGE') {
-            const imageEntry = addImageEntry(
-                data_allProductImages.get(content.id),
-                productItem.querySelector('.product-images'),
-                null, media.content
-            );
-            imageEntry.dataset.mediaId = media.id;
-        }
-    });
-    content.descriptions.forEach(description => {
-        const descriptionItem = addProductDescription(productItem, content.id);
-        descriptionItem.dataset.descriptionId = description.id;
-
-        const descriptionTextArea = descriptionItem.querySelector('.description-textarea-entry');
-        if (description.contentType === "TEXT") {
-            descriptionTextArea.innerHTML = description.content;
-        } else if (description.contentType === "IMAGE") {
-            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), description.content);
-        }
-    });
 }

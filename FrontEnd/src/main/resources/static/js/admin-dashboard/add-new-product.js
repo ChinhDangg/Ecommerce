@@ -6,61 +6,25 @@ export function initializeAdd() {
     data_allProductDescriptionImages.clear();
     products.splice(1);
 
-    // product line
-    document.getElementById('add-line-image-btn').addEventListener('click', function () {
-        productLineImageInput.click();
-    });
-    document.getElementById('add-line-description-btn').addEventListener('click', function () {
-        addProductLineDescription();
-    });
-
-    // product category section
-    document.getElementById('product-category-section').querySelector('.toggle-collapse').addEventListener('click', async function(){
-        if (this.classList.contains('hidden')) {
-            return;
-        }
-        expandCategorySection(this);
-        if (!categoryTree.length) {
-            await fetchTopCategories();
-        }
-        this.classList.add('hidden');
-        const categorySection = document.getElementById('product-category-section');
-        categorySection.querySelector('.category-description').classList.remove('hidden');
-        categorySection.querySelector('#category-back-button').classList.remove('hidden');
-    });
-    document.getElementById('category-back-button').addEventListener('click', function () {
-        removeAllSubcategoryDisplay();
-        if (categoryNavStack.length > 1) {
-            categoryNavStack.pop();
-            removeAllTopCategoryDisplay();
-            addTopCategories(categoryNavStack[categoryNavStack.length - 1]);
-            categoryNavStack.pop();
-        } else {
-            addTopCategories(categoryNavStack.pop());
-        }
-        console.log(categoryNavStack);
-    });
-
-    // product option
-    document.getElementById('add-option-btn').addEventListener('click', function () {
-        const key = prompt('Enter a new option name:');
-        addOptionKey(key);
-    });
-    document.getElementById('add-product-btn').addEventListener('click', async function () {
-        addNewProductEntry();
-    });
-
-    // product specification
-    document.getElementById('add-spec-btn').addEventListener('click', function () {
-        const key = prompt('Enter a new spec name:');
-        addSpecificationKey(key);
-    });
+    initializeProductLineSection();
+    initializeCategorySection();
+    initializeProductOptionSection();
+    initializeProductSpecificationSection();
 }
 
 
 /* Product line section */
 const productLineImageInput = document.getElementById('add-line-image-input');
 export const data_productLineImages = []
+
+function initializeProductLineSection() {
+    document.getElementById('add-line-image-btn').addEventListener('click', function () {
+        productLineImageInput.click();
+    });
+    document.getElementById('add-line-description-btn').addEventListener('click', function () {
+        addProductLineDescription();
+    });
+}
 
 productLineImageInput.addEventListener('change', function () {
     const productLineImageContainer = document.getElementById('product-line-images');
@@ -195,6 +159,34 @@ export function updateDescriptionImage(descriptionContainer, dataImageArray, ima
 in sub then is sub of the sub, else direct sub of a top cate,
 must be only one sub in either top or another sub
 Top-category should be in top-categories class */
+
+function initializeCategorySection() {
+    document.getElementById('product-category-section').querySelector('.toggle-collapse').addEventListener('click', async function(){
+        if (this.classList.contains('hidden')) {
+            return;
+        }
+        expandCategorySection(this);
+        if (!categoryTree.length) {
+            await fetchTopCategories();
+        }
+    });
+    document.getElementById('category-back-button').addEventListener('click',async function () {
+        removeAllSubcategoryDisplay();
+        if (categoryNavStack.length > 1) {
+            categoryNavStack.pop();
+            removeAllTopCategoryDisplay();
+            await addTopCategories(categoryNavStack[categoryNavStack.length - 1]);
+            categoryNavStack.pop();
+        } else if (categoryNavStack.length) {
+            await addTopCategories(categoryNavStack.pop());
+            categoryNavStack.pop();
+        } else {
+            await fetchTopCategories();
+        }
+        console.log(categoryNavStack);
+    });
+}
+
 export function expandCategorySection(categoryToggleButton) {
     categoryToggleButton.classList.add('hidden');
     const categorySection = document.getElementById('product-category-section');
@@ -210,9 +202,9 @@ async function fetchTopCategories() {
     try {
         const response = await fetch('http://localhost:8080/api/product/category');
         const topCategories = await response.json(); // [{id, name}]
-        topCategories.forEach(topCategory => {
-            categoryTree.push(topCategory); // update
-        });
+        // topCategories.forEach(topCategory => {
+        //     categoryTree.push(topCategory); // update
+        // });
         addTopCategories(topCategories);
     } catch (error) {
         console.error('Error fetching top categories:', error);
@@ -221,7 +213,7 @@ async function fetchTopCategories() {
     }
 }
 
-export async function addTopCategories(topCategories, categoryToToggle = null) {
+export async function addTopCategories(topCategories, categoryToToggle = null, isChecked = false) {
     removeAllTopCategoryDisplay();
     categoryNavStack.push(topCategories);
     console.log(categoryNavStack);
@@ -230,7 +222,7 @@ export async function addTopCategories(topCategories, categoryToToggle = null) {
         const categoryItem = categoryContainer.querySelector('.category-item').cloneNode(true);
         categoryItem.classList.remove('hidden');
         categoryContainer.appendChild(categoryItem);
-        updateCategoryInfo(categoryItem, topCategory);
+        updateCategoryInfo(categoryItem, topCategory, isChecked);
         const toggleButton = categoryItem.querySelector('.toggle-subcategories');
         if (topCategory === categoryToToggle) {
             toggleButton.querySelector('svg').classList.toggle('rotate-[-90deg]');
@@ -294,6 +286,9 @@ async function toggleSubcategories(topCategory, toggleButton) {
         if (querySubcategories) {
             foundCategory.subcategories = querySubcategories;
             addSubCategories(querySubcategories);
+        } else {
+            const subcategoryContainer = document.getElementById('subcategory-list');
+            subcategoryContainer.innerHTML = 'Fail to load sub-categories';
         }
     }
     currentCategory = topCategory;
@@ -332,6 +327,16 @@ function updateCategoryInfo(container, category, isChecked = false) {
 /* Product Options Section */
 const optionMap = new Map();
 export let products = [0];
+
+function initializeProductOptionSection() {
+    document.getElementById('add-option-btn').addEventListener('click', function () {
+        const key = prompt('Enter a new option name:');
+        addOptionKey(key);
+    });
+    document.getElementById('add-product-btn').addEventListener('click', async function () {
+        addNewProductEntry();
+    });
+}
 
 export function addOptionKey(key) {
     if (key && !optionMap.has(key)) {
@@ -491,6 +496,13 @@ function removeProductItemFromOption(productId) {
 /* Product Specifications Section */
 const specMap = new Map();
 
+function initializeProductSpecificationSection() {
+    document.getElementById('add-spec-btn').addEventListener('click', function () {
+        const key = prompt('Enter a new spec name:');
+        addSpecificationKey(key);
+    });
+}
+
 export function addSpecificationKey(key) {
     if (key && !specMap.has(key)) {
         specMap.set(key, []);
@@ -598,9 +610,9 @@ function addNewProductGroupTemplate(productId, collapsed) {
     data_allProductImages.set(productId, []);
     data_allProductDescriptionImages.set(productId, []);
 
-    productGroupItem.querySelector('.delete-product-btn').addEventListener('click', function() {
+    productGroupItem.querySelector('.delete-product-btn').onclick = function() {
         removeProductInfo(productId);
-    });
+    };
     productGroupItem.querySelector('.toggle-collapse').addEventListener('click', function() {
         productGroupItem.querySelector('.product-details').classList.toggle('hidden');
     });

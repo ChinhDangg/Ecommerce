@@ -7,72 +7,6 @@ import {
     products,
 } from "./add-new-product.js";
 
-async function uploadImages(dataImageArray) {
-    if (dataImageArray.length === 0)
-        return dataImageArray;
-
-    const formData = new FormData();
-    // Store indexes of image Files to update later
-    const fileIndexes = [];
-
-    dataImageArray.forEach((image, index) => {
-        if (image instanceof File) {
-            formData.append('images', image);
-            fileIndexes.push(index);
-        }
-    });
-
-    if (fileIndexes.length === 0) {
-        return dataImageArray;
-    }
-
-    try {
-        const response = await fetch('http://localhost:8080/api/product/uploadImages', {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (response.status !== 201) {
-            throw new Error('Fail upload images');
-        }
-        const uploadedNames = await response.json(); // array of image names
-        // Replace File entries in original array with returned image names
-        fileIndexes.forEach((fileIndex, i) => {
-            dataImageArray[fileIndex] = uploadedNames[i];
-        });
-        return dataImageArray;
-
-    } catch (error) {
-        console.error('Error uploading files:', error);
-        return null;
-    }
-}
-
-
-// product line POST
-export function postProductLineInfo(productLineInfoData) {
-    const url = 'http://localhost:8080/api/productLine/new';
-    return fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productLineInfoData)
-    })
-        .then(response => {
-            if (!response.ok)
-                throw new Error('Fail upload product line info');
-            return response.text();
-        })
-        .then(data => {
-            console.log('Success upload product line info');
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading product line info', error);
-            return null;
-        });
-}
 
 export async function getProductLineInfo() {
     const productLineNameInput = document.getElementById('product-line-name-input');
@@ -137,31 +71,6 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
     return descriptionTexts;
 }
 
-
-// product group POST
-export function postProductInfo(productInfoData) {
-    const url = 'http://localhost:8080/api/product';
-    return fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productInfoData)
-    })
-        .then(response => {
-            if (response.status === 201) //created
-                return response.text();
-            throw new Error('Fail upload product info');
-        })
-        .then(data => {
-            console.log('Success upload product info: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading product info', error);
-            return null;
-        });
-}
 
 export async function getProductInfo(productLineId, productId) {
     const productGroupContainer = document.getElementById('product-group-container');
@@ -279,4 +188,95 @@ export function initializePost() {
         }
         await processProducts();
     });
+}
+
+// product line POST
+export function postProductLineInfo(productLineInfoData) {
+    const url = 'http://localhost:8080/api/productLine';
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productLineInfoData)
+    })
+        .then(response => {
+            if (!response.ok)
+                throw new Error('Fail upload product line info');
+            return response.text();
+        })
+        .then(data => {
+            console.log('Success upload product line info');
+            return data;
+        })
+        .catch(error => {
+            console.error('Error uploading product line info', error);
+            return null;
+        });
+}
+
+// product group POST
+export function postProductInfo(productInfoData) {
+    const url = 'http://localhost:8080/api/product';
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productInfoData)
+    })
+        .then(response => {
+            if (response.status === 201) //created
+                return response.text();
+            throw new Error('Fail upload product info');
+        })
+        .then(data => {
+            console.log('Success upload product info: ', data);
+            return data;
+        })
+        .catch(error => {
+            console.error('Error uploading product info', error);
+            return null;
+        });
+}
+
+async function uploadImages(dataImageArray) {
+    if (dataImageArray.length === 0)
+        return dataImageArray;
+
+    const formData = new FormData();
+    // Store indexes of image Files to update later
+    const fileIndexes = [];
+
+    dataImageArray.forEach((image, index) => {
+        if (image instanceof File) {
+            formData.append('images', image);
+            fileIndexes.push(index);
+        }
+    });
+
+    if (fileIndexes.length === 0) {
+        return dataImageArray;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8080/api/product/uploadImages', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.status !== 201) {
+            throw new Error('Fail upload images');
+        }
+        const uploadedNames = await response.json(); // array of image names
+        // Replace File entries in original array with returned image names
+        fileIndexes.forEach((fileIndex, i) => {
+            dataImageArray[fileIndex] = uploadedNames[i];
+        });
+        return dataImageArray;
+
+    } catch (error) {
+        console.error('Error uploading files:', error);
+        return null;
+    }
 }
