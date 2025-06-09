@@ -23,6 +23,7 @@ public interface ProductMapper {
     List<ProductDTO> toProductDTOList(List<Product> products);
 
     @Mapping(source = "productLine.id", target = "productLineId")
+    @Mapping(source = "category.id", target = "categoryId")
     @Mapping(source = "features", target = "features", qualifiedByName = "featuresToContentList")
     ProductDTO toProductDTO(Product product);
 

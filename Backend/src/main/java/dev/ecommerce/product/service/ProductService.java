@@ -6,10 +6,7 @@ import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -128,7 +125,10 @@ public class ProductService {
                 root.get("quantity"),
                 root.get("price"),
                 root.get("salePrice"),
-                root.get("saleEndDate")
+                root.get("saleEndDate"),
+                root.get("category"),
+                root.get("productLine"),
+                root.get("media")
         ));
 
         TypedQuery<Product> typedQuery = entityManager.createQuery(query);
@@ -138,7 +138,6 @@ public class ProductService {
         List<Product> resultList = typedQuery.getResultList();
         List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
         for (Product product : resultList) {
-            product.getMedia().size();
             ShortProductDTO current = productMapper.toShortProductWithoutFeaturesDTO(product);
             current.setProductLineId(product.getProductLine() == null ? null : product.getProductLine().getId());
             current.setCategoryId(product.getCategory().getId());
@@ -161,6 +160,7 @@ public class ProductService {
     public ProductDTO findProductById(Long id) {
         Product foundProduct = getProductById(id);
         foundProduct.getProductLine();
+        foundProduct.getCategory().getId();
         foundProduct.getOptions().size();
         foundProduct.getSpecifications().size();
         foundProduct.getFeatures().size();
