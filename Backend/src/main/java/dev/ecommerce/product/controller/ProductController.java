@@ -50,9 +50,9 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public Page<ShortProductDTO> searchProducts(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<ShortProductDTO>> searchProducts(@RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "") String search) {
-        return productService.findProductsByName(search, page);
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByName(search, page));
     }
 
     @GetMapping("/{id}")
@@ -89,10 +89,10 @@ public class ProductController {
                         try {
                             // Save file to a directory (e.g., uploads/)
                             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                            Path path = Paths.get("C:\\Users\\admin\\IdeaProjects\\Ecommerce\\FrontEnd\\src\\main\\resources\\static\\images\\" + fileName);
+                            Path path = Paths.get("C:\\Users\\minhc\\IdeaProjects\\Ecommerce\\FrontEnd\\src\\main\\resources\\static\\images\\" + fileName);
                             Files.createDirectories(path.getParent()); // Ensure directory exists
                             Files.write(path, file.getBytes());
-                            return path.getFileName().toString();
+                            return "/images/" + path.getFileName().toString();
                         } catch (IOException e) {
                             throw new RuntimeException("Failed to store file: " + file.getOriginalFilename(), e);
                         }
