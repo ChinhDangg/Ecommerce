@@ -9,7 +9,8 @@ document.getElementById('admin-dashboard-top-header-link').addEventListener('cli
 });
 
 const addNewQuery = 'addProduct'
-document.getElementById('add-product-link').addEventListener('click', async function(e) {
+const addProductLink = document.getElementById('add-product-link');
+addProductLink.addEventListener('click', async function(e) {
     e.preventDefault();
     const newUrl = `/admin/dashboard?query=${addNewQuery}`;
     this.href = newUrl;
@@ -18,7 +19,8 @@ document.getElementById('add-product-link').addEventListener('click', async func
 });
 
 export const updateProductQuery = 'updateProduct';
-document.getElementById('update-product-link').addEventListener('click', async function(e) {
+const updateProductLink = document.getElementById('update-product-link');
+updateProductLink.addEventListener('click', async function(e) {
     e.preventDefault();
     const newUrl = `/admin/dashboard?query=${updateProductQuery}`;
     this.href = newUrl;
@@ -26,7 +28,14 @@ document.getElementById('update-product-link').addEventListener('click', async f
     await getUpdateProductTemplate()
 });
 
+const resetClickedLinks = () => {
+    addProductLink.classList.remove('bg-blue-300');
+    updateProductLink.classList.remove('bg-blue-300');
+};
+
 async function getAddNewProductTemplate() {
+    resetClickedLinks();
+    addProductLink.classList.add('bg-blue-300');
     await getAdminProductTemplate('/admin/dashboard/addNewProduct', mainContentArea);
     import('./add-new-product.js')
         .then((module) => {
@@ -39,6 +48,8 @@ async function getAddNewProductTemplate() {
 }
 
 async function getUpdateProductTemplate() {
+    resetClickedLinks();
+    updateProductLink.classList.add('bg-blue-300');
     await getAdminProductTemplate('/admin/dashboard/updateProduct', mainContentArea);
     import('./retrieve-product.js')
         .then((module) => {

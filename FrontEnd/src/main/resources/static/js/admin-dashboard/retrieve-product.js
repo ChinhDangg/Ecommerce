@@ -1,35 +1,32 @@
 import {
-    addProductLineDescription,
     addImageEntry,
-    addProductFeature,
-    updateDescriptionImage,
-    addProductDescription,
-    addTopCategories,
+    addNewProductEntry,
     addOptionKey,
     addOptionValue,
+    addProductDescription,
+    addProductFeature,
+    addProductLineDescription,
     addSpecificationKey,
     addSpecificationValue,
-    addNewProductEntry,
-    removeProductInfo,
-    data_productLineImages,
-    data_allProductImages,
+    addTopCategories,
     data_allProductDescriptionImages,
+    data_allProductImages,
     data_productLineDescriptionImages,
-    products,
+    data_productLineImages,
+    expandCategorySection,
     initializeAdd,
-    expandCategorySection
+    products,
+    removeProductInfo,
+    updateDescriptionImage
 } from './add-new-product.js';
 
-import {
-    updatePageUrl,
-    updateProductQuery,
-} from './admin-navigation.js';
+import {updatePageUrl, updateProductQuery,} from './admin-navigation.js';
 
 import {
-    getProductLineInfo,
-    postProductLineInfo,
+    clearProductLineSection,
+    clearAllProductInfo,
     getProductInfo,
-    postProductInfo
+    getProductLineInfo
 } from "./post-new-product.js";
 
 
@@ -123,6 +120,15 @@ function displaySearchResult(content) {
     });
 }
 
+function displayNoSearchResult(content) {
+    clearSearchEntry();
+    const productSearchContainer = document.getElementById('product-search-container');
+    const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode();
+    searchEntry.innerHTML = content;
+    searchEntry.classList.remove('hidden');
+    productSearchContainer.appendChild(searchEntry);
+}
+
 function clearSearchEntry() {
     const productSearchContainer = document.getElementById('product-search-container');
     const allSearchEntries = productSearchContainer.querySelectorAll('.search-entry');
@@ -151,6 +157,9 @@ export async function handleProductResult(productId, productLineId, categoryId) 
     document.getElementById('main-content').classList.remove('hidden');
     if (productLineId) {
         const productLineInfo = await fetchProductLineInfo(productLineId);
+        if (!productLineInfo) {
+            return;
+        }
         displayProductLineInfo(productLineInfo);
         productLineInfo.productIdList.forEach(productId => {
             addProductEntry(productId);
@@ -158,16 +167,6 @@ export async function handleProductResult(productId, productLineId, categoryId) 
     } else {
         addProductEntry(productId);
     }
-}
-
-function clearProductLineSection() {
-    data_productLineImages.length = 0;
-    data_productLineDescriptionImages.length = 0;
-    document.getElementById('product-line-name-input').value = '';
-    document.getElementById('product-line-images').innerHTML = '';
-    // Remove all description entries except the first one
-    Array.from(document.getElementById('product-line-descriptions')
-        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
 }
 
 function displayProductLineInfo(productLineInfo) {
@@ -198,6 +197,9 @@ function addProductEntry(productId) {
             return;
         retrieved_product.push(productId);
         const productInfo = await fetchProductInfo(productId);
+        if (!productInfo) {
+            return;
+        }
         productInfo.options.forEach((option) => {
             const optionItem = addOptionKey(option.name);
             addOptionValue(optionItem, option.name, option.value);
@@ -221,13 +223,6 @@ function addProductEntry(productId) {
         }
         removeProductInfo(productId);
     };
-}
-
-function clearAllProductInfo() {
-    products.forEach(productId => {
-        if (productId !== 0)
-            removeProductInfo(productId);
-    });
 }
 
 function displayProductInfo(productItem, content) {
@@ -319,174 +314,191 @@ function updateProductInfo(productId, productInfoData) {
 
 async function searchProduct(productNameSearch) {
     try {
-        // const page = 0;
-        // const baseUrl = 'http://localhost:8080/api/product/search';
-        // const queryParams = new URLSearchParams({
-        //     page: page.toString(),
-        //     search: productNameSearch
-        // });
-        // const url = `${baseUrl}?${queryParams.toString()}`;
-        // const response = await fetch(url);
-        // const searchResult = await response.json();
-        const searchResult = {
-            content: [
-                {
-                    productLineId: 1,
-                    categoryId: 1,
-                    id: 1,
-                    manufacturerId: 1,
-                    name: 'Some product name to show',
-                    quality: 50,
-                    price: 50.5,
-                    features: [],
-                    imageName: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
-                    discountPrice: '',
-                }
-            ]
-        };
-        displaySearchResult(searchResult.content);
+        const page = 0;
+        const baseUrl = 'http://localhost:8080/api/product/search';
+        const queryParams = new URLSearchParams({
+            page: page.toString(),
+            search: productNameSearch
+        });
+        const url = `${baseUrl}?${queryParams.toString()}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            displayNoSearchResult('Failed searching product');
+            return;
+        }
+        const searchResult = await response.json();
+        // const searchResult = {
+        //     content: [
+        //         {
+        //             productLineId: 1,
+        //             categoryId: 1,
+        //             id: 1,
+        //             manufacturerId: 1,
+        //             name: 'Some product name to show',
+        //             quality: 50,
+        //             price: 50.5,
+        //             features: [],
+        //             imageName: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+        //             discountPrice: '',
+        //         }
+        //     ]
+        // };
+        if (searchResult.totalElements) {
+            displaySearchResult(searchResult.content);
+        } else {
+            displayNoSearchResult('No result found with search');
+        }
     } catch (error) {
         console.error('Error searching for product:', error);
+        displayNoSearchResult('Error searching for product');
     }
 }
 
 async function fetchProductLineInfo(productLineId) {
     try {
-        // const url = await fetch('http://localhost:8080/api/product/productLine/' + productLineId);
-        // const response = await fetch(url);
-        // if (!response.ok) {
-        //     throw new Error(`Failed to get product with id: ${productId}`);
-        // }
-        //const result = await response.json();
-        return {
-            name: "Product Line Name",
-            media: [
-                {
-                    id: 1,
-                    contentType: "IMAGE",
-                    content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
-                },
-                {
-                    id: 2,
-                    contentType: "IMAGE",
-                    content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
-                }
-            ],
-            descriptions: [
-                {
-                    id: 1,
-                    contentType: "IMAGE",
-                    content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
-                },
-                {
-                    id: 2,
-                    contentType: "TEXT",
-                    content: "Some description about the product line"
-                }
-            ],
-            productIdList: [
-                1, 2
-            ]
+        const url = 'http://localhost:8080/api/productLine/' + productLineId;
+        const response = await fetch(url);
+        if (!response.ok) {
+            alert('Failed to get product line with id: ' + productLineId);
+            return null;
         }
+        return await response.json();
+        // return {
+        //     name: "Product Line Name",
+        //     media: [
+        //         {
+        //             id: 1,
+        //             contentType: "IMAGE",
+        //             content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
+        //         },
+        //         {
+        //             id: 2,
+        //             contentType: "IMAGE",
+        //             content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
+        //         }
+        //     ],
+        //     descriptions: [
+        //         {
+        //             id: 1,
+        //             contentType: "IMAGE",
+        //             content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
+        //         },
+        //         {
+        //             id: 2,
+        //             contentType: "TEXT",
+        //             content: "Some description about the product line"
+        //         }
+        //     ],
+        //     productIdList: [
+        //         1, 2
+        //     ]
+        // }
     } catch (error) {
         console.error('Error fetching product line:', error);
+        alert('Error fetching product line');
         return null;
     }
 }
 
 async function fetchProductCategory(productCategoryId) {
     try {
-        // const url = `http://localhost:8080/api/product/category/` + productCategoryId;
-        // const response = await fetch(url);
-        // if (!response.ok) {
-        //     throw new Error(`Failed to get product with id: ${productCategoryId}`);
-        // }
-        // const result = await response.json();
-        return [
-            {
-                id: 1,
-                name: 'Electronics'
-            }
-        ]
+        const url = `http://localhost:8080/api/product/category/` + productCategoryId;
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error('Failed to get product category');
+            alert(`Failed to get category with id: ${productCategoryId}`);
+        }
+        return await response.json();
+        // return [
+        //     {
+        //         id: 1,
+        //         name: 'Electronics'
+        //     }
+        // ]
     } catch (error) {
         console.error('Error fetching for product category:', error);
+        alert('Error fetching product category');
     }
 }
 
 async function fetchProductInfo(productId) {
     try {
-        // const url = `http://localhost:8080/api/product/${productId}`;
-        // const response = await fetch(url);
-        // if (!response.ok) {
-        //     throw new Error(`Failed to get product with id: ${productId}`);
-        // }
-        //const result = await response.json();
-        return {
-            productLineId: 1,
-            id: 1,
-            manufacturerId: 'Manu 2',
-            name: 'Product name with something',
-            brand: 'Brand name',
-            quantity: 45,
-            conditionType: 'USED',
-            categoryId: 1,
-            price: '20.5',
-            salePrice: '10.5',
-            saleEndDate: '2025-05-19',
-            options: [
-                {
-                    id: 1,
-                    name: 'Option 1',
-                    value: 'value 1'
-                },
-                {
-                    id: 2,
-                    name: 'Option 2',
-                    value: 'value 2'
-                }
-            ],
-            specifications: [
-                {
-                    id: 1,
-                    name: 'Spec 1',
-                    value: 'value 1'
-                },
-                {
-                    id: 2,
-                    name: 'Spec 2',
-                    value: 'value 2'
-                }
-            ],
-            features: [
-                'feature 1', 'feature 2', 'feature 3'
-            ],
-            media: [
-                {
-                    id: 1,
-                    contentType: 'IMAGE',
-                    content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
-                },
-                {
-                    id: 2,
-                    contentType: 'IMAGE',
-                    content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
-                }
-            ],
-            descriptions: [
-                {
-                    id: 1,
-                    contentType: 'IMAGE',
-                    content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
-                },
-                {
-                    id: 2,
-                    contentType: 'TEXT',
-                    content: 'some description some description'
-                }
-            ]
+        const url = `http://localhost:8080/api/product/${productId}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error('Error fetching product info with id: ' + productId);
+            alert(`Failed to get product with id: ${productId}`);
+            return null;
         }
+        return await response.json();
+        // return {
+        //     productLineId: 1,
+        //     id: 1,
+        //     manufacturerId: 'Manu 2',
+        //     name: 'Product name with something',
+        //     brand: 'Brand name',
+        //     quantity: 45,
+        //     conditionType: 'USED',
+        //     categoryId: 1,
+        //     price: '20.5',
+        //     salePrice: '10.5',
+        //     saleEndDate: '2025-05-19',
+        //     options: [
+        //         {
+        //             id: 1,
+        //             name: 'Option 1',
+        //             value: 'value 1'
+        //         },
+        //         {
+        //             id: 2,
+        //             name: 'Option 2',
+        //             value: 'value 2'
+        //         }
+        //     ],
+        //     specifications: [
+        //         {
+        //             id: 1,
+        //             name: 'Spec 1',
+        //             value: 'value 1'
+        //         },
+        //         {
+        //             id: 2,
+        //             name: 'Spec 2',
+        //             value: 'value 2'
+        //         }
+        //     ],
+        //     features: [
+        //         'feature 1', 'feature 2', 'feature 3'
+        //     ],
+        //     media: [
+        //         {
+        //             id: 1,
+        //             contentType: 'IMAGE',
+        //             content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
+        //         },
+        //         {
+        //             id: 2,
+        //             contentType: 'IMAGE',
+        //             content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
+        //         }
+        //     ],
+        //     descriptions: [
+        //         {
+        //             id: 1,
+        //             contentType: 'IMAGE',
+        //             content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
+        //         },
+        //         {
+        //             id: 2,
+        //             contentType: 'TEXT',
+        //             content: 'some description some description'
+        //         }
+        //     ]
+        // }
     } catch (error) {
         console.error('Error fetching for product:', error);
+        alert('Error fetching product');
+        return null;
     }
 }
 

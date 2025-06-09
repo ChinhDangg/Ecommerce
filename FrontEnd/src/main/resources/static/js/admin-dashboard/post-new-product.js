@@ -4,7 +4,7 @@ import {
     data_productLineDescriptionImages,
     data_allProductImages,
     data_allProductDescriptionImages,
-    products,
+    products, removeProductInfo,
 } from "./add-new-product.js";
 
 
@@ -27,6 +27,9 @@ export async function getProductLineInfo() {
 
 async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
     const mediaNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
+    if (mediaNames == null) { // null - fail uploading images
+        return null;
+    }
     const mediaContent = [];
     allMediaTemplateEntries.forEach((entry, index) => {
         mediaContent.push(
@@ -41,7 +44,7 @@ async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
 }
 
 async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
-    const descriptionImageNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
+    let descriptionImageNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
     const descriptionTexts = [];
     const filteredDescriptionImages = descriptionImageNames.filter(item => item !== undefined && item !== null);
     allDescriptionEntries.forEach(descriptionEntry => {
@@ -170,74 +173,87 @@ function getProductSpecificationContent(productId) {
 
 export function initializePost() {
     document.getElementById('publish-btn').addEventListener('click', async function () {
-        const productLineInfo = await getProductLineInfo();
-        let productLineId = null;
-        console.log('Product line info: ', productLineInfo);
-        if (productLineInfo)
-            productLineId = await postProductLineInfo(productLineInfo);
-        async function processProducts() {
-            for (const productId of products) {
-                const productInfo = await getProductInfo(productLineId, productId);
-                console.log(`Product info for ${productId}: `, productInfo);
-                if (productInfo) {
-                    await postProductInfo(productInfo);
-                } else {
-                    break;
-                }
+        try {
+            const productLineInfo = await getProductLineInfo();
+            if (productLineInfo) {
+                const productLineId = await postProductLineInfo(productLineInfo);
+                await uploadProducts(productLineId);
+            } else {
+                await uploadProducts(null);
             }
+            clearProductLineSection();
+            clearAllProductInfo();
+        } catch (error) {
+            console.error(error);
+            console.error('Fail to publish all info');
         }
-        await processProducts();
     });
 }
 
+async function uploadProducts(productLineId) {
+    try {
+        for (let i = 1; i < products.length; i++) {
+            const productId = products[i];
+            const productInfo = await getProductInfo(productLineId, productId);
+            console.log(`Product info for ${productId}: `, productInfo);
+            if (productInfo) {
+                await postProductInfo(productInfo);
+            } else {
+                break;
+            }
+        }
+    } catch (error) {
+        console.error('Fail to upload all products');
+        throw error;
+    }
+}
+
+export function clearProductLineSection() {
+    data_productLineImages.length = 0;
+    data_productLineDescriptionImages.length = 0;
+    document.getElementById('product-line-name-input').value = '';
+    document.getElementById('product-line-images').innerHTML = '';
+    // Remove all description entries except the first one
+    Array.from(document.getElementById('product-line-descriptions')
+        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
+}
+
+export function clearAllProductInfo() {
+    products.forEach(productId => {
+        if (productId !== 0)
+            removeProductInfo(productId);
+    });
+}
+
+// CRUD operations
 // product line POST
-export function postProductLineInfo(productLineInfoData) {
-    const url = 'http://localhost:8080/api/productLine';
-    return fetch(url, {
+export async function postProductLineInfo(productLineInfoData) {
+    const response = await fetch('http://localhost:8080/api/productLine', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(productLineInfoData)
-    })
-        .then(response => {
-            if (!response.ok)
-                throw new Error('Fail upload product line info');
-            return response.text();
-        })
-        .then(data => {
-            console.log('Success upload product line info');
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading product line info', error);
-            return null;
-        });
+    });
+    if (!response.ok) {
+        throw new Error('Failed uploading product line info');
+    }
+    return response.text();
 }
 
 // product group POST
-export function postProductInfo(productInfoData) {
-    const url = 'http://localhost:8080/api/product';
-    return fetch(url, {
+export async function postProductInfo(productInfoData) {
+    const response = await fetch('http://localhost:8080/api/product', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(productInfoData)
-    })
-        .then(response => {
-            if (response.status === 201) //created
-                return response.text();
-            throw new Error('Fail upload product info');
-        })
-        .then(data => {
-            console.log('Success upload product info: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error uploading product info', error);
-            return null;
-        });
+    });
+    if (!response.ok) {
+        throw new Error('Failed uploading product info');
+    }
+    return response.text();
 }
 
 async function uploadImages(dataImageArray) {
@@ -259,24 +275,19 @@ async function uploadImages(dataImageArray) {
         return dataImageArray;
     }
 
-    try {
-        const response = await fetch('http://localhost:8080/api/product/uploadImages', {
-            method: 'POST',
-            body: formData,
-        });
+    const response = await fetch('http://localhost:8080/api/product/uploadImages', {
+        method: 'POST',
+        body: formData,
+    });
 
-        if (response.status !== 201) {
-            throw new Error('Fail upload images');
-        }
-        const uploadedNames = await response.json(); // array of image names
-        // Replace File entries in original array with returned image names
-        fileIndexes.forEach((fileIndex, i) => {
-            dataImageArray[fileIndex] = uploadedNames[i];
-        });
-        return dataImageArray;
-
-    } catch (error) {
-        console.error('Error uploading files:', error);
-        return null;
+    if (response.status !== 201) {
+        console.error('Failed to upload images');
+        throw new Error('Fail uploading images');
     }
+    const uploadedNames = await response.json(); // array of image names
+    // Replace File entries in original array with returned image names
+    fileIndexes.forEach((fileIndex, i) => {
+        dataImageArray[fileIndex] = uploadedNames[i];
+    });
+    return dataImageArray;
 }
