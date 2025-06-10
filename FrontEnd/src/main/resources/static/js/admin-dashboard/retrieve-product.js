@@ -202,13 +202,13 @@ function addProductEntry(productId) {
         }
         productInfo.options.forEach((option) => {
             const optionItem = addOptionKey(option.name);
-            addOptionValue(optionItem, option.name, option.value);
-            productOptionItem.querySelector(`select[data-option-id="${option.name}"]`).value = option.value;
+            addOptionValue(optionItem, option.name, option.valueOption);
+            productOptionItem.querySelector(`select[data-option-id="${option.name}"]`).value = option.valueOption;
         });
         productInfo.specifications.forEach((spec) => {
             const specItem = addSpecificationKey(spec.name);
-            addSpecificationValue(specItem, spec.name, spec.value);
-            productSpecItem.querySelector(`select[data-spec-id="${spec.name}"]`).value = spec.value;
+            addSpecificationValue(specItem, spec.name, spec.valueOption);
+            productSpecItem.querySelector(`select[data-spec-id="${spec.name}"]`).value = spec.valueOption;
         });
         displayProductInfo(productItem, productInfo);
     });
@@ -343,7 +343,7 @@ async function searchProduct(productNameSearch) {
         //         }
         //     ]
         // };
-        if (searchResult.totalElements) {
+        if (searchResult.page.totalElements) {
             displaySearchResult(searchResult.content);
         } else {
             displayNoSearchResult('No result found with search');

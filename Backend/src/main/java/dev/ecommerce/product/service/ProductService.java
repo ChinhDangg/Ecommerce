@@ -224,14 +224,14 @@ public class ProductService {
 
         List<ProductOption> optionList = new ArrayList<>();
         for (OptionDTO option : productDTO.getOptions()) {
-            optionList.add(new ProductOption(savedProduct, productLine, option.name(), option.value()));
+            optionList.add(new ProductOption(savedProduct, productLine, option.name(), option.valueOption()));
         }
         if (!optionList.isEmpty())
             productOptionRepository.saveAll(optionList);
 
         List<ProductSpecification> specificationList = new ArrayList<>();
         for (OptionDTO specification : productDTO.getSpecifications()) {
-            specificationList.add(new ProductSpecification(savedProduct, specification.name(), specification.value()));
+            specificationList.add(new ProductSpecification(savedProduct, specification.name(), specification.valueOption()));
         }
         if (!specificationList.isEmpty())
             productSpecificationRepository.saveAll(specificationList);
@@ -338,11 +338,11 @@ public class ProductService {
         for (OptionDTO dto : incomingDTOs) {
             if (currentOptionMap.containsKey(dto.name())) {
                 T option = currentOptionMap.get(dto.name());
-                if (!dto.value().equals(option.getName()))
-                    option.setValueOption(dto.value());
+                if (!dto.valueOption().equals(option.getName()))
+                    option.setValueOption(dto.valueOption());
                 updatedOptionList.add(option);
             } else {
-                T newOption = newOptionFactory.apply(dto.name(), dto.value());
+                T newOption = newOptionFactory.apply(dto.name(), dto.valueOption());
                 updatedOptionList.add(newOption);
             }
         }

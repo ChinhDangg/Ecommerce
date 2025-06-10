@@ -150,7 +150,7 @@ function getProductOptionContent(productId) {
     productOptionItem.querySelectorAll('select').forEach(select => {
         optionContent.push({
             name: select.dataset.optionId,
-            value: select.value,
+            valueOption: select.value,
         });
     })
     return optionContent.length === 0 ? [] : optionContent;
@@ -165,7 +165,7 @@ function getProductSpecificationContent(productId) {
     productSpecItem.querySelectorAll('select').forEach(select => {
         specContent.push({
             name: select.dataset.specId,
-            value: select.value,
+            valueOption: select.value,
         })
     })
     return specContent.length === 0 ? [] : specContent;
