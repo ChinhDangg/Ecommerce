@@ -240,8 +240,8 @@ public class ProductService {
     }
 
     @Transactional
-    public Long updateProductInfo(Long productId, ProductDTO productDTO) {
-        Product product = getProductById(productId);
+    public Long updateProductInfo(ProductDTO productDTO) {
+        Product product = getProductById(productDTO.getId());
 
         // update basic info
         if (!productDTO.getManufacturerId().equals(product.getManufacturerId()))

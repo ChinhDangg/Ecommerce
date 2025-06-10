@@ -29,9 +29,9 @@ public class ProductLineController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Integer> updateProductLine(@PathVariable Integer id, @Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer updatedProductLineId = productLineService.updateProductLineInfo(id, productLineDTO);
+    @PutMapping()
+    public ResponseEntity<Integer> updateProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
+        Integer updatedProductLineId = productLineService.updateProductLineInfo(productLineDTO);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
     }
 

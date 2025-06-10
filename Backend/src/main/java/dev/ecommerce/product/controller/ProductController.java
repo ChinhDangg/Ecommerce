@@ -67,9 +67,9 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Long> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO productDTO) {
-        Long updatedProductId = productService.updateProductInfo(id, productDTO);
+    @PutMapping()
+    public ResponseEntity<Long> updateProduct(@Valid @RequestBody ProductDTO productDTO) {
+        Long updatedProductId = productService.updateProductInfo(productDTO);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductId);
     }
 

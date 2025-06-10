@@ -101,8 +101,8 @@ public class ProductLineService {
     }
 
     @Transactional // will leverage entity manager to update by retrieving the entity itself
-    public Integer updateProductLineInfo(int productLineId, ProductLineDTO productLineDTO) {
-        ProductLine productLine = getProductLineById(productLineId);
+    public Integer updateProductLineInfo(ProductLineDTO productLineDTO) {
+        ProductLine productLine = getProductLineById(productLineDTO.getId());
 
         if (productLineDTO.getName().isEmpty())
             throw new IllegalArgumentException("Product line name is empty");
