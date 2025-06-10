@@ -11,6 +11,8 @@ import java.util.List;
 @Getter
 public class ProductLineDTO {
 
+    private final Integer id;
+
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
     private final String name;
@@ -24,7 +26,8 @@ public class ProductLineDTO {
     @Setter
     private Long[] productIdList;
 
-    public ProductLineDTO(String name, List<ContentDTO> media, List<ContentDTO> descriptions) {
+    public ProductLineDTO(Integer id, String name, List<ContentDTO> media, List<ContentDTO> descriptions) {
+        this.id = id;
         this.name = name;
         this.media = media;
         this.descriptions = descriptions;
