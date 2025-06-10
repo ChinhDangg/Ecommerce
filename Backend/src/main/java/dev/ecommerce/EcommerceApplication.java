@@ -28,7 +28,7 @@ public class EcommerceApplication {
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
             ProductService productService,
-            ProductLineRepository productLineRepository) {
+            ProductLineRepository productLineRepository, ProductLineMediaRepository productLineMediaRepository, ProductLineDescriptionRepository productLineDescriptionRepository, ProductMediaRepository productMediaRepository, ProductDescriptionRepository productDescriptionRepository, ProductFeatureRepository productFeatureRepository, ProductOptionRepository productOptionRepository, ProductSpecificationRepository productSpecificationRepository) {
         return _ -> {
             ProductCategory electronics = new ProductCategory("Electronics", null);
             ProductCategory computers = new ProductCategory("Computers", electronics);
@@ -40,31 +40,173 @@ public class EcommerceApplication {
 
             productCategoryRepository.saveAll(List.of(electronics, computers, laptops, gamingLaptops, macs, computerComponent, graphicsCard));
 
-//            List<ProductCategoryDTO> parentProductCategories = productCategoryRepository.findAllTopParentCategory();
-//            System.out.println(parentProductCategories.getFirst().getId());
-//            System.out.println(parentProductCategories.getFirst().getName());
 
-//            ProductLine savedProductLine = productLineRepository.save(new ProductLine("Product line name"));
-//
-//            Product newProduct = new Product(
-//                    "Man 2",
-//                    "Some name with many different words for testing the search functionality",
-//                    "brand",
-//                    5,
-//                    ConditionType.NEW,
-//                    LocalDate.now(),
-//                    new BigDecimal("100"),
-//                    null,
-//                    null,
-//                    savedProductLine,
-//                    electronics
-//            );
-//
-//            productRepository.save(newProduct);
-//
-//            Page<ShortProductDTO> shortP = productService.findProductsByName("name many",0);
-//            System.out.println(shortP.getTotalElements());
-//            System.out.println(shortP.getContent().getFirst().getName());
+            ProductLine savedProductLine = productLineRepository.save(new ProductLine("Product line name"));
+            ProductLineMedia productLineMedia = new ProductLineMedia(
+                    savedProductLine,
+                    ContentType.IMAGE,
+                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    0
+            );
+            productLineMediaRepository.save(productLineMedia);
+            ProductLineDescription productLineDescription = new ProductLineDescription(
+                    savedProductLine,
+                    ContentType.IMAGE,
+                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    0
+            );
+            ProductLineDescription productLineDescription2 = new ProductLineDescription(
+                savedProductLine,
+                ContentType.TEXT,
+                "Product Line Description",
+                1
+            );
+            productLineDescriptionRepository.saveAll(List.of(productLineDescription, productLineDescription2));
+
+            Product product1 = new Product(
+                    "Man part 1",
+                    "Product Name 1",
+                    "Brand 1",
+                    5,
+                    ConditionType.NEW,
+                    LocalDate.now(),
+                    new BigDecimal("100"),
+                    null,
+                    null,
+                    savedProductLine,
+                    electronics
+            );
+            productRepository.save(product1);
+            ProductOption product1Option1 = new ProductOption(
+                    product1,
+                    savedProductLine,
+                    "Option 1",
+                    "Option 1 value 1"
+            );
+            ProductOption product1Option2 = new ProductOption(
+                    product1,
+                    savedProductLine,
+                    "Option 2",
+                    "Option 2 value 1"
+            );
+            productOptionRepository.saveAll(List.of(product1Option1, product1Option2));
+            ProductSpecification product1Spec1 = new ProductSpecification(
+                    product1,
+                    "Spec 1",
+                    "Spec 1 value 1"
+            );
+            ProductSpecification product1Spec2 = new ProductSpecification(
+                    product1,
+                    "Spec 2",
+                    "Spec 2 value 1"
+            );
+            productSpecificationRepository.saveAll(List.of(product1Spec1, product1Spec2));
+            ProductFeature product1Feature1 = new ProductFeature(
+                    product1,
+                    "Product 1 feature 1"
+            );
+            ProductFeature product1Feature2 = new ProductFeature(
+                    product1,
+                    "Product 1 feature 2"
+            );
+            ProductFeature product1Feature3 = new ProductFeature(
+                    product1,
+                    "Product 1 feature 3"
+            );
+            productFeatureRepository.saveAll(List.of(product1Feature1, product1Feature2, product1Feature3));
+            ProductMedia newProductMedia = new ProductMedia(
+                    product1,
+                    ContentType.IMAGE,
+                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    0
+            );
+            productMediaRepository.save(newProductMedia);
+            ProductDescription product1Description1 = new ProductDescription(
+                    product1,
+                    ContentType.IMAGE,
+                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    0
+            );
+            ProductDescription product1Description2 = new ProductDescription(
+                    product1,
+                    ContentType.TEXT,
+                    "Product 1 Description",
+                    1
+            );
+            productDescriptionRepository.saveAll(List.of(product1Description1, product1Description2));
+
+
+            Product product2 = new Product(
+                    "Man part 2",
+                    "Product Name 2",
+                    "Brand 1",
+                    5,
+                    ConditionType.NEW,
+                    LocalDate.now(),
+                    new BigDecimal("100"),
+                    null,
+                    null,
+                    savedProductLine,
+                    electronics
+            );
+            productRepository.save(product2);
+            ProductOption product2Option1 = new ProductOption(
+                    product2,
+                    savedProductLine,
+                    "Option 1",
+                    "Option 1 value 2"
+            );
+            ProductOption product2Option2 = new ProductOption(
+                    product2,
+                    savedProductLine,
+                    "Option 2",
+                    "Option 2 value 2"
+            );
+            productOptionRepository.saveAll(List.of(product2Option1, product2Option2));
+            ProductSpecification product2Spec1 = new ProductSpecification(
+                    product2,
+                    "Spec 1",
+                    "Spec 1 value 2"
+            );
+            ProductSpecification product2Spec2 = new ProductSpecification(
+                    product2,
+                    "Spec 2",
+                    "Spec 2 value 2"
+            );
+            productSpecificationRepository.saveAll(List.of(product2Spec1, product2Spec2));
+            ProductFeature product2Feature1 = new ProductFeature(
+                    product2,
+                    "Product 2 feature 1"
+            );
+            ProductFeature product2Feature2 = new ProductFeature(
+                    product2,
+                    "Product 2 feature 2"
+            );
+            ProductFeature product2Feature3 = new ProductFeature(
+                    product2,
+                    "Product 2 feature 3"
+            );
+            productFeatureRepository.saveAll(List.of(product2Feature1, product2Feature2, product2Feature3));
+            ProductMedia newProductMedia2 = new ProductMedia(
+                    product2,
+                    ContentType.IMAGE,
+                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    0
+            );
+            productMediaRepository.save(newProductMedia2);
+            ProductDescription product2Description1 = new ProductDescription(
+                    product2,
+                    ContentType.IMAGE,
+                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    0
+            );
+            ProductDescription product2Description2 = new ProductDescription(
+                    product2,
+                    ContentType.TEXT,
+                    "Product 2 Description",
+                    1
+            );
+            productDescriptionRepository.saveAll(List.of(product2Description1, product2Description2));
 
         };
     }

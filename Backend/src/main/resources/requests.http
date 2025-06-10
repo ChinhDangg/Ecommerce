@@ -9,4 +9,7 @@ GET http://localhost:8080/api/product/category
 ###
 GET http://localhost:8080/api/product/search?
     page=0&
-    search={name}
+    search=P
+
+###
+GET http://localhost:8080/api/product/2
