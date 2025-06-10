@@ -344,11 +344,12 @@ function initializeProductOptionSection() {
 }
 
 export function addOptionKey(key) {
+    const optionValueContainer = document.getElementById('option-values-container');
     if (key && !optionMap.has(key)) {
         optionMap.set(key, []);
-        const optionValueContainer = document.getElementById('option-values-container');
         const optionValueItem = optionValueContainer.querySelector('.option-value-item').cloneNode(true);
         optionValueItem.classList.remove('hidden');
+        optionValueItem.dataset.optionItemId = key;
         optionValueItem.querySelector('.option-key').innerHTML = `${key}:`;
         optionValueContainer.appendChild(optionValueItem);
         initializeOptionValueButtons(optionValueItem, key);
@@ -359,6 +360,8 @@ export function addOptionKey(key) {
         optionHeaderWrapper.appendChild(optionHeaderItem);
         addProductOptionSelection(key);
         return optionValueItem;
+    } else if (optionMap.has(key)) {
+        return optionValueContainer.querySelector(`.option-value-item[data-option-item-id="${key}"]`);
     }
     return null;
 }
@@ -509,11 +512,12 @@ function initializeProductSpecificationSection() {
 }
 
 export function addSpecificationKey(key) {
+    const specValueContainer = document.getElementById('spec-values-container');
     if (key && !specMap.has(key)) {
         specMap.set(key, []);
-        const specValueContainer = document.getElementById('spec-values-container');
         const specValueItem = specValueContainer.querySelector('.spec-value-item').cloneNode(true);
         specValueItem.classList.remove('hidden');
+        specValueItem.dataset.specItemId = key;
         specValueItem.querySelector('.spec-key').innerHTML = `${key}:`;
         specValueContainer.appendChild(specValueItem);
         initializeSpecValueButtons(specValueItem, key);
@@ -524,6 +528,8 @@ export function addSpecificationKey(key) {
         specHeaderWrapper.appendChild(specHeaderItem);
         addProductSpecSelection(key);
         return specValueItem;
+    } else if (specMap.has(key)) {
+        return specValueContainer.querySelector(`.spec-value-item[data-spec-item-id="${key}"]`);
     }
     return null;
 }
