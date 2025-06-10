@@ -8,7 +8,7 @@ import {
 } from "./add-new-product.js";
 
 
-export async function getProductLineInfo() {
+export async function getProductLineInfo(productLineId = null) {
     const productLineNameInput = document.getElementById('product-line-name-input');
     const productLineName = productLineNameInput.value.trim();
     if (!productLineName)
@@ -19,6 +19,7 @@ export async function getProductLineInfo() {
         Array.from(document.getElementById('product-line-descriptions').querySelectorAll('.description-entry')).slice(1);
     const descriptionContent = await getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries);
     return {
+        id: productLineId,
         name: productLineName,
         media: productLineImageContents,
         descriptions: descriptionContent
@@ -95,6 +96,7 @@ export async function getProductInfo(productLineId, productId) {
     const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
     const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries);
     return {
+        id: productId,
         productLineId: productLineId,
         name: productContainer.querySelector('.product-name-input').value,
         brand: productContainer.querySelector('.product-brand-input').value,
@@ -238,7 +240,7 @@ export async function postProductLineInfo(productLineInfoData) {
     if (!response.ok) {
         throw new Error('Failed uploading product line info');
     }
-    return response.text();
+    return await response.text();
 }
 
 // product group POST
@@ -253,7 +255,7 @@ export async function postProductInfo(productInfoData) {
     if (!response.ok) {
         throw new Error('Failed uploading product info');
     }
-    return response.text();
+    return await response.text();
 }
 
 async function uploadImages(dataImageArray) {

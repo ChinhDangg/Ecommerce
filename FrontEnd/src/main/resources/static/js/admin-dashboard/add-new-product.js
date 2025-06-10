@@ -31,7 +31,7 @@ productLineImageInput.addEventListener('change', function () {
     setInputImageChangeListener(productLineImageInput, data_productLineImages, productLineImageContainer);
 });
 
-function  setInputImageChangeListener(input, dataImageArray, allImageContainer) {
+function setInputImageChangeListener(input, dataImageArray, allImageContainer) {
     const inputImageFiles = Array.from(input.files);
     // const imageEntryTemplate = document.querySelector('#image-entry-template').cloneNode(true);
     // imageEntryTemplate.classList.remove('hidden');

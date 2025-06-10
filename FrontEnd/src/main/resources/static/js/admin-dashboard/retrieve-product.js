@@ -52,36 +52,25 @@ export function initializeUpdate() {
     });
 
     document.getElementById('update-btn').addEventListener('click', async () => {
-        const productLineInfo = await getProductLineInfo();
-        // await postProductLineInfo(productLineInfo);
-        // const productInfo = await getProductInfo(null, 1);
-        // await postProductInfo(productInfo);
         const productLineId = new URLSearchParams(window.location.search).get('line');
+        const productLineInfo = await getProductLineInfo(productLineId);
+        const productInfos = await Promise.all(retrieved_product.map(id => getProductInfo(productLineId, id)));
+
         if (productLineId && !productLineInfo) {
             const confirmDeleteProductLine = confirm('Product line name is empty - marking as deletion - continue?');
             if (!confirmDeleteProductLine)
                 return;
-            const deletedProductLine = await deleteProductLine(productLineId);
-            if (!deletedProductLine) {
-                alert('Fail deleting product line');
-                return;
+            try {
+                await deleteProductLine(productLineId);
+            } catch (error) {
+                alert('Failed to delete product line - update fail');
             }
         }
-        else if (productLineId) {
-            const updatedProductLine = await updateProductLineInfo(productLineId, productLineInfo);
-            if (!updatedProductLine) {
-                alert('Fail updating product line - abort all');
-                return;
-            }
-        }
-        for (let j = 0; j < retrieved_product.length; j++) {
-            const productInfo = await getProductInfo(productLineId, retrieved_product[j]);
-            if (productInfo) {
-                const updatedProduct = await updateProductInfo(retrieved_product[j], productInfo);
-                if (!updatedProduct) {
-                    alert('Stopping update due to Fail updating product: ' + retrieved_product[j]);
-                    return;
-                }
+        else if (productInfos.length) {
+            try {
+                const retrievedIds = await updateAllProductInfo(productLineInfo, productInfos);
+            } catch (error) {
+                alert('Failed to update all product info');
             }
         }
     });
@@ -262,54 +251,53 @@ function displayProductInfo(productItem, content) {
     });
 }
 
+
 // CRUD operations
 
-function updateProductLineInfo(productLineId, productLineInfoData) {
-    const url = 'http://localhost:8080/api/productLine/' + productLineId;
-    return fetch(url, {
+async function updateProductLineInfo(productLineId, productLineInfoData) {
+    const response = await fetch('http://localhost:8080/api/productLine/' + productLineId, {
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
         },
         body: JSON.stringify(productLineInfoData)
-    })
-        .then(response => {
-            if (response.status === 200) // ok
-                return response.text();
-            throw new Error('Fail update product line info');
-        })
-        .then(data => {
-            console.log('Success update product line info: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error updating product line info', error);
-            return null;
-        });
+    });
+    if (!response.ok) {
+        throw new Error('Fail update product line info');
+    }
+    return await response.text();
 }
 
-function updateProductInfo(productId, productInfoData) {
-    const url = 'http://localhost:8080/api/product/' + productId;
-    return fetch(url, {
+async function updateProductInfo(productId, productInfoData) {
+    const response = await fetch('http://localhost:8080/api/product/' + productId, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type':'application/json',
         },
         body: JSON.stringify(productInfoData)
-    })
-        .then(response => {
-            if (response.status === 200) // ok
-                return response.text();
-            throw new Error('Fail update product info')
-        })
-        .then(data => {
-            console.log('Success update product info: ', data);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error updating product info', error);
-            return null;
-        });
+    });
+    if (!response.ok) {
+        throw new Error('Fail update product info');
+    }
+    return await response.text();
+}
+
+async function updateAllProductInfo(productLineInfoData, productInfoDataList) {
+    const productInfoWrapper = {
+        productLineDTO: productLineInfoData,
+        productDTOList: productInfoDataList
+    }
+    const response = await fetch('http://localhost:8080/api/productWrapper/', {
+        method: 'PUT',
+        headers: {
+            'Content-Type':'application/json',
+        },
+        body: JSON.stringify(productInfoWrapper)
+    });
+    if (!response.ok) {
+        throw new Error('Failed updating all product info');
+    }
+    return await response.json();
 }
 
 async function searchProduct(productNameSearch) {
@@ -327,22 +315,6 @@ async function searchProduct(productNameSearch) {
             return;
         }
         const searchResult = await response.json();
-        // const searchResult = {
-        //     content: [
-        //         {
-        //             productLineId: 1,
-        //             categoryId: 1,
-        //             id: 1,
-        //             manufacturerId: 1,
-        //             name: 'Some product name to show',
-        //             quality: 50,
-        //             price: 50.5,
-        //             features: [],
-        //             imageName: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
-        //             discountPrice: '',
-        //         }
-        //     ]
-        // };
         if (searchResult.page.totalElements) {
             displaySearchResult(searchResult.content);
         } else {
@@ -355,185 +327,44 @@ async function searchProduct(productNameSearch) {
 }
 
 async function fetchProductLineInfo(productLineId) {
-    try {
-        const url = 'http://localhost:8080/api/productLine/' + productLineId;
-        const response = await fetch(url);
-        if (!response.ok) {
-            alert('Failed to get product line with id: ' + productLineId);
-            return null;
-        }
-        return await response.json();
-        // return {
-        //     name: "Product Line Name",
-        //     media: [
-        //         {
-        //             id: 1,
-        //             contentType: "IMAGE",
-        //             content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
-        //         },
-        //         {
-        //             id: 2,
-        //             contentType: "IMAGE",
-        //             content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
-        //         }
-        //     ],
-        //     descriptions: [
-        //         {
-        //             id: 1,
-        //             contentType: "IMAGE",
-        //             content: "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg"
-        //         },
-        //         {
-        //             id: 2,
-        //             contentType: "TEXT",
-        //             content: "Some description about the product line"
-        //         }
-        //     ],
-        //     productIdList: [
-        //         1, 2
-        //     ]
-        // }
-    } catch (error) {
-        console.error('Error fetching product line:', error);
-        alert('Error fetching product line');
-        return null;
+    const response = await fetch('http://localhost:8080/api/productLine/' + productLineId);
+    if (!response.ok) {
+        throw new Error('Failed to get product line with id: ' + productLineId);
     }
+    return await response.json();
 }
 
 async function fetchProductCategory(productCategoryId) {
-    try {
-        const url = `http://localhost:8080/api/product/category/` + productCategoryId;
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.error('Failed to get product category');
-            alert(`Failed to get category with id: ${productCategoryId}`);
-        }
-        return await response.json();
-        // return [
-        //     {
-        //         id: 1,
-        //         name: 'Electronics'
-        //     }
-        // ]
-    } catch (error) {
-        console.error('Error fetching for product category:', error);
-        alert('Error fetching product category');
+    const url = 'http://localhost:8080/api/product/category/' + productCategoryId;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to get category with id: ${productCategoryId}`);
     }
+    return await response.json();
 }
 
 async function fetchProductInfo(productId) {
-    try {
-        const url = `http://localhost:8080/api/product/${productId}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.error('Error fetching product info with id: ' + productId);
-            alert(`Failed to get product with id: ${productId}`);
-            return null;
-        }
-        return await response.json();
-        // return {
-        //     productLineId: 1,
-        //     id: 1,
-        //     manufacturerId: 'Manu 2',
-        //     name: 'Product name with something',
-        //     brand: 'Brand name',
-        //     quantity: 45,
-        //     conditionType: 'USED',
-        //     categoryId: 1,
-        //     price: '20.5',
-        //     salePrice: '10.5',
-        //     saleEndDate: '2025-05-19',
-        //     options: [
-        //         {
-        //             id: 1,
-        //             name: 'Option 1',
-        //             value: 'value 1'
-        //         },
-        //         {
-        //             id: 2,
-        //             name: 'Option 2',
-        //             value: 'value 2'
-        //         }
-        //     ],
-        //     specifications: [
-        //         {
-        //             id: 1,
-        //             name: 'Spec 1',
-        //             value: 'value 1'
-        //         },
-        //         {
-        //             id: 2,
-        //             name: 'Spec 2',
-        //             value: 'value 2'
-        //         }
-        //     ],
-        //     features: [
-        //         'feature 1', 'feature 2', 'feature 3'
-        //     ],
-        //     media: [
-        //         {
-        //             id: 1,
-        //             contentType: 'IMAGE',
-        //             content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
-        //         },
-        //         {
-        //             id: 2,
-        //             contentType: 'IMAGE',
-        //             content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
-        //         }
-        //     ],
-        //     descriptions: [
-        //         {
-        //             id: 1,
-        //             contentType: 'IMAGE',
-        //             content: '/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg'
-        //         },
-        //         {
-        //             id: 2,
-        //             contentType: 'TEXT',
-        //             content: 'some description some description'
-        //         }
-        //     ]
-        // }
-    } catch (error) {
-        console.error('Error fetching for product:', error);
-        alert('Error fetching product');
-        return null;
+    const response = await fetch(`http://localhost:8080/api/product/${productId}`);
+    if (!response.ok) {
+        throw new Error(`Failed to get product with id: ${productId}`);
     }
+    return await response.json();
 }
 
 async function deleteProductLine(productLineId) {
-    const url = `http://localhost:8080/api/productLine/${productLineId}`;
-    return fetch(url, {
+    const response = await fetch(`http://localhost:8080/api/productLine/${productLineId}`, {
         method: 'DELETE'
-    })
-        .then(response => {
-            if (response.status === 204) {// no content
-                console.log('Success deleting product line');
-                return true;
-            }
-            throw new Error('Fail deleting product line');
-        })
-        .catch(error => {
-            console.error('Error deleting product line', error);
-            return false;
-        });
+    });
+    if (response.status !== 204) { // no content
+        throw new Error('Fail deleting product line');
+    }
 }
 
 async function deleteProduct(productId) {
-    const url = `http://localhost:8080/api/product/${productId}`;
-    return fetch(url, {
+    const response = await fetch(`http://localhost:8080/api/product/${productId}`, {
         method: 'DELETE'
-    })
-        .then(response => {
-            if (response.status === 204) { // no content
-                console.log('Success deleting product');
-                return true;
-            }
-            throw new Error('Fail deleting product');
-        })
-        .catch(error => {
-            console.error('Error deleting product', error);
-            return false;
-        });
+    });
+    if (response.status !== 204) { // no content
+        throw new Error('Fail deleting product');
+    }
 }
