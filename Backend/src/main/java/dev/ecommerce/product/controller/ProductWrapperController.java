@@ -2,6 +2,7 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductWrapperDTO;
 import dev.ecommerce.product.service.ProductWrapperService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,7 +23,7 @@ public class ProductWrapperController {
     }
 
     @PutMapping
-    public ResponseEntity<List<Long>> updateAllProductInfo(@RequestBody ProductWrapperDTO productWrapperDTO) {
+    public ResponseEntity<List<Long>> updateAllProductInfo(@Valid @RequestBody ProductWrapperDTO productWrapperDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 productWrapperService.updateAllProductInfo(
                         productWrapperDTO.productLineDTO(),
