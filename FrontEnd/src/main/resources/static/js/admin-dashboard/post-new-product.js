@@ -19,7 +19,7 @@ export async function getProductLineInfo(productLineId = null) {
         Array.from(document.getElementById('product-line-descriptions').querySelectorAll('.description-entry')).slice(1);
     const descriptionContent = await getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries);
     return {
-        id: productLineId,
+        id: parseInt(productLineId),
         name: productLineName,
         media: productLineImageContents,
         descriptions: descriptionContent
@@ -35,7 +35,7 @@ async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
     allMediaTemplateEntries.forEach((entry, index) => {
         mediaContent.push(
             {
-                id: entry.dataset.mediaId,
+                id: parseInt(entry.dataset.mediaId),
                 contentType: 'IMAGE',
                 content: mediaNames[index]
             }
@@ -53,7 +53,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
         if (image.src && image.alt !== "empty") {
             descriptionTexts.push(
                 {
-                    id: descriptionEntry.dataset.descriptionId,
+                    id: parseInt(descriptionEntry.dataset.descriptionId),
                     contentType: 'IMAGE',
                     content: filteredDescriptionImages.shift()
                 }
@@ -64,7 +64,7 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
             if (descriptionTextValue) {
                 descriptionTexts.push(
                     {
-                        id: descriptionEntry.dataset.descriptionId,
+                        id: parseInt(descriptionEntry.dataset.descriptionId),
                         contentType: 'TEXT',
                         content: descriptionTextValue
                     }
@@ -96,8 +96,8 @@ export async function getProductInfo(productLineId, productId) {
     const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
     const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries);
     return {
-        id: productId,
-        productLineId: productLineId,
+        id: parseInt(productId),
+        productLineId: parseInt(productLineId),
         name: productContainer.querySelector('.product-name-input').value,
         brand: productContainer.querySelector('.product-brand-input').value,
         manufacturerId: productContainer.querySelector('.product-manufacturer-part-number-input').value,
