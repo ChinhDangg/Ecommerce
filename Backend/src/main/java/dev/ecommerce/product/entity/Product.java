@@ -106,7 +106,7 @@ public class Product {
 
     public Product(Long id, String manufacturerId, String name,
                    Integer quantity, BigDecimal price, BigDecimal salePrice, LocalDate saleEndDate,
-                   ProductCategory category, ProductLine productLine, ProductMedia media) {
+                   ProductLine productLine, ProductMedia media) {
         this.id = id;
         this.manufacturerId = manufacturerId;
         this.name = name;
@@ -114,7 +114,6 @@ public class Product {
         this.price = price;
         this.salePrice = salePrice;
         this.saleEndDate = saleEndDate;
-        this.category = category;
         this.productLine = productLine;
         this.media.add(media);
     }

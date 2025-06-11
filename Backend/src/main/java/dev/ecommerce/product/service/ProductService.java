@@ -63,10 +63,9 @@ public class ProductService {
         return productCategoryRepository.findAllTopParentCategory();
     }
 
-    public List<ProductCategoryDTO> findCategorySameParentCategoriesById(Integer id) {
-        ProductCategory productCategory = productCategoryRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Category not found with id: " + id)
-        );
+    public List<ProductCategoryDTO> findCategorySameParentCategoriesById(Long id) {
+        ProductCategory productCategory = getProductById(id).getCategory();
+
         ProductCategory parentCategory = productCategory.getParentProductCategory();
         return (parentCategory == null)
                 ? productMapper.toProductCategoryDTOList(List.of(productCategory))
@@ -126,7 +125,6 @@ public class ProductService {
                 root.get("price"),
                 root.get("salePrice"),
                 root.get("saleEndDate"),
-                root.get("category"),
                 root.get("productLine"),
                 root.get("media")
         ));
@@ -140,7 +138,6 @@ public class ProductService {
         for (Product product : resultList) {
             ShortProductDTO current = productMapper.toShortProductWithoutFeaturesDTO(product);
             current.setProductLineId(product.getProductLine() == null ? null : product.getProductLine().getId());
-            current.setCategoryId(product.getCategory().getId());
             current.setImageName(product.getMedia().isEmpty() ? null : product.getMedia().getFirst().getContent());
             current.setDiscountedPrice(
                     product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null

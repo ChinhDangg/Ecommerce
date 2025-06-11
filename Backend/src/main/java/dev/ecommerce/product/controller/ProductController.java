@@ -33,9 +33,9 @@ public class ProductController {
         return productService.findAllTopCategory();
     }
 
-    @GetMapping("/category/{id}")
-    public List<ProductCategoryDTO> getSameParentCategories(@PathVariable Integer id) {
-        return productService.findCategorySameParentCategoriesById(id);
+    @GetMapping("/category/{productId}")
+    public List<ProductCategoryDTO> getSameParentCategories(@PathVariable Long productId) {
+        return productService.findCategorySameParentCategoriesById(productId);
     }
 
     @GetMapping("/subcategory/{id}")
