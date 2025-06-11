@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
-        return ResponseEntity.badRequest().body("Error Runtime: " + e.getMessage());
+        return ResponseEntity.internalServerError().body("Error Runtime: " + e.getMessage());
     }
 
 }
