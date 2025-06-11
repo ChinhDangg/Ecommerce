@@ -66,11 +66,20 @@ export function initializeUpdate() {
                 alert('Failed to delete product line - update fail');
             }
         }
-        else if (productInfos.length) {
+        if (productInfos.length) {
             try {
                 const retrievedIds = await updateAllProductInfo(productLineInfo, productInfos);
+                console.log('Updated all product info');
             } catch (error) {
                 alert('Failed to update all product info');
+            }
+        } else if (productLineId && productLineInfo) { // updating only product line as no product info retrieved - nothing to update
+            try {
+                console.log(productLineInfo);
+                const retrievedProductLineId = await updateProductLineInfo(productLineInfo);
+                console.log('Updated product line');
+            } catch (error) {
+                alert('Failed to update product line info');
             }
         }
     });
@@ -99,12 +108,12 @@ function displaySearchResult(content) {
         const searchImageAnchor = searchEntry.querySelector('.product-image-anchor');
         searchImageAnchor.href = getProductLink(result.id, result.productLineId);
         searchImageAnchor.addEventListener('click', async function(e) {
-            await clickOnProductResult(e, result.id, result.productLineId, result.categoryId);
+            await clickOnProductResult(e, result.id, result.productLineId);
         });
         const searchNameAnchor = searchEntry.querySelector('.product-name-anchor');
         searchNameAnchor.href = getProductLink(result.id, result.productLineId);
         searchNameAnchor.addEventListener('click', async function(e) {
-            await clickOnProductResult(e, result.id, result.productLineId, result.categoryId);
+            await clickOnProductResult(e, result.id, result.productLineId);
         });
     });
 }
@@ -128,19 +137,19 @@ function getProductLink(productId, productLineId) {
     return `/admin/dashboard?query=${updateProductQuery}&product=${productId}&line=${productLineId}`;
 }
 
-async function clickOnProductResult(e, productId, productLineId, categoryId) {
+async function clickOnProductResult(e, productId, productLineId) {
     e.preventDefault();
-    await handleProductResult(productId, productLineId, categoryId);
+    await handleProductResult(productId, productLineId);
 }
 
-export async function handleProductResult(productId, productLineId, categoryId) {
+export async function handleProductResult(productId, productLineId) {
     const newUrl = getProductLink(productId, productLineId);
     const query = `${updateProductQuery}P${productId}`;
     updatePageUrl(newUrl, query);
     clearSearchEntry();
     clearProductLineSection();
     clearAllProductInfo();
-    const currentCategory = await fetchProductCategory(categoryId);
+    const currentCategory = await fetchProductCategory(productId);
     console.log(currentCategory);
     await addTopCategories(currentCategory, false, true);
     document.getElementById('main-content').classList.remove('hidden');
@@ -254,8 +263,8 @@ function displayProductInfo(productItem, content) {
 
 // CRUD operations
 
-async function updateProductLineInfo(productLineId, productLineInfoData) {
-    const response = await fetch('http://localhost:8080/api/productLine/' + productLineId, {
+async function updateProductLineInfo(productLineInfoData) {
+    const response = await fetch('http://localhost:8080/api/productLine', {
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
@@ -268,8 +277,8 @@ async function updateProductLineInfo(productLineId, productLineInfoData) {
     return await response.text();
 }
 
-async function updateProductInfo(productId, productInfoData) {
-    const response = await fetch('http://localhost:8080/api/product/' + productId, {
+async function updateProductInfo(productInfoData) {
+    const response = await fetch('http://localhost:8080/api/product',{
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
@@ -334,11 +343,11 @@ async function fetchProductLineInfo(productLineId) {
     return await response.json();
 }
 
-async function fetchProductCategory(productCategoryId) {
-    const url = 'http://localhost:8080/api/product/category/' + productCategoryId;
+async function fetchProductCategory(productId) {
+    const url = 'http://localhost:8080/api/product/category/' + productId;
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error(`Failed to get category with id: ${productCategoryId}`);
+        throw new Error(`Failed to get product category with product id: ${productId}`);
     }
     return await response.json();
 }
