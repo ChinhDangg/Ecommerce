@@ -28,27 +28,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping("/category")
-    public List<ProductCategoryDTO> getTopCategories() {
-        return productService.findAllTopCategory();
-    }
-
-    @GetMapping("/category/{productId}")
-    public List<ProductCategoryDTO> getSameParentCategories(@PathVariable Long productId) {
-        return productService.findCategorySameParentCategoriesById(productId);
-    }
-
-    @GetMapping("/subcategory/{id}")
-    public List<ProductCategoryDTO> getSubCategories(@PathVariable Integer id) {
-        return productService.findAllSubCategoryOf(id);
-    }
-
-    @PostMapping("/category/new")
-    public ResponseEntity<ProductCategoryDTO> addCategory(@RequestBody ProductCategoryDTO categoryDTO) {
-        ProductCategoryDTO cat = productService.saveProductCategory(categoryDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cat);
-    }
-
     @GetMapping("/search")
     public ResponseEntity<Page<ShortProductDTO>> searchProducts(@RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "") String search) {

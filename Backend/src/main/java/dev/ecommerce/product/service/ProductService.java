@@ -59,42 +59,7 @@ public class ProductService {
         this.entityManager = entityManager;
     }
 
-    public List<ProductCategoryDTO> findAllTopCategory() {
-        return productCategoryRepository.findAllTopParentCategory();
-    }
-
-    public List<ProductCategoryDTO> findCategorySameParentCategoriesById(Long id) {
-        ProductCategory productCategory = getProductById(id).getCategory();
-
-        ProductCategory parentCategory = productCategory.getParentProductCategory();
-        return (parentCategory == null)
-                ? productMapper.toProductCategoryDTOList(List.of(productCategory))
-                : productMapper.toProductCategoryDTOList(parentCategory.getSubcategories());
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProductCategoryDTO> findAllSubCategoryOf(Integer id) {
-        ProductCategory category = productCategoryRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Category not found with id: " + id)
-        );
-        return productMapper.toProductCategoryDTOList(category.getSubcategories());
-    }
-
-    @Transactional
-    public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
-        Integer id = productCategoryDTO.getId();
-        ProductCategory parentCategory = (id == null) ? null : productCategoryRepository
-                .findById(id).orElse(null);
-        ProductCategory newCategory = new ProductCategory(
-                productCategoryDTO.getName(),
-                parentCategory
-        );
-
-        ProductCategory createdCategory = productCategoryRepository.save(newCategory);
-        return new ProductCategoryDTO(createdCategory.getId(), createdCategory.getName());
-    }
-
-    private Product getProductById(Long id) {
+    public Product getProductById(Long id) {
         if (id == null)
             throw new IllegalArgumentException("Product id is null");
         return productRepository.findById(id)
