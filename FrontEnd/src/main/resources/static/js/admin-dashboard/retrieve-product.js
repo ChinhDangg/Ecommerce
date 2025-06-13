@@ -17,7 +17,8 @@ import {
     initializeAdd,
     products,
     removeProductInfo,
-    updateDescriptionImage
+    updateDescriptionImage,
+    categoryTree
 } from './add-new-product.js';
 
 import {updatePageUrl, updateProductQuery,} from './admin-navigation.js';
@@ -81,6 +82,19 @@ export function initializeUpdate() {
             } catch (error) {
                 alert('Failed to update product line info');
             }
+            // check if new category is picked
+            const initialCategory = categoryTree[0].id;
+            const newCategory = document.querySelector('input[name="category"]:checked')?.id.replace("category-", "");
+            console.log('initialCategory: ' + initialCategory);
+            console.log(('newCategory: ' + newCategory));
+            if (initialCategory !== newCategory) {
+                try {
+                    const retrievedProductIds = await updateProductCategory(products.slice(1), parseInt(newCategory));
+                    console.log('Updated product category');
+                } catch (error) {
+                    alert('Failed to update all product category');
+                }
+            }
         }
     });
 
@@ -124,6 +138,7 @@ function displayNoSearchResult(content) {
     const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode();
     searchEntry.innerHTML = content;
     searchEntry.classList.remove('hidden');
+    document.getElementById('update-btn').classList.add('hidden');
     productSearchContainer.appendChild(searchEntry);
 }
 
@@ -153,6 +168,7 @@ export async function handleProductResult(productId, productLineId) {
     console.log(currentCategory);
     await addTopCategories(currentCategory, false, true);
     document.getElementById('main-content').classList.remove('hidden');
+    document.getElementById('update-btn').classList.remove('hidden');
     if (productLineId) {
         const productLineInfo = await fetchProductLineInfo(productLineId);
         if (!productLineInfo) {
@@ -309,6 +325,24 @@ async function updateAllProductInfo(productLineInfoData, productInfoDataList) {
     return await response.json();
 }
 
+async function updateProductCategory(productIdList, categoryId) {
+    const content = {
+        productIds: productIdList,
+        categoryId: categoryId,
+    }
+    const response = await fetch('http://localhost:8080/api/category', {
+        method: 'PUT',
+        headers: {
+            'Content-Type':'application/json',
+        },
+        body: JSON.stringify(content)
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update all product category');
+    }
+    return await response.json();
+}
+
 async function searchProduct(productNameSearch) {
     try {
         const page = 0;
@@ -344,8 +378,7 @@ async function fetchProductLineInfo(productLineId) {
 }
 
 async function fetchProductCategory(productId) {
-    const url = 'http://localhost:8080/api/product/category/' + productId;
-    const response = await fetch(url);
+    const response = await fetch('http://localhost:8080/api/category/parent/' + productId);
     if (!response.ok) {
         throw new Error(`Failed to get product category with product id: ${productId}`);
     }
