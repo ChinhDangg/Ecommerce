@@ -8,6 +8,29 @@ import {
 } from "./add-new-product.js";
 
 
+export function initializePost() {
+    document.getElementById('publish-btn').addEventListener('click', async function () {
+        try {
+            if (products.length < 2) {
+                alert('No product found to add');
+                return;
+            }
+            const productLineInfo = await getProductLineInfo();
+            if (productLineInfo) {
+                const productLineId = await postProductLineInfo(productLineInfo);
+                await uploadProducts(productLineId);
+            } else {
+                await uploadProducts(null);
+            }
+            clearProductLineSection();
+            clearAllProductInfo();
+        } catch (error) {
+            console.error(error);
+            console.error('Fail to publish all info');
+        }
+    });
+}
+
 export async function getProductLineInfo(productLineId = null) {
     const productLineNameInput = document.getElementById('product-line-name-input');
     const productLineName = productLineNameInput.value.trim();
@@ -171,25 +194,6 @@ function getProductSpecificationContent(productId) {
         })
     })
     return specContent.length === 0 ? [] : specContent;
-}
-
-export function initializePost() {
-    document.getElementById('publish-btn').addEventListener('click', async function () {
-        try {
-            const productLineInfo = await getProductLineInfo();
-            if (productLineInfo) {
-                const productLineId = await postProductLineInfo(productLineInfo);
-                await uploadProducts(productLineId);
-            } else {
-                await uploadProducts(null);
-            }
-            clearProductLineSection();
-            clearAllProductInfo();
-        } catch (error) {
-            console.error(error);
-            console.error('Fail to publish all info');
-        }
-    });
 }
 
 async function uploadProducts(productLineId) {

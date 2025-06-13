@@ -2,10 +2,7 @@ const mainContentArea = document.getElementById('main-content-area');
 
 document.getElementById('admin-dashboard-top-header-link').addEventListener('click', async function(e) {
     e.preventDefault();
-    const newUrl = `/admin/dashboard`;
-    this.href = newUrl;
-    updatePageUrl(newUrl, 'admin-dashboard');
-    await updateTemplateOnQueryPath();
+    window.location.href = 'http://localhost:8081/admin/dashboard';
 });
 
 const addNewQuery = 'addProduct'
@@ -76,8 +73,6 @@ async function updateTemplateOnQueryPath() {
         await getAddNewProductTemplate();
     } else if (query === updateProductQuery) {
         await getUpdateProductTemplate();
-    } else {
-        mainContentArea.innerHTML = '';
     }
 }
 
