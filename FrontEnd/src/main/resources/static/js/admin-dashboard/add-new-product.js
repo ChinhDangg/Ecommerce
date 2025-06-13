@@ -161,7 +161,7 @@ must be only one sub in either top or another sub
 Top-category should be in top-categories class */
 let currentCategory = null, currentCategoryButton = null;
 const categoryNavStack = [];
-const categoryTree = [];
+export const categoryTree = [];
 
 function initializeCategorySection() {
     currentCategory = null;
@@ -205,11 +205,8 @@ export function expandCategorySection(categoryToggleButton) {
 
 async function fetchTopCategories() {
     try {
-        const response = await fetch('http://localhost:8080/api/product/category');
+        const response = await fetch('http://localhost:8080/api/category/top');
         const topCategories = await response.json(); // [{id, name}]
-        // topCategories.forEach(topCategory => {
-        //     categoryTree.push(topCategory); // update
-        // });
         addTopCategories(topCategories);
     } catch (error) {
         console.error('Error fetching top categories:', error);
@@ -270,7 +267,7 @@ function removeAllSubcategoryDisplay() {
 
 async function fetchSubCategories(parentId) {
     try {
-        const response = await fetch('http://localhost:8080/api/product/subcategory/' + parentId);
+        const response = await fetch('http://localhost:8080/api/category/subcategory/' + parentId);
         return await response.json(); // [{id, name}]
     } catch (error) {
         console.error('Error fetching top categories:', error);
