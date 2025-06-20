@@ -32,6 +32,9 @@ public class ProductLine {
     @OneToMany(mappedBy = "productLine")
     private final List<Product> products = new ArrayList<>();
 
+    @OneToMany(mappedBy = "productLine")
+    private final List<ProductOption> productOptions = new ArrayList<>();
+
     public ProductLine(String name) {
         this.name = name;
     }

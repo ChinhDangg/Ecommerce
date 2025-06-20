@@ -15,6 +15,7 @@ public class ProductOption extends BaseOption {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "product_line_id")
     private ProductLine productLine;

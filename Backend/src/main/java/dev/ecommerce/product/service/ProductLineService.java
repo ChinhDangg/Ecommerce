@@ -139,6 +139,7 @@ public class ProductLineService {
     public void deleteProductLineById(Integer id) {
         ProductLine productLine = getProductLineById(id);
         productLine.getProducts().forEach(product -> product.setProductLine(null));
+        productLine.getProductOptions().forEach(option -> option.setProductLine(null));
         productLineRepository.delete(productLine);
     }
 
