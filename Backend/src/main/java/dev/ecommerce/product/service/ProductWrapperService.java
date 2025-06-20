@@ -28,4 +28,12 @@ public class ProductWrapperService {
         }
         return updatedIds;
     }
+
+    @Transactional
+    public void deleteAllProductInfo(Integer productLineId, List<Long> productIdList) {
+        if (productLineId != null)
+            productLineService.deleteProductLineById(productLineId);
+        for (Long productId : productIdList)
+            productService.deleteProductById(productId);
+    }
 }
