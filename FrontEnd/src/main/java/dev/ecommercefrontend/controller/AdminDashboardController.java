@@ -15,12 +15,12 @@ public class AdminDashboardController {
 
     @GetMapping("/addNewProduct")
     public String getAddNewProductTemplate() {
-        return "/product-add-new-product/add-new-product :: add-new-product-template";
+        return "/admin-dashboard/add-new-product :: add-new-product-template";
     }
 
     @GetMapping("/updateProduct")
     public String getUpdateProductContent() {
-        return "/product-update-product/update-product :: update-product-template";
+        return "/admin-dashboard/update-product :: update-product-template";
     }
 
 }
