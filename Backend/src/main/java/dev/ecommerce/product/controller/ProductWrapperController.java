@@ -1,14 +1,12 @@
 package dev.ecommerce.product.controller;
 
-import dev.ecommerce.product.DTO.ProductWrapperDTO;
+import dev.ecommerce.product.DTO.ProductDeleteDTO;
+import dev.ecommerce.product.DTO.ProductUpdateWrapperDTO;
 import dev.ecommerce.product.service.ProductWrapperService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,13 +21,19 @@ public class ProductWrapperController {
     }
 
     @PutMapping
-    public ResponseEntity<List<Long>> updateAllProductInfo(@Valid @RequestBody ProductWrapperDTO productWrapperDTO) {
+    public ResponseEntity<List<Long>> updateAllProductInfo(@Valid @RequestBody ProductUpdateWrapperDTO productUpdateWrapperDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 productWrapperService.updateAllProductInfo(
-                        productWrapperDTO.productLineDTO(),
-                        productWrapperDTO.productDTOList()
+                        productUpdateWrapperDTO.productLineDTO(),
+                        productUpdateWrapperDTO.productDTOList()
                 )
         );
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteAllProductInfo(@Valid @RequestBody ProductDeleteDTO productDeleteDTO) {
+        productWrapperService.deleteAllProductInfo(productDeleteDTO.productLineId(), productDeleteDTO.productIdList());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
