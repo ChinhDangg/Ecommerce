@@ -52,10 +52,10 @@ async function getUpdateProductTemplate() {
         .then((module) => {
             // You can use `module` here
             module.initializeUpdate();
-            const product = new URLSearchParams(window.location.search).get('product');
-            const productLine = new URLSearchParams(window.location.search).get('line');
-            if (product)
-                module.handleProductResult(product, productLine);
+            const productId = new URLSearchParams(window.location.search).get('product');
+            const productLineId = new URLSearchParams(window.location.search).get('line');
+            if (productId)
+                module.handleProductResult(productId, productLineId);
         });
 }
 
