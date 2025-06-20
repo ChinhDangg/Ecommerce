@@ -1,0 +1,266 @@
+const productId = document.getElementById('product-id').innerText;
+
+console.log('productId: ', productId);
+
+async function fetchProductInfo(productId) {
+    // if (!productId) {
+    //     throw new Error('No product id found.');
+    // }
+    // const response = await fetch(`/api/product/${productId}`);
+    // if (!response.ok) {
+    //     throw new Error('Failed to fetch product');
+    // }
+    // return await response.json();
+    return {
+        productLineId: 1,
+        id: 1,
+        manufacturerId: 'Part num 1',
+        name: 'Product Name 1',
+        brand: 'Product Brand 1',
+        quantity: 5,
+        conditionType: 'NEW',
+        categoryId: 1,
+        price: 20.00,
+        salePrice: 10.00,
+        saleEndDate: '2025-01-01',
+        options: [
+            {
+                name: 'Option 1',
+                valueOption: 'value 1'
+            },
+            {
+                name: 'Option 2',
+                valueOption: 'value 2'
+            }
+        ],
+        specifications: [
+            {
+                name: 'Spec 1',
+                valueOption: 'value 1'
+            },
+            {
+                name: 'Spec 2',
+                valueOption: 'value 2'
+            }
+        ],
+        features: [
+            'feature 1', 'feature 2', 'feature 3', 'feature 4',
+        ],
+        media: [
+            {
+                id: 1,
+                contentType: 'IMAGE',
+                content: '/images/Aqua水淼 - Cantarella (3).jpg'
+            },
+            {
+                id: 2,
+                contentType: 'IMAGE',
+                content: '/images/Aqua水淼 - Cantarella (3).jpg'
+            }
+        ],
+        descriptions: [
+            {
+                id: 1,
+                contentType: 'TEXT',
+                content: 'Product Description 1',
+            },
+            {
+                id: 2,
+                contentType: 'IMAGE',
+                content: '/images/Aqua水淼 - Cantarella (3).jpg'
+            }
+        ]
+    }
+}
+
+function showProductDetails(productInfo) {
+    document.getElementById('product-title').innerHTML = productInfo.name;
+    document.getElementById('manufacturer-id').innerHTML = 'MFR # ' + productInfo.manufacturerId;
+
+    showProductMedia(productInfo.media);
+
+    //quantity
+    if (productInfo.quantity > 0) {
+        document.getElementById('in-stock-label').classList.remove('hidden');
+        document.getElementById('out-stock-label').classList.add('hidden');
+    }
+
+    // pricing
+    showProductPrice(productInfo);
+
+    showProductConfig(productInfo.options);
+
+    const featureListContainer = document.getElementById('feature-list-container');
+    const featureItemTem = featureListContainer.querySelector('.feature-item');
+    productInfo.features.forEach(feature => {
+        const featureItem = featureItemTem.cloneNode(true);
+        featureItem.classList.remove('hidden');
+        featureItem.querySelector('.feature').innerHTML = feature;
+        featureListContainer.appendChild(featureItem);
+    });
+
+    if (productInfo.quantity < 10) {
+        const quantitySelect = document.getElementById('quantity-select');
+        quantitySelect.innerHTML = '';
+        for (let i = 0; i < productInfo.quantity; i++) {
+            const option = document.createElement('option');
+            const index = (i + 1) + '';
+            option.value = index;
+            option.textContent = index;
+            quantitySelect.appendChild(option);
+        }
+    }
+}
+
+function showProductPrice(productInfo) {
+    const priceSaleRemainingDay = getDayDifference(productInfo.saleEndDate);
+    if (priceSaleRemainingDay < 0) {
+        document.getElementById('sale-price').innerHTML = '$' + productInfo.price.toFixed(2);
+        document.getElementById('price').classList.add('hidden');
+        document.getElementById('saved-price').classList.add('hidden');
+        document.getElementById('price-end-date').classList.add('hidden');
+    } else {
+        document.getElementById('sale-price').innerHTML = productInfo.salePrice;
+        document.getElementById('price').innerHTML = '$' + productInfo.price;
+        document.getElementById('saved-price').innerHTML = `Save $${(productInfo.price - productInfo.salePrice)}`;
+        const day = priceSaleRemainingDay > 1 ? 'days' : 'day';
+        document.getElementById('price-end-date').innerHTML =
+            `Special pricing ends in ${priceSaleRemainingDay} ${day}`;
+    }
+}
+
+let currentClickedThumbnail = null;
+let currentShowMainImage = null;
+function showProductMedia(productMedia) {
+    const mainImageContainer = document.getElementById('main-image-container');
+    const mainImageItemTem = mainImageContainer.querySelector('.main-image');
+    const thumbnailContainer = document.getElementById('thumbnail-container');
+    const thumbnailItemTem = thumbnailContainer.querySelector('.thumbnail-item');
+    let count = 0;
+    productMedia.forEach(media => {
+        const mainImageItem = mainImageItemTem.cloneNode(true);
+        const thumbnailItem = thumbnailItemTem.cloneNode(true);
+        mainImageItem.src = media.content;
+        thumbnailItem.querySelector('img').src = media.content;
+        if (count < 5) {
+            if (count === 0) {
+                mainImageItem.classList.remove('hidden');
+                thumbnailItem.classList.add('border-2', 'border-blue-600');
+                currentShowMainImage = mainImageItem;
+                currentClickedThumbnail = thumbnailItem;
+            }
+            thumbnailItem.classList.remove('hidden');
+        }
+        thumbnailItem.addEventListener('click',function () {
+            clickOnThumbnail(this, mainImageItem, count, productMedia.length);
+        });
+        mainImageContainer.appendChild(mainImageItem);
+        thumbnailContainer.appendChild(thumbnailItem);
+        count++;
+    });
+    updateImageCountIndication(1, count);
+}
+
+function clickOnThumbnail(clickedThumbnail, mainImageItem, currentCount, maxCount) {
+    currentShowMainImage.classList.add('hidden');
+    currentClickedThumbnail.classList.remove('border-2', 'border-blue-600');
+    mainImageItem.classList.remove('hidden');
+    clickedThumbnail.classList.add('border-2', 'border-blue-600');
+    currentShowMainImage = mainImageItem;
+    currentClickedThumbnail = clickedThumbnail;
+    updateImageCountIndication(currentCount, maxCount);
+}
+
+document.getElementById('left-image-btn').addEventListener('click', function() {
+    const mainImageArray = Array.from(
+        document.getElementById('main-image-container').children);
+    const thumbnailArray = Array.from(
+        document.getElementById('thumbnail-container').children);
+    const previousIndex = mainImageArray.indexOf(currentShowMainImage) - 1;
+    if (previousIndex === -2) {
+        throw new Error('Null child exists');
+    }
+    const lastIndex = thumbnailArray.length - 1;
+    if (previousIndex === 0) {
+        clickOnThumbnail(thumbnailArray[lastIndex], mainImageArray[lastIndex], lastIndex, lastIndex);
+    } else {
+        clickOnThumbnail(thumbnailArray[previousIndex], mainImageArray[previousIndex], previousIndex, lastIndex)
+    }
+});
+
+document.getElementById('right-image-btn').addEventListener('click', function() {
+    const mainImageArray = Array.from(
+        document.getElementById('main-image-container').children);
+    const thumbnailArray = Array.from(
+        document.getElementById('thumbnail-container').children);
+    const nextIndex = mainImageArray.indexOf(currentShowMainImage) + 1;
+    if (nextIndex === 0) {
+        throw new Error('Null child exists');
+    }
+    const lastIndex = thumbnailArray.length - 1;
+    if (nextIndex === mainImageArray.length) {
+        clickOnThumbnail(thumbnailArray[1], mainImageArray[1], 1, lastIndex);
+    } else {
+        clickOnThumbnail(thumbnailArray[nextIndex], mainImageArray[nextIndex], nextIndex, lastIndex)
+    }
+});
+
+function updateImageCountIndication(currentCount, maxCount) {
+    document.getElementById('image-count-indicator').innerText = `Image ${currentCount} of ${maxCount}`;
+}
+
+function showProductConfig(productOptions) {
+    productOptions.forEach(item => {
+        addProductConfig(item.name, item.valueOption, true);
+    });
+}
+
+function addProductConfig(name, optionValue, selected = false) {
+    const configContainer = document.getElementById('config-container');
+    let configEntry = configContainer.querySelector(`.config-entry[data-config-id="${name}"]`);
+    if (configEntry) {
+        const existingConfigOption = configEntry.querySelector(`.config-option[data-config-value=${optionValue}]`);
+        if (existingConfigOption) {
+            return;
+        }
+    } else {
+        configEntry = document.querySelector('.config-entry').cloneNode(true);
+        configEntry.classList.remove('hidden');
+        configEntry.dataset.configId = name;
+        configEntry.querySelector('.config-title').innerText = name;
+        configContainer.appendChild(configEntry);
+    }
+    const configOption = configEntry.querySelector('.config-option').cloneNode(true);
+    configOption.classList.remove('hidden');
+    configOption.dataset.configValue = optionValue;
+    configOption.innerText = optionValue;
+    if (selected) {
+        configOption.classList.remove('border', 'border-gray-500', 'hover:bg-gray-50');
+        configOption.classList.add('border-2', 'border-blue-600', 'bg-blue-50', 'text-blue-600');
+    }
+    configEntry.querySelector('.config-option-container').appendChild(configOption);
+}
+
+function getDayDifference(jsonDate) {
+    // Parse the JSON date string into a Date object
+    const givenDate = new Date(jsonDate);
+
+    // Get the current date
+    const currentDate = new Date();
+
+    // Calculate the difference in milliseconds
+    const diffInMs = givenDate - currentDate;
+
+    // Convert milliseconds to days (1 day = 86,400,000 ms)
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+    // Return the rounded day difference (negative if given date is in the past)
+    return Math.round(diffInDays);
+}
+
+async function show() {
+    const productInfo = await fetchProductInfo(1);
+    showProductDetails(productInfo);
+}
+
+show();
