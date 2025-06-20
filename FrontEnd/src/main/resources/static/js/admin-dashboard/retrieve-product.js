@@ -47,8 +47,22 @@ export function initializeUpdate() {
         if (searchInput.value)
             await searchProduct(searchInput.value);
         else {
-            document.getElementById('main-content').classList.add('hidden');
+            hideMainContent();
             clearSearchEntry();
+        }
+    });
+
+    document.getElementById('discard-button').addEventListener('click',async function () {
+        const confirmDelete = confirm('Are you sure you want to delete the entire product line');
+        if (confirmDelete) {
+            try {
+                const productLineId = new URLSearchParams(window.location.search).get('line');
+                const productIdList = products.slice(1);
+                await deleteAllProductInfo(productLineId, productIdList);
+                window.location.href = 'http://localhost:8081/admin/dashboard?query=updateProduct';
+            } catch (error) {
+                alert('Failed to delete the entire product line');
+            }
         }
     });
 
@@ -85,8 +99,6 @@ export function initializeUpdate() {
             // check if new category is picked
             const initialCategory = categoryTree[0].id;
             const newCategory = document.querySelector('input[name="category"]:checked')?.id.replace("category-", "");
-            console.log('initialCategory: ' + initialCategory);
-            console.log(('newCategory: ' + newCategory));
             if (initialCategory !== newCategory) {
                 try {
                     const retrievedProductIds = await updateProductCategory(products.slice(1), parseInt(newCategory));
@@ -138,8 +150,22 @@ function displayNoSearchResult(content) {
     const searchEntry = productSearchContainer.querySelector('.search-entry').cloneNode();
     searchEntry.innerHTML = content;
     searchEntry.classList.remove('hidden');
-    document.getElementById('update-btn').classList.add('hidden');
+    showTopToolbar(false);
     productSearchContainer.appendChild(searchEntry);
+}
+
+function hideMainContent() {
+    document.getElementById('main-content').classList.remove('hidden');
+}
+
+function showTopToolbar(show) {
+    if (show) {
+        document.getElementById('discard-button').classList.remove('hidden');
+        document.getElementById('update-btn').classList.remove('hidden');
+    } else {
+        document.getElementById('discard-button').classList.add('hidden');
+        document.getElementById('update-btn').classList.add('hidden');
+    }
 }
 
 function clearSearchEntry() {
@@ -167,8 +193,8 @@ export async function handleProductResult(productId, productLineId) {
     const currentCategory = await fetchProductCategory(productId);
     console.log(currentCategory);
     await addTopCategories(currentCategory, false, true);
-    document.getElementById('main-content').classList.remove('hidden');
-    document.getElementById('update-btn').classList.remove('hidden');
+    hideMainContent();
+    showTopToolbar(true);
     if (productLineId) {
         const productLineInfo = await fetchProductLineInfo(productLineId);
         if (!productLineInfo) {
@@ -391,6 +417,23 @@ async function fetchProductInfo(productId) {
         throw new Error(`Failed to get product with id: ${productId}`);
     }
     return await response.json();
+}
+
+async function deleteAllProductInfo(productLineId, productIdList) {
+    const content = {
+        productLineId: productLineId,
+        productIdList: productIdList
+    }
+    const response = await fetch('http://localhost:8080/api/productWrapper', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(content)
+    });
+    if (response.status !== 204) {
+        throw new Error('Failed to delete all product info');
+    }
 }
 
 async function deleteProductLine(productLineId) {
