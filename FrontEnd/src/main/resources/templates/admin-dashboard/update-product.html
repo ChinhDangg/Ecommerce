@@ -17,7 +17,8 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <span class="hidden px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Draft</span>
-                    <button class="hidden px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Discard
+                    <button id="discard-button"
+                            class="hidden px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Discard
                     </button>
                     <button id="update-btn"
                             class="hidden px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Update
@@ -33,7 +34,7 @@
                     <button id="search-button" type="submit"
                             class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Search
                     </button>
-                    <input id="search-input" type="text" placeholder="Search products..." autocomplete="off"
+                    <input id="search-input" type="text" placeholder="Search products to update..." autocomplete="off"
                            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </form>
