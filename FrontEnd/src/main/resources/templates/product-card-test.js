@@ -61,13 +61,13 @@ async function fetchProductInfo(productId) {
         descriptions: [
             {
                 id: 1,
-                contentType: 'TEXT',
-                content: 'Product Description 1',
+                contentType: 'IMAGE',
+                content: '/images/Aqua水淼 - Cantarella (3).jpg'
             },
             {
                 id: 2,
-                contentType: 'IMAGE',
-                content: '/images/Aqua水淼 - Cantarella (3).jpg'
+                contentType: 'TEXT',
+                content: 'Product Description 1',
             }
         ]
     }
@@ -110,6 +110,12 @@ function showProductDetails(productInfo) {
             quantitySelect.appendChild(option);
         }
     }
+
+    populateProductDescription(productInfo.descriptions);
+
+    populateProductSpecification(productInfo.specifications);
+
+    showContentTab(document.getElementById('description-tab'));
 }
 
 function showProductPrice(productInfo) {
@@ -240,6 +246,73 @@ function addProductConfig(name, optionValue, selected = false) {
     }
     configEntry.querySelector('.config-option-container').appendChild(configOption);
 }
+
+function populateProductDescription(productDescriptions) {
+    const descriptionTab = document.getElementById('description-tab');
+    const descriptionImageEntryTem = descriptionTab.querySelector('.description-image-entry');
+    const descriptionTextEntryTem = descriptionTab.querySelector('.description-text-entry');
+    productDescriptions.forEach(description => {
+        let descriptionEntry = null;
+        if (description.contentType === 'TEXT') {
+            descriptionEntry = descriptionTextEntryTem.cloneNode(true);
+            descriptionEntry.innerText = description.content;
+        } else if (description.contentType === 'IMAGE') {
+            descriptionEntry = descriptionImageEntryTem.cloneNode(true);
+            descriptionEntry.src = description.content;
+        }
+        descriptionEntry.classList.remove('hidden');
+        descriptionTab.appendChild(descriptionEntry);
+    });
+}
+
+function populateProductSpecification(productSpecification) {
+    const specGrid = document.getElementById('specification-grid');
+    const specNameTem = specGrid.querySelector('.spec-name');
+    productSpecification.forEach(spec => {
+        const specName = specNameTem.cloneNode(true);
+        specName.classList.remove('hidden');
+        specName.innerText = spec.name;
+        const specValue = document.createElement('div');
+        specValue.innerText = spec.valueOption;
+        specGrid.appendChild(specName);
+        specGrid.appendChild(specValue);
+    });
+}
+
+function showContentTab(tab) {
+    const mainTab = document.getElementById('current-tab-content');
+    mainTab.innerHTML = '';
+    const tabClone = tab.cloneNode(true);
+    tabClone.id = tab.id + '-tem';
+    tabClone.classList.remove('hidden');
+    mainTab.appendChild(tabClone);
+}
+
+let currentSelectedTabBtn = document.getElementById('overview-btn');
+function initializeProductInfoTabs() {
+    document.getElementById('overview-btn').addEventListener('click', function() {
+        if (currentSelectedTabBtn === this)
+            return;
+        showContentTab(document.getElementById('description-tab'));
+        selectThisTabButton(this);
+    });
+    document.getElementById('specification-btn').addEventListener('click', function() {
+        if (currentSelectedTabBtn === this)
+            return;
+        showContentTab(document.getElementById('specification-tab'));
+        selectThisTabButton(this);
+    });
+}
+
+function selectThisTabButton(button) {
+    currentSelectedTabBtn.classList.remove('border-blue-600', 'text-blue-600');
+    currentSelectedTabBtn.classList.add('border-transparent', 'text-gray-600');
+    currentSelectedTabBtn = button;
+    button.classList.add('border-blue-600', 'text-blue-600');
+    button.classList.remove('border-transparent', 'text-gray-600');
+}
+
+initializeProductInfoTabs();
 
 function getDayDifference(jsonDate) {
     // Parse the JSON date string into a Date object
