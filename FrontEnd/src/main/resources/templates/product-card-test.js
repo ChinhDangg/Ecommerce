@@ -6,7 +6,7 @@ async function fetchProductInfo(productId) {
     // if (!productId) {
     //     throw new Error('No product id found.');
     // }
-    // const response = await fetch(`/api/product/${productId}`);
+    // const response = await fetch(`localhost:8080/api/productWrapper/card/${productId}`);
     // if (!response.ok) {
     //     throw new Error('Failed to fetch product');
     // }
@@ -19,10 +19,35 @@ async function fetchProductInfo(productId) {
         brand: 'Product Brand 1',
         quantity: 5,
         conditionType: 'NEW',
-        categoryId: 1,
-        price: 20.00,
-        salePrice: 10.00,
-        saleEndDate: '2025-01-01',
+
+        productGroupedOptions: [
+            {
+                productId: 2,
+                name: 'Option 1',
+                valueOption: 'value 3'
+            },
+            {
+                productId: 3,
+                name: 'Option 2',
+                valueOption: 'value 4'
+            }
+        ],
+
+        productCategoryChain: [
+            {
+                id: 1,
+                name: 'Photography',
+            },
+            {
+                id: 2,
+                name: 'Digital Camera'
+            },
+            {
+                id: 3,
+                name: 'DSLR Cameras'
+            }
+        ],
+
         options: [
             {
                 name: 'Option 1',
@@ -33,6 +58,9 @@ async function fetchProductInfo(productId) {
                 valueOption: 'value 2'
             }
         ],
+        price: 20.00,
+        salePrice: 10.00,
+        saleEndDate: '2025-01-01',
         specifications: [
             {
                 name: 'Spec 1',
@@ -74,6 +102,9 @@ async function fetchProductInfo(productId) {
 }
 
 function showProductDetails(productInfo) {
+
+    showCategoryChainLinks(productInfo.productCategoryChain);
+
     document.getElementById('product-title').innerHTML = productInfo.name;
     document.getElementById('manufacturer-id').innerHTML = 'MFR # ' + productInfo.manufacturerId;
 
@@ -89,6 +120,7 @@ function showProductDetails(productInfo) {
     showProductPrice(productInfo);
 
     showProductConfig(productInfo.options);
+    addDifferentProductConfig(productInfo.productGroupedOptions);
 
     const featureListContainer = document.getElementById('feature-list-container');
     const featureItemTem = featureListContainer.querySelector('.feature-item');
@@ -116,6 +148,20 @@ function showProductDetails(productInfo) {
     populateProductSpecification(productInfo.specifications);
 
     showContentTab(document.getElementById('description-tab'));
+}
+
+function showCategoryChainLinks(productCategoryChain) {
+    const categoryNavContainer = document.getElementById('category-nav-container');
+    const linkTem = categoryNavContainer.querySelector('.link-list');
+    const fSlashTem = categoryNavContainer.querySelector('.forward-slash');
+    productCategoryChain.forEach((category, index) => {
+        const link = linkTem.cloneNode(true);
+        link.querySelector('a').innerHTML = category.name;
+        categoryNavContainer.appendChild(link);
+        if (index !== productCategoryChain.length - 1) {
+            categoryNavContainer.appendChild(fSlashTem.cloneNode(true));
+        }
+    });
 }
 
 function showProductPrice(productInfo) {
@@ -215,17 +261,23 @@ function updateImageCountIndication(currentCount, maxCount) {
     document.getElementById('image-count-indicator').innerText = `Image ${currentCount} of ${maxCount}`;
 }
 
-function showProductConfig(productOptions) {
-    productOptions.forEach(item => {
-        addProductConfig(item.name, item.valueOption, true);
+function addDifferentProductConfig(productGroupedOptions) {
+    productGroupedOptions.forEach((option) => {
+        addProductConfig(option.name, option.valueOption, option.productId, false);
     });
 }
 
-function addProductConfig(name, optionValue, selected = false) {
+function showProductConfig(productOptions) {
+    productOptions.forEach(item => {
+        addProductConfig(item.name, item.valueOption, null, true);
+    });
+}
+
+function addProductConfig(name, optionValue, productId = null, selected = false) {
     const configContainer = document.getElementById('config-container');
     let configEntry = configContainer.querySelector(`.config-entry[data-config-id="${name}"]`);
     if (configEntry) {
-        const existingConfigOption = configEntry.querySelector(`.config-option[data-config-value=${optionValue}]`);
+        const existingConfigOption = configEntry.querySelector(`.config-option-btn[data-config-value="${optionValue}"]`);
         if (existingConfigOption) {
             return;
         }
@@ -236,7 +288,7 @@ function addProductConfig(name, optionValue, selected = false) {
         configEntry.querySelector('.config-title').innerText = name;
         configContainer.appendChild(configEntry);
     }
-    const configOption = configEntry.querySelector('.config-option').cloneNode(true);
+    const configOption = configEntry.querySelector('.config-option-btn').cloneNode(true);
     configOption.classList.remove('hidden');
     configOption.dataset.configValue = optionValue;
     configOption.innerText = optionValue;
@@ -245,6 +297,11 @@ function addProductConfig(name, optionValue, selected = false) {
         configOption.classList.add('border-2', 'border-blue-600', 'bg-blue-50', 'text-blue-600');
     }
     configEntry.querySelector('.config-option-container').appendChild(configOption);
+    if (productId) {
+        configOption.addEventListener('click', function() {
+            window.location.href = 'http://localhost:8081/product/card/' + productId;
+        });
+    }
 }
 
 function populateProductDescription(productDescriptions) {
