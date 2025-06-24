@@ -27,7 +27,7 @@ public class ProductLine {
     @OrderBy("sortOrder ASC")
     private final List<ProductLineDescription> descriptions = new ArrayList<>();
 
-    // variants of product (configurations or options) fall into same product line
+    // variants of product (configurations) fall into same product line
     //@JsonManagedReference
     @OneToMany(mappedBy = "productLine")
     private final List<Product> products = new ArrayList<>();
