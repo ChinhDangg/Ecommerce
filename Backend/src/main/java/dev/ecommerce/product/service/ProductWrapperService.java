@@ -1,9 +1,12 @@
 package dev.ecommerce.product.service;
 
+import dev.ecommerce.product.DTO.ProductCardDTO;
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
-import jakarta.transaction.Transactional;
+import dev.ecommerce.product.DTO.ProductMapper;
+import dev.ecommerce.product.entity.Product;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +16,13 @@ public class ProductWrapperService {
 
     private final ProductLineService productLineService;
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
-    public ProductWrapperService(ProductLineService productLineService, ProductService productService) {
+    public ProductWrapperService(ProductLineService productLineService, ProductService productService
+    , ProductMapper productMapper) {
         this.productLineService = productLineService;
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     @Transactional
@@ -36,4 +42,14 @@ public class ProductWrapperService {
         for (Long productId : productIdList)
             productService.deleteProductById(productId);
     }
+
+    @Transactional(readOnly = true)
+    public ProductCardDTO getProductCardById(Long id) {
+        Product product = productService.getProductById(id);
+        ProductCardDTO cardDTO = productMapper.toProductCardDTO(product);
+        cardDTO.setProductGroupedOptions(productLineService.findProductGroupedOptions(product.getProductLine().getId()));
+        cardDTO.setProductCategoryChain(productService.getProductCategoryChain(product.getId()));
+        return cardDTO;
+    }
+
 }

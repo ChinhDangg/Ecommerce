@@ -1,5 +1,6 @@
 package dev.ecommerce.product.controller;
 
+import dev.ecommerce.product.DTO.ProductCardDTO;
 import dev.ecommerce.product.DTO.ProductDeleteDTO;
 import dev.ecommerce.product.DTO.ProductUpdateWrapperDTO;
 import dev.ecommerce.product.service.ProductWrapperService;
@@ -34,6 +35,13 @@ public class ProductWrapperController {
     public ResponseEntity<String> deleteAllProductInfo(@Valid @RequestBody ProductDeleteDTO productDeleteDTO) {
         productWrapperService.deleteAllProductInfo(productDeleteDTO.productLineId(), productDeleteDTO.productIdList());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/card/{id}")
+    public ResponseEntity<ProductCardDTO> getProductCardDTO(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                productWrapperService.getProductCardById(id)
+        );
     }
 
 }
