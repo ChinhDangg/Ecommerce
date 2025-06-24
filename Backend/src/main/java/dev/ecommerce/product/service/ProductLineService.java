@@ -1,13 +1,13 @@
 package dev.ecommerce.product.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
-import dev.ecommerce.product.DTO.ContentDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
-import dev.ecommerce.product.entity.Product;
+import dev.ecommerce.product.DTO.ProductOptionDTO;
 import dev.ecommerce.product.entity.ProductLine;
 import dev.ecommerce.product.entity.ProductLineDescription;
 import dev.ecommerce.product.entity.ProductLineMedia;
+import dev.ecommerce.product.entity.ProductOption;
 import dev.ecommerce.product.repository.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,6 @@ public class ProductLineService {
     private final ProductLineMediaRepository productLineMediaRepository;
     private final ProductLineDescriptionRepository productLineDescriptionRepository;
     private final ProductRepository productRepository;
-    private final ProductOptionRepository productOptionRepository;
     private final ProductMapper productMapper;
 
     public ProductLineService(
@@ -33,21 +32,13 @@ public class ProductLineService {
             ProductLineMediaRepository productLineMediaRepository,
             ProductLineDescriptionRepository productLineDescriptionRepository,
             ProductRepository productRepository,
-            ProductOptionRepository productOptionRepository,
             ProductMapper productMapper
     ) {
         this.productLineRepository = productLineRepository;
         this.productLineMediaRepository = productLineMediaRepository;
         this.productLineDescriptionRepository = productLineDescriptionRepository;
         this.productRepository = productRepository;
-        this.productOptionRepository = productOptionRepository;
         this.productMapper = productMapper;
-    }
-
-    public void findProductGroupedOptions(Integer productLineId) {
-        if (productLineId == null)
-            throw new IllegalStateException("Passing null Product line id");
-        List<ProductOptionGroupProjection> groupedOptions = productOptionRepository.findProductOptionByProductLine(productLineId);
     }
 
     private ProductLine getProductLineById(Integer id) {
@@ -55,6 +46,13 @@ public class ProductLineService {
             throw new IllegalArgumentException("Product line id is null");
         return productLineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product line not found with id: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductOptionDTO> findProductGroupedOptions(Integer productLineId) {
+        ProductLine productLine = getProductLineById(productLineId);
+        List<ProductOption> productOptions = productLine.getProductOptions();
+        return productMapper.toProductOptionDTOList(productOptions);
     }
 
     @Transactional(readOnly = true)
