@@ -66,6 +66,18 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    @Transactional
+    public List<ProductCategoryDTO> getProductCategoryChain(Long id) {
+        Product product = getProductById(id);
+        List<ProductCategoryDTO> productCategoryChain = new ArrayList<>();
+        ProductCategory parentCategory = product.getCategory();
+        while (parentCategory != null) {
+            productCategoryChain.add(productMapper.toProductCategoryDTO(parentCategory));
+            parentCategory = parentCategory.getParentProductCategory();
+        }
+        return productCategoryChain.reversed();
+    }
+
     @Transactional(readOnly = true)
     public Page<ShortProductDTO> findProductsByName(String productName, int page) {
         Pageable pageable = PageRequest.of(page, 10);
@@ -166,7 +178,7 @@ public class ProductService {
                     savedProduct,
                     productDTO.getMedia().get(j).contentType(),
                     productDTO.getMedia().get(j).content(),
-                    Integer.valueOf(j)
+                    j
             ));
         }
         if (!mediaList.isEmpty())
@@ -178,7 +190,7 @@ public class ProductService {
                     savedProduct,
                     productDTO.getDescriptions().get(j).contentType(),
                     productDTO.getDescriptions().get(j).content(),
-                    Integer.valueOf(j)
+                    j
             ));
         }
         if (!descriptionList.isEmpty())
@@ -326,10 +338,10 @@ public class ProductService {
                 if (!dto.content().equals(media.getContent()))
                     media.setContent(dto.content());
                 if (media.getSortOrder() != order)
-                    media.setSortOrder(Integer.valueOf(order));
+                    media.setSortOrder(order);
                 updatedList.add(media);
             } else {
-                T newMedia = newMediaFactory.apply(dto, Integer.valueOf(order));
+                T newMedia = newMediaFactory.apply(dto, order);
                 updatedList.add(newMedia);
             }
             order++;
