@@ -8,27 +8,24 @@
   </head>
   <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-6">
+
       <!-- Breadcrumb navigation -->
       <nav class="mb-4 text-sm">
-        <ol class="flex flex-wrap items-center">
-          <li><a href="#" class="text-blue-600 hover:underline">Home</a></li>
-          <li class="mx-2 text-gray-500">/</li>
-          <li><a href="#" class="text-blue-600 hover:underline">Photography</a></li>
-          <li class="mx-2 text-gray-500">/</li>
-          <li><a href="#" class="text-blue-600 hover:underline">Digital Cameras</a></li>
-          <li class="mx-2 text-gray-500">/</li>
-          <li class="text-gray-700">DSLR Cameras</li>
+        <ol id="category-nav-container" class="flex flex-wrap items-center">
+          <li class="link-list"><a href="#" class="text-blue-600 hover:underline">Home</a></li>
+          <li class="forward-slash mx-2 text-gray-500">/</li>
         </ol>
       </nav>
 
       <!-- Main product card -->
       <div class="rounded bg-white shadow-md">
-        <div class="md:flex">
+        <div class="md:flex md:items-start md:gap-4 md:h-full">
           <!-- Left side: Images -->
-          <div class="border-b border-gray-200 p-4 md:w-2/5 md:border-r md:border-b-0">
+          <div class="p-4 md:w-2/5 md:border-r md:border-b-0 sticky top-6 border border-red-500">
             <!-- Main image with responsive container -->
             <div id="main-image-container" class="relative mb-4 aspect-square bg-gray-100">
-              <img src="/api/placeholder/500/500" alt="Canon EOS R6 Mark II" class="main-image hidden absolute inset-0 h-full w-full object-contain"/>
+              <img src="/api/placeholder/500/500" alt="Canon EOS R6 Mark II"
+                   class="main-image hidden absolute inset-0 h-full w-full object-contain"/>
             </div>
 
             <!-- Thumbnail gallery with navigation arrows -->
@@ -36,23 +33,26 @@
               <!-- Left arrow button -->
               <button id="left-image-btn"
                       class="absolute top-1/2 -left-3 z-10 -translate-y-1/2 transform rounded-full bg-white p-1 shadow-md hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
               </button>
 
               <!-- Thumbnails container -->
               <div id="thumbnail-container" class="grid grid-cols-5 gap-2 px-2">
                 <div class="thumbnail-item hidden relative aspect-square border hover:border-blue-600">
-                  <img src="/api/placeholder/100/80" alt="Side view" class="absolute inset-0 h-full w-full cursor-pointer object-cover" />
+                  <img src="/api/placeholder/100/80" alt="Side view"
+                       class="absolute inset-0 h-full w-full cursor-pointer object-cover"/>
                 </div>
               </div>
 
               <!-- Right arrow button -->
               <button id="right-image-btn"
                       class="absolute top-1/2 -right-3 z-10 -translate-y-1/2 transform rounded-full bg-white p-1 shadow-md hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
             </div>
@@ -63,14 +63,18 @@
             <!-- Actions under image -->
             <div class="mt-4 flex flex-wrap gap-2">
               <button class="flex items-center text-sm text-blue-600 hover:underline">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/>
                 </svg>
                 Enlarge
               </button>
               <button class="flex items-center text-sm text-blue-600 hover:underline">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
                 View Demo
               </button>
@@ -79,7 +83,6 @@
 
           <!-- Right side: Product information -->
           <div class="p-4 md:w-3/5">
-
             <!-- In Stock status and wishlist button - Kept in right column -->
             <div class="mb-4 flex">
               <div class="flex items-center">
@@ -137,11 +140,10 @@
             <!-- Configuration options -->
             <div id="config-container" class="mb-6">
               <h3 class="mb-2 text-lg font-semibold text-gray-800">Configuration</h3>
-              <div class="config-entry mb-2">
+              <div class="config-entry hidden mb-2">
                 <h4 class="config-title block text-sm font-medium text-gray-700">RAM</h4>
                 <div class="config-option-container flex flex-wrap gap-2">
-<!--                  <button class="config-option rounded-md border-2 border-blue-600 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600">16GB</button>-->
-                  <button class="config-option rounded-md border border-gray-500 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">16GB</button>
+                  <button class="hidden config-option-btn rounded-md border border-gray-500 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">16GB</button>
                 </div>
               </div>
             </div>
@@ -170,7 +172,7 @@
               </div>
             </div>
 
-            <!-- Quantity selector - ADDED HERE -->
+            <!-- Quantity selector -->
             <div class="mb-6">
               <label for="quantity-select" class="mb-2 block text-sm font-medium text-gray-700">Quantity</label>
               <div class="flex items-center">
