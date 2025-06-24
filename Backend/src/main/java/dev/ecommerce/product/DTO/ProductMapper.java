@@ -20,7 +20,14 @@ public interface ProductMapper {
 
     List<ProductCategoryDTO> toProductCategoryDTOList(List<ProductCategory> productCategory);
 
-    List<ProductDTO> toProductDTOList(List<Product> products);
+    @Mapping(source = "product.id", target = "productId")
+    ProductOptionDTO toProductOptionDTO(ProductOption productOption);
+
+    List<ProductOptionDTO> toProductOptionDTOList(List<ProductOption> productOption);
+
+    @Mapping(source = "productLine.id", target = "productLineId")
+    @Mapping(source = "features", target = "features", qualifiedByName = "featuresToContentList")
+    ProductCardDTO toProductCardDTO(Product product);
 
     @Mapping(source = "productLine.id", target = "productLineId")
     @Mapping(source = "category.id", target = "categoryId")
