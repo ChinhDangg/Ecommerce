@@ -9,8 +9,7 @@ import java.util.List;
 @Getter
 public class ShortProductDTO {
 
-    @Setter
-    private Integer productLineId;
+    private final Integer productLineId;
 
     private final Long id;
 
@@ -22,8 +21,7 @@ public class ShortProductDTO {
 
     private final BigDecimal price;
 
-    @Setter
-    private List<String> features;
+    private final List<String> features;
 
     @Setter
     private String imageName;
@@ -31,8 +29,9 @@ public class ShortProductDTO {
     @Setter
     private BigDecimal discountedPrice;
 
-    public ShortProductDTO(Long id, String manufacturerId, String name,
+    public ShortProductDTO(Integer productLineId, Long id, String manufacturerId, String name,
                            Integer quantity, BigDecimal price, List<String> features) {
+        this.productLineId = productLineId;
         this.id = id;
         this.manufacturerId = manufacturerId;
         this.name = name;
