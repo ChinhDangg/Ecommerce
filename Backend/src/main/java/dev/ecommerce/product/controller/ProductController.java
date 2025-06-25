@@ -29,9 +29,11 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ShortProductDTO>> searchProducts(@RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "") String search) {
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByName(search, page));
+    public ResponseEntity<Page<ShortProductDTO>> searchProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "false") boolean getFeatures) {
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByName(search, page, getFeatures));
     }
 
     @GetMapping("/{id}")
