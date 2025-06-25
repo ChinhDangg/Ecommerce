@@ -103,18 +103,4 @@ public class Product {
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<ProductReview> reviews = new ArrayList<>();
-
-    public Product(Long id, String manufacturerId, String name,
-                   Integer quantity, BigDecimal price, BigDecimal salePrice, LocalDate saleEndDate,
-                   ProductLine productLine, ProductMedia media) {
-        this.id = id;
-        this.manufacturerId = manufacturerId;
-        this.name = name;
-        this.quantity = quantity;
-        this.price = price;
-        this.salePrice = salePrice;
-        this.saleEndDate = saleEndDate;
-        this.productLine = productLine;
-        this.media.add(media);
-    }
 }

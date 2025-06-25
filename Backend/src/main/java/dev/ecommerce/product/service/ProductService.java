@@ -79,12 +79,12 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ShortProductDTO> findProductsByName(String productName, int page) {
+    public Page<ShortProductDTO> findProductsByName(String productName, int page, boolean getFeatures) {
         Pageable pageable = PageRequest.of(page, 10);
         Specification<Product> spec = ProductSpecifications.nameContainsWords(productName);
 
         if (spec == null)
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);;
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Product> query = cb.createQuery(Product.class);
@@ -93,18 +93,7 @@ public class ProductService {
         Predicate predicate = spec.toPredicate(root, query, cb);
         query.where(predicate);
 
-        query.select(cb.construct(
-                Product.class,
-                root.get("id"),
-                root.get("manufacturerId"),
-                root.get("name"),
-                root.get("quantity"),
-                root.get("price"),
-                root.get("salePrice"),
-                root.get("saleEndDate"),
-                root.get("productLine"),
-                root.get("media")
-        ));
+        query.select(root);
 
         TypedQuery<Product> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
@@ -113,8 +102,8 @@ public class ProductService {
         List<Product> resultList = typedQuery.getResultList();
         List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
         for (Product product : resultList) {
-            ShortProductDTO current = productMapper.toShortProductWithoutFeaturesDTO(product);
-            current.setProductLineId(product.getProductLine() == null ? null : product.getProductLine().getId());
+            ShortProductDTO current = (getFeatures) ? productMapper.toShortProductWithFeaturesDTO(product)
+                    : productMapper.toShortProductWithoutFeaturesDTO(product);
             current.setImageName(product.getMedia().isEmpty() ? null : product.getMedia().getFirst().getContent());
             current.setDiscountedPrice(
                     product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
