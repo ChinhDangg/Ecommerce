@@ -9,7 +9,8 @@ GET http://localhost:8080/api/product/category
 ###
 GET http://localhost:8080/api/product/search?
     page=0&
-    search=P
+    search=P&
+    getFeatures=true
 
 ###
 GET http://localhost:8080/api/product/2
