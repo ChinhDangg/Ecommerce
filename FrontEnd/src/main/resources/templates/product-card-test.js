@@ -23,11 +23,13 @@ async function fetchProductInfo(productId) {
         productGroupedOptions: [
             {
                 productId: 2,
+                id: 1,
                 name: 'Option 1',
                 valueOption: 'value 3'
             },
             {
                 productId: 3,
+                id: 2,
                 name: 'Option 2',
                 valueOption: 'value 4'
             }
