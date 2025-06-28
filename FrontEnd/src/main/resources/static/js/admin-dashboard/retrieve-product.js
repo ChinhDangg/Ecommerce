@@ -372,10 +372,10 @@ async function updateProductCategory(productIdList, categoryId) {
 async function searchProduct(productNameSearch) {
     try {
         const page = 0;
-        const baseUrl = 'http://localhost:8080/api/product/search';
+        const baseUrl = 'http://localhost:8080/api/product/by-name';
         const queryParams = new URLSearchParams({
-            page: page.toString(),
-            search: productNameSearch
+            name: productNameSearch,
+            page: page.toString()
         });
         const url = `${baseUrl}?${queryParams.toString()}`;
         const response = await fetch(url);

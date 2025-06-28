@@ -28,12 +28,20 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping("/search")
+    @GetMapping("/by-name")
     public ResponseEntity<Page<ShortProductDTO>> searchProducts(
+            @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "false") boolean getFeatures) {
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByName(search, page, getFeatures));
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByName(name, page, getFeatures));
+    }
+
+    @GetMapping("/by-category")
+    public ResponseEntity<Page<ShortProductDTO>> searchProductsByCategory(
+            @RequestParam(defaultValue = "1") Integer id,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByCategory(id, page));
     }
 
     @GetMapping("/{id}")
