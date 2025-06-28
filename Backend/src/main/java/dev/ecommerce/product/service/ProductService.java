@@ -66,7 +66,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProductCategoryDTO> getProductCategoryChain(Long id) {
         Product product = getProductById(id);
         List<ProductCategoryDTO> productCategoryChain = new ArrayList<>();
@@ -76,6 +76,13 @@ public class ProductService {
             parentCategory = parentCategory.getParentProductCategory();
         }
         return productCategoryChain.reversed();
+    }
+
+    @Transactional
+    public Page<ShortProductDTO> findProductsByCategory(Integer id, int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Product> productPage = productRepository.findByCategoryId(id, pageable);
+        return productPage.map(productMapper::toShortProductWithFeaturesDTO);
     }
 
     @Transactional(readOnly = true)
@@ -94,6 +101,18 @@ public class ProductService {
         query.where(predicate);
 
         query.select(root);
+//        query.select(cb.construct(
+//                Product.class,
+//                root.get("id"),
+//                root.get("manufacturerId"),
+//                root.get("name"),
+//                root.get("quantity"),
+//                root.get("price"),
+//                root.get("salePrice"),
+//                root.get("saleEndDate"),
+//                root.get("productLine"),
+//                root.get("media")
+//        ));
 
         TypedQuery<Product> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
