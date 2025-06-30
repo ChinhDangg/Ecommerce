@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +33,7 @@ public class ProductService {
     private final ProductDescriptionRepository productDescriptionRepository;
     private final ProductOptionRepository productOptionRepository;
     private final ProductSpecificationRepository productSpecificationRepository;
+    private final ProductCoreSpecificationRepository productCoreSpecificationRepository;
     private final ProductMapper productMapper;
     private final EntityManager entityManager;
 
@@ -44,6 +46,7 @@ public class ProductService {
             ProductDescriptionRepository productDescriptionRepository,
             ProductOptionRepository productOptionRepository,
             ProductSpecificationRepository productSpecificationRepository,
+            ProductCoreSpecificationRepository productCoreSpecificationRepository,
             ProductMapper productMapper,
             EntityManager entityManager
     ) {
@@ -55,6 +58,7 @@ public class ProductService {
         this.productDescriptionRepository = productDescriptionRepository;
         this.productOptionRepository = productOptionRepository;
         this.productSpecificationRepository = productSpecificationRepository;
+        this.productCoreSpecificationRepository = productCoreSpecificationRepository;
         this.productMapper = productMapper;
         this.entityManager = entityManager;
     }
@@ -156,9 +160,11 @@ public class ProductService {
         if (productDTO.getName() == null)
             throw new DataIntegrityViolationException("Product name is null");
 
-        ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId()).orElse(null);
+        ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         ProductLine productLine = productDTO.getProductLineId() == null
-                ? null : productLineRepository.findById(productDTO.getProductLineId()).orElse(null);
+                ? null : productLineRepository.findById(productDTO.getProductLineId())
+                .orElseThrow(() -> new IllegalArgumentException("Product line not found"));
         Product savedProduct = productRepository.save(new Product(
                 productDTO.getManufacturerId(),
                 productDTO.getName(),
@@ -213,7 +219,13 @@ public class ProductService {
 
         List<ProductSpecification> specificationList = new ArrayList<>();
         for (OptionDTO specification : productDTO.getSpecifications()) {
-            specificationList.add(new ProductSpecification(savedProduct, specification.name(), specification.valueOption()));
+            specificationList.add(new ProductSpecification(
+                    savedProduct,
+                    specification.id() == null ? null : productCoreSpecificationRepository.findById(specification.id())
+                            .orElseThrow(() -> new IllegalArgumentException("Predefined Specification not found")),
+                    specification.name(),
+                    specification.valueOption()
+            ));
         }
         if (!specificationList.isEmpty())
             productSpecificationRepository.saveAll(specificationList);
@@ -293,7 +305,7 @@ public class ProductService {
         List<ProductOption> updatedOptionList = buildUpdateOptionList(
                 productDTO.getOptions(),
                 currentOptionMap,
-                (name, value) -> new ProductOption(product, productLine, name, value)
+                (dto) -> new ProductOption(product, productLine, dto.name(), dto.valueOption())
         );
         product.getOptions().clear();
         product.getOptions().addAll(updatedOptionList);
@@ -303,7 +315,13 @@ public class ProductService {
         List<ProductSpecification> updatedSpecificationList = buildUpdateOptionList(
                 productDTO.getSpecifications(),
                 currentSpecificationMap,
-                (name, value) -> new ProductSpecification(product, name, value)
+                (dto) -> new ProductSpecification(
+                        product,
+                        dto.id() == null ? null : productCoreSpecificationRepository.findById(dto.id())
+                                .orElseThrow(() -> new IllegalArgumentException("Predefined Specification not found")),
+                        dto.name(),
+                        dto.valueOption()
+                )
         );
         product.getSpecifications().clear();
         product.getSpecifications().addAll(updatedSpecificationList);
@@ -314,7 +332,7 @@ public class ProductService {
     private <T extends BaseOption> List<T> buildUpdateOptionList(
             List<OptionDTO> incomingDTOs,
             Map<String, T> currentOptionMap,
-            BiFunction<String, String, T> newOptionFactory
+            Function<OptionDTO, T> newOptionFactory
     ) {
         List<T> updatedOptionList = new ArrayList<>();
         for (OptionDTO dto : incomingDTOs) {
@@ -324,7 +342,7 @@ public class ProductService {
                     option.setValueOption(dto.valueOption());
                 updatedOptionList.add(option);
             } else {
-                T newOption = newOptionFactory.apply(dto.name(), dto.valueOption());
+                T newOption = newOptionFactory.apply(dto);
                 updatedOptionList.add(newOption);
             }
         }
