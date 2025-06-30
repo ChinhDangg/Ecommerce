@@ -1,10 +1,8 @@
 package dev.ecommerce.product.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,7 @@ public class ProductCategory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne
@@ -27,8 +25,19 @@ public class ProductCategory {
     @OneToMany(mappedBy = "parentProductCategory", cascade = CascadeType.PERSIST)
     private final List<ProductCategory> subcategories = new ArrayList<>();
 
+    @OneToMany(mappedBy = "category")
+    private final List<ProductCoreSpecification> coreSpecs = new ArrayList<>();
+
+    private boolean isPrimary = true;
+
     public ProductCategory(String name, ProductCategory parentProductCategory) {
         this.name = name;
         this.parentProductCategory = parentProductCategory;
+    }
+
+    public ProductCategory(String name, ProductCategory parentProductCategory, boolean isPrimary) {
+        this.name = name;
+        this.parentProductCategory = parentProductCategory;
+        this.isPrimary = isPrimary;
     }
 }

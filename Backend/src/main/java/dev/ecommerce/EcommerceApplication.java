@@ -1,8 +1,5 @@
 package dev.ecommerce;
 
-import dev.ecommerce.product.DTO.ProductCategoryDTO;
-import dev.ecommerce.product.DTO.ProductLineDTO;
-import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.product.service.ProductService;
@@ -10,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,18 +24,34 @@ public class EcommerceApplication {
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
             ProductService productService,
-            ProductLineRepository productLineRepository, ProductLineMediaRepository productLineMediaRepository, ProductLineDescriptionRepository productLineDescriptionRepository, ProductMediaRepository productMediaRepository, ProductDescriptionRepository productDescriptionRepository, ProductFeatureRepository productFeatureRepository, ProductOptionRepository productOptionRepository, ProductSpecificationRepository productSpecificationRepository) {
+            ProductLineRepository productLineRepository,
+            ProductLineMediaRepository productLineMediaRepository,
+            ProductLineDescriptionRepository productLineDescriptionRepository,
+            ProductMediaRepository productMediaRepository,
+            ProductDescriptionRepository productDescriptionRepository,
+            ProductFeatureRepository productFeatureRepository,
+            ProductOptionRepository productOptionRepository,
+            ProductSpecificationRepository productSpecificationRepository,
+            ProductCoreSpecificationRepository productCoreSpecificationRepository) {
         return _ -> {
             ProductCategory electronics = new ProductCategory("Electronics", null);
             ProductCategory computers = new ProductCategory("Computers", electronics);
-            ProductCategory laptops = new ProductCategory("Laptop", computers);
+            ProductCategory display = new ProductCategory("Display", electronics);
+            ProductCategory laptops = new ProductCategory("Laptops", computers);
+            ProductCategory laptops2 = new ProductCategory("Laptops", display, false);
             ProductCategory gamingLaptops = new ProductCategory("GamingLaptops", laptops);
             ProductCategory macs = new ProductCategory("Mac", laptops);
             ProductCategory computerComponent= new ProductCategory("Computer Component", electronics);
             ProductCategory graphicsCard = new ProductCategory("Graphics Card", computerComponent);
 
-            productCategoryRepository.saveAll(List.of(electronics, computers, laptops, gamingLaptops, macs, computerComponent, graphicsCard));
+            productCategoryRepository.saveAll(List.of(electronics, computers, laptops, laptops2, gamingLaptops, macs, computerComponent, graphicsCard));
 
+            ProductCoreSpecification displaySizeSpec = new ProductCoreSpecification("Display Size", laptops2);
+            ProductCoreSpecification monitorResolutionSpec = new ProductCoreSpecification("Monitor Resolution", laptops2);
+            ProductCoreSpecification processorSpec = new ProductCoreSpecification("Processor", computers);
+            ProductCoreSpecification ramSpec = new ProductCoreSpecification("RAM", computers);
+            ProductCoreSpecification storageSpec = new ProductCoreSpecification("Storage Size", computers);
+            productCoreSpecificationRepository.saveAll(List.of(displaySizeSpec, monitorResolutionSpec, processorSpec, ramSpec, storageSpec));
 
             ProductLine savedProductLine = productLineRepository.save(new ProductLine("Product line name"));
             ProductLineMedia productLineMedia = new ProductLineMedia(
@@ -92,13 +104,15 @@ public class EcommerceApplication {
             productOptionRepository.saveAll(List.of(product1Option1, product1Option2));
             ProductSpecification product1Spec1 = new ProductSpecification(
                     product1,
-                    "Spec 1",
-                    "Spec 1 value 1"
+                    processorSpec,
+                    "CPU",
+                    "Core i9"
             );
             ProductSpecification product1Spec2 = new ProductSpecification(
                     product1,
-                    "Spec 2",
-                    "Spec 2 value 1"
+                    ramSpec,
+                    "RAM",
+                    "16GB"
             );
             productSpecificationRepository.saveAll(List.of(product1Spec1, product1Spec2));
             ProductFeature product1Feature1 = new ProductFeature(
@@ -165,13 +179,15 @@ public class EcommerceApplication {
             productOptionRepository.saveAll(List.of(product2Option1, product2Option2));
             ProductSpecification product2Spec1 = new ProductSpecification(
                     product2,
-                    "Spec 1",
-                    "Spec 1 value 2"
+                    processorSpec,
+                    "CPU",
+                    "Core i7"
             );
             ProductSpecification product2Spec2 = new ProductSpecification(
                     product2,
-                    "Spec 2",
-                    "Spec 2 value 2"
+                    ramSpec,
+                    "RAM",
+                    "32GB"
             );
             productSpecificationRepository.saveAll(List.of(product2Spec1, product2Spec2));
             ProductFeature product2Feature1 = new ProductFeature(
