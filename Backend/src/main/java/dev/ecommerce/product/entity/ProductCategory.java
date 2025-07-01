@@ -28,16 +28,8 @@ public class ProductCategory {
     @OneToMany(mappedBy = "category")
     private final List<ProductCoreSpecification> coreSpecs = new ArrayList<>();
 
-    private boolean isPrimary = true;
-
     public ProductCategory(String name, ProductCategory parentProductCategory) {
         this.name = name;
         this.parentProductCategory = parentProductCategory;
-    }
-
-    public ProductCategory(String name, ProductCategory parentProductCategory, boolean isPrimary) {
-        this.name = name;
-        this.parentProductCategory = parentProductCategory;
-        this.isPrimary = isPrimary;
     }
 }

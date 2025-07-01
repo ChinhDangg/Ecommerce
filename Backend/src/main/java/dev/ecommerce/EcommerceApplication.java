@@ -38,16 +38,15 @@ public class EcommerceApplication {
             ProductCategory computers = new ProductCategory("Computers", electronics);
             ProductCategory display = new ProductCategory("Display", electronics);
             ProductCategory laptops = new ProductCategory("Laptops", computers);
-            ProductCategory laptops2 = new ProductCategory("Laptops", display, false);
             ProductCategory gamingLaptops = new ProductCategory("GamingLaptops", laptops);
             ProductCategory macs = new ProductCategory("Mac", laptops);
             ProductCategory computerComponent= new ProductCategory("Computer Component", electronics);
             ProductCategory graphicsCard = new ProductCategory("Graphics Card", computerComponent);
 
-            productCategoryRepository.saveAll(List.of(electronics, computers, laptops, laptops2, gamingLaptops, macs, computerComponent, graphicsCard));
+            productCategoryRepository.saveAll(List.of(electronics, computers, laptops, gamingLaptops, macs, computerComponent, graphicsCard));
 
-            ProductCoreSpecification displaySizeSpec = new ProductCoreSpecification("Display Size", laptops2);
-            ProductCoreSpecification monitorResolutionSpec = new ProductCoreSpecification("Monitor Resolution", laptops2);
+            ProductCoreSpecification displaySizeSpec = new ProductCoreSpecification("Display Size", laptops);
+            ProductCoreSpecification monitorResolutionSpec = new ProductCoreSpecification("Monitor Resolution", laptops);
             ProductCoreSpecification processorSpec = new ProductCoreSpecification("Processor", computers);
             ProductCoreSpecification ramSpec = new ProductCoreSpecification("RAM", computers);
             ProductCoreSpecification storageSpec = new ProductCoreSpecification("Storage Size", computers);
