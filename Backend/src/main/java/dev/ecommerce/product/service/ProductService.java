@@ -70,6 +70,16 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    public List<String> getProductFilterFields(Long id) {
+        ProductCategory category = getProductById(id).getCategory();
+        ProductFilterDTO productFilterDTO = new ProductFilterDTO();
+
+        for (ProductCoreSpecification spec : category.getCoreSpecs()) {
+            productFilterDTO.addFilterField(spec.getName());
+        }
+        return productFilterDTO.getFilterFields();
+    }
+
     @Transactional(readOnly = true)
     public List<ProductCategoryDTO> getProductCategoryChain(Long id) {
         Product product = getProductById(id);

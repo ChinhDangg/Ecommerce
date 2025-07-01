@@ -44,6 +44,11 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByCategory(id, page));
     }
 
+    @GetMapping("/{id}/filters")
+    public ResponseEntity<List<String>> getProductFilters(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(productService.getProductFilterFields(id));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
         ProductDTO productDTO = productService.findProductById(id);
