@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductCategoryService {
@@ -31,6 +32,13 @@ public class ProductCategoryService {
         this.productMapper = productMapper;
     }
 
+    private ProductCategory findProductCategoryById(Integer id, boolean nullable) {
+        Optional<ProductCategory> productCategory = productCategoryRepository.findById(id);
+        return (nullable)
+                ? productCategory.orElse(null)
+                : productCategory.orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+    }
+
     public List<ProductCategoryDTO> findAllTopCategory() {
         return productCategoryRepository.findAllTopParentCategory();
     }
@@ -46,17 +54,14 @@ public class ProductCategoryService {
 
     @Transactional(readOnly = true)
     public List<ProductCategoryDTO> findAllSubCategoryOf(Integer id) {
-        ProductCategory category = productCategoryRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Category not found with id: " + id)
-        );
+        ProductCategory category = findProductCategoryById(id, false);
         return productMapper.toProductCategoryDTOList(category.getSubcategories());
     }
 
     @Transactional
     public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
         Integer id = productCategoryDTO.getId();
-        ProductCategory parentCategory = (id == null) ? null : productCategoryRepository
-                .findById(id).orElse(null);
+        ProductCategory parentCategory = (id == null) ? null : findProductCategoryById(id, true);
         ProductCategory newCategory = new ProductCategory(
                 productCategoryDTO.getName(),
                 parentCategory
@@ -68,9 +73,7 @@ public class ProductCategoryService {
 
     @Transactional
     public List<Long> updateProductCategory(List<Long> productIds, Integer categoryId) {
-        ProductCategory category = productCategoryRepository.findById(categoryId).orElseThrow(
-                () -> new ResourceNotFoundException("Category not found with id: " + categoryId)
-        );
+        ProductCategory category = findProductCategoryById(categoryId, false);
         List<Long> updatedProductIds = new ArrayList<>();
         for (Long productId : productIds) {
             Product product = productService.getProductById(productId);
