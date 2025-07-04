@@ -8,7 +8,9 @@
 <body class="bg-gray-100">
 <div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Header -->
-    <h1 class="text-1xl font-bold text-gray-900 mb-6">Search Results for "Gaming Laptop"</h1>
+    <h1 class="text-1xl font-bold text-gray-900 mb-6">
+        <span>Search Results for "</span><span id="product-search-key" th:text="${name}">Gaming Laptop</span><span>"</span>
+    </h1>
 
     <!-- Filters -->
     <div class="mb-6 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
@@ -266,7 +268,7 @@
     </div>
 </div>
 
-<!-- Collapse Toggle Script -->
+<script src="product-search-test.js"></script>
 <script>
     function toggleFilter(button) {
         const content = button.nextElementSibling;
