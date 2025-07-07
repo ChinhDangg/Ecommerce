@@ -15,7 +15,7 @@ public class ProductSpecification extends BaseOption {
     private Product product;
 
     @ManyToOne
-    @JoinColumn(name = "product_filter_id")
+    @JoinColumn(name = "core_specification_id")
     private ProductCoreSpecification productCoreSpecification;
 
     public ProductSpecification(Product product, ProductCoreSpecification productCoreSpecification, String name, String valueOption) {
