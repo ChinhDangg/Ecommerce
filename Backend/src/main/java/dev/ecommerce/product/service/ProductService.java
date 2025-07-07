@@ -1,10 +1,14 @@
 package dev.ecommerce.product.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,7 +39,6 @@ public class ProductService {
     private final ProductSpecificationRepository productSpecificationRepository;
     private final ProductCoreSpecificationRepository productCoreSpecificationRepository;
     private final ProductMapper productMapper;
-    private final EntityManager entityManager;
 
     public ProductService(
             ProductCategoryRepository productCategoryRepository,
@@ -47,8 +50,7 @@ public class ProductService {
             ProductOptionRepository productOptionRepository,
             ProductSpecificationRepository productSpecificationRepository,
             ProductCoreSpecificationRepository productCoreSpecificationRepository,
-            ProductMapper productMapper,
-            EntityManager entityManager
+            ProductMapper productMapper
     ) {
         this.productCategoryRepository = productCategoryRepository;
         this.productLineRepository = productLineRepository;
@@ -60,7 +62,6 @@ public class ProductService {
         this.productSpecificationRepository = productSpecificationRepository;
         this.productCoreSpecificationRepository = productCoreSpecificationRepository;
         this.productMapper = productMapper;
-        this.entityManager = entityManager;
     }
 
     public Product getProductById(Long id) {
@@ -68,16 +69,6 @@ public class ProductService {
             throw new IllegalArgumentException("Product id is null");
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-    }
-
-    public List<String> getProductFilterFields(Long id) {
-        ProductCategory category = getProductById(id).getCategory();
-        ProductFilterDTO productFilterDTO = new ProductFilterDTO();
-
-        for (ProductCoreSpecification spec : category.getCoreSpecs()) {
-            productFilterDTO.addFilterField(spec.getName());
-        }
-        return productFilterDTO.getFilterFields();
     }
 
     @Transactional(readOnly = true)
@@ -97,59 +88,6 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, 10);
         Page<Product> productPage = productRepository.findByCategoryId(id, pageable);
         return productPage.map(productMapper::toShortProductWithFeaturesDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ShortProductDTO> findProductsByName(String productName, int page, boolean getFeatures) {
-        Pageable pageable = PageRequest.of(page, 10);
-        Specification<Product> spec = ProductSpecifications.nameContainsWords(productName);
-
-        if (spec == null)
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
-
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Product> query = cb.createQuery(Product.class);
-        Root<Product> root = query.from(Product.class);
-
-        Predicate predicate = spec.toPredicate(root, query, cb);
-        query.where(predicate);
-
-        query.select(root);
-//        query.select(cb.construct(
-//                Product.class,
-//                root.get("id"),
-//                root.get("manufacturerId"),
-//                root.get("name"),
-//                root.get("quantity"),
-//                root.get("price"),
-//                root.get("salePrice"),
-//                root.get("saleEndDate"),
-//                root.get("productLine"),
-//                root.get("media")
-//        ));
-
-        TypedQuery<Product> typedQuery = entityManager.createQuery(query);
-        typedQuery.setFirstResult((int) pageable.getOffset());
-        typedQuery.setMaxResults(pageable.getPageSize());
-
-        List<Product> resultList = typedQuery.getResultList();
-        List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
-        for (Product product : resultList) {
-            ShortProductDTO current = (getFeatures) ? productMapper.toShortProductWithFeaturesDTO(product)
-                    : productMapper.toShortProductWithoutFeaturesDTO(product);
-            current.setImageName(product.getMedia().isEmpty() ? null : product.getMedia().getFirst().getContent());
-            current.setDiscountedPrice(
-                    product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
-            );
-            shortProductDTOList.add(current);
-        }
-
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<Product> countRoot = countQuery.from(Product.class);
-        countQuery.select(cb.count(countRoot)).where(spec.toPredicate(countRoot, countQuery, cb));
-        Long total = entityManager.createQuery(countQuery).getSingleResult();
-
-        return new PageImpl<>(shortProductDTOList, pageable, total);
     }
 
     @Transactional(readOnly = true)
