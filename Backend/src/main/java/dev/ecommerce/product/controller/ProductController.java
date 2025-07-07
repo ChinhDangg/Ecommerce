@@ -1,6 +1,5 @@
 package dev.ecommerce.product.controller;
 
-import dev.ecommerce.product.DTO.ProductCategoryDTO;
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.service.ProductService;
@@ -42,11 +41,6 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByCategory(id, page));
-    }
-
-    @GetMapping("/{id}/filters")
-    public ResponseEntity<List<String>> getProductFilters(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(productService.getProductFilterFields(id));
     }
 
     @GetMapping("/{id}")
