@@ -1,14 +1,11 @@
 package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductLineDTO;
-import dev.ecommerce.product.DTO.ProductOptionDTO;
 import dev.ecommerce.product.service.ProductLineService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/productLine")

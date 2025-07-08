@@ -3,8 +3,8 @@ package dev.ecommerce.product.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.ecommerce.product.DTO.ProductFilterDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
+import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.entity.ProductSpecification;
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ProductSearchService {
@@ -38,16 +39,51 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ShortProductDTO> findProductsByName(String searchString, Map<String, String> selectedSpecs, int page, boolean getFeatures) {
-        Pageable pageable = PageRequest.of(page, 10);
-
+    public ProductSearchResultDTO searchProductByName(String searchString, Map<String, String> selectedSpecs, int page, boolean getFeatures) throws JsonProcessingException {
         String refined = searchString.replaceAll("[^a-zA-Z0-9 ]", "");
         if (refined.isEmpty())
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            return null;
 
         String[] words = refined.toLowerCase().split("\\s+");
         if (words.length == 0)
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            return null;
+
+        CompletableFuture<ProductCountAndDetails> detailsAndCountFuture =
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return getProductDetailsAndCountByName(words, selectedSpecs);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        CompletableFuture<ProductCoreSpecs> specFuture =
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return getProductCoreSpecListByName(words, selectedSpecs);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        // Wait for both to finish
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(detailsAndCountFuture, specFuture);
+
+        allDone.join();
+
+        // retrieve the results
+        ProductCountAndDetails productMainDetailsAndCount = detailsAndCountFuture.join();
+        ProductCoreSpecs productCoreSpecList = specFuture.join();
+        productMainDetailsAndCount.filters.putAll(productCoreSpecList.specs);
+
+        Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count.longValue(), getFeatures);
+
+        return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
+    }
+
+    @Transactional(readOnly = true)
+    private Page<ShortProductDTO> findProductByName(String[] words, Map<String, String> selectedSpecs, int page, int size, long total, boolean getFeatures) {
+        Pageable pageable = PageRequest.of(page, size);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
@@ -56,8 +92,24 @@ public class ProductSearchService {
         Root<Product> root = query.from(Product.class);
         Join<Product, ProductSpecification> specJoin = root.join("product_specifications", JoinType.INNER);
 
-        List<Predicate> predicates = buildSearchPredicates(cb, root, specJoin, words, selectedSpecs);
+        // create the predicates
+        List<Predicate> predicates = new ArrayList<>();
+        // Keyword match
+        for (String word : words) {
+            predicates.add(cb.like(cb.lower(root.get("name")), "%" + word.toLowerCase() + "%"));
+        }
+        // Spec filters
+        if (selectedSpecs != null && !selectedSpecs.isEmpty()) {
+            List<Predicate> specConditions = new ArrayList<>();
+            for (Map.Entry<String, String> entry : selectedSpecs.entrySet()) {
+                Predicate nameMatch = cb.equal(cb.lower(specJoin.get("name")), entry.getKey().toLowerCase());
+                Predicate optionMatch = cb.equal(cb.lower(specJoin.get("option")), entry.getValue().toLowerCase());
+                specConditions.add(cb.and(nameMatch, optionMatch));
+            }
+            predicates.add(cb.or(specConditions.toArray(new Predicate[0])));
+        }
 
+        // create the query
         query.select(root)
                 .where(cb.and(predicates.toArray(new Predicate[0])))
                 .groupBy(root.get("id"))
@@ -79,53 +131,27 @@ public class ProductSearchService {
             shortProductDTOList.add(current);
         }
 
-        // --------- Count Query ---------
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<Product> countRoot = countQuery.from(Product.class);
-        Join<Product, ProductSpecification> countSpecJoin = countRoot.join("product_specifications", JoinType.INNER);
-
-        List<Predicate> countPredicates = buildSearchPredicates(cb, countRoot, countSpecJoin, words, selectedSpecs);
-
-        countQuery.select(countRoot.get("id"))
-                .where(cb.and(countPredicates.toArray(new Predicate[0])))
-                .groupBy(countRoot.get("id"))
-                .having(cb.equal(cb.countDistinct(countSpecJoin.get("name")), selectedSpecs.size()));
-
-        long total = entityManager.createQuery(countQuery).getResultList().size();
+//        // --------- Count Query ---------
+//        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+//        Root<Product> countRoot = countQuery.from(Product.class);
+//        Join<Product, ProductSpecification> countSpecJoin = countRoot.join("product_specifications", JoinType.INNER);
+//
+//        List<Predicate> countPredicates = buildSearchPredicates(cb, countRoot, countSpecJoin, words, selectedSpecs);
+//
+//        countQuery.select(countRoot.get("id"))
+//                .where(cb.and(countPredicates.toArray(new Predicate[0])))
+//                .groupBy(countRoot.get("id"))
+//                .having(cb.equal(cb.countDistinct(countSpecJoin.get("name")), selectedSpecs.size()));
+//
+//        long total = entityManager.createQuery(countQuery).getResultList().size();
 
         return new PageImpl<>(shortProductDTOList, pageable, total);
     }
 
-    // get predicate by name with product specification - name and option
-    private List<Predicate> buildSearchPredicates(
-            CriteriaBuilder cb,
-            Root<Product> root,
-            Join<Product, ProductSpecification> specJoin,
-            String[] words,
-            Map<String, String> selectedSpecs
-    ) {
-        List<Predicate> predicates = new ArrayList<>();
+    private ProductCoreSpecs getProductCoreSpecListByName(String[] keywords, Map<String, String> specs) throws JsonProcessingException {
+        if (keywords.length == 0)
+            return new ProductCoreSpecs(null);
 
-        // Keyword match
-        for (String word : words) {
-            predicates.add(cb.like(cb.lower(root.get("name")), "%" + word.toLowerCase() + "%"));
-        }
-
-        // Spec filters
-        if (selectedSpecs != null && !selectedSpecs.isEmpty()) {
-            List<Predicate> specConditions = new ArrayList<>();
-            for (Map.Entry<String, String> entry : selectedSpecs.entrySet()) {
-                Predicate nameMatch = cb.equal(cb.lower(specJoin.get("name")), entry.getKey().toLowerCase());
-                Predicate optionMatch = cb.equal(cb.lower(specJoin.get("option")), entry.getValue().toLowerCase());
-                specConditions.add(cb.and(nameMatch, optionMatch));
-            }
-            predicates.add(cb.or(specConditions.toArray(new Predicate[0])));
-        }
-
-        return predicates;
-    }
-
-    private void getProductCoreSpecByName(String[] keywords, Map<String, String> specs) throws JsonProcessingException {
         StringBuilder sql = new StringBuilder("""
            SELECT ps.name,
            jsonb_agg(
@@ -173,19 +199,23 @@ public class ProductSearchService {
 
         List<Object[]> rows = query.getResultList();
         ObjectMapper objectMapper = new ObjectMapper();
-        List<ProductFilterDTO> productFilterList = new ArrayList<>();
+        Map<String, List<Map<String, Object>>> productFilterList = new HashMap<>();
         for (Object[] row : rows) {
             String specName = (String) row[0];
             String jsonArray = (String) row[1];
 
             List<Map<String, Object>> optionCounts =
                     objectMapper.readValue(jsonArray, new TypeReference<>() {});
+            productFilterList.put(specName, optionCounts);
         }
+        return new ProductCoreSpecs(productFilterList);
     }
 
-    private void getProductDetailsAndCount(String[] keywords, Map<String, String> specs) throws JsonProcessingException {
+    private record ProductCoreSpecs(Map<String, List<Map<String, Object>>> specs) {}
+
+    private ProductCountAndDetails getProductDetailsAndCountByName(String[] keywords, Map<String, String> specs) throws JsonProcessingException {
         if (keywords.length == 0)
-            return;
+            return null;
 
         StringBuilder sql = new StringBuilder("""
             WITH filtered_products AS (
@@ -256,14 +286,29 @@ public class ProductSearchService {
 
         List<Object[]> rows = query.getResultList();
         ObjectMapper objectMapper = new ObjectMapper();
+        /*
+         * {
+         *   "product_count": 18,
+         *   "filters": {
+         *     "brand": [{"value": "Lenovo", "count": 10}, {"value": "Dell", "count": 8}],
+         *     "category": [...]
+         *   }
+         * }
+         */
         if (!rows.isEmpty()) {
             Object[] result = rows.getFirst();
             BigInteger productCount = (BigInteger) result[0];
             String json = result[1].toString(); // or cast to PGobject then getValue()
 
-            Map<String, List<Map<String, Object>>> allCounts =
+            Map<String, List<Map<String, Object>>> filters =
                     objectMapper.readValue(json, new TypeReference<>() {});
+            return new ProductCountAndDetails(productCount, filters);
         }
+        return new ProductCountAndDetails(new BigInteger("0"), null);
     }
 
+    private record ProductCountAndDetails(
+            BigInteger count,
+            Map<String, List<Map<String, Object>>> filters
+    ) {}
 }

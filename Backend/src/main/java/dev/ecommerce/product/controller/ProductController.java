@@ -2,6 +2,7 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
+import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,11 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductSearchService productSearchService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductSearchService productSearchService) {
         this.productService = productService;
+        this.productSearchService = productSearchService;
     }
 
     @GetMapping("/by-name")
@@ -32,7 +35,7 @@ public class ProductController {
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "false") boolean getFeatures) {
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByName(name, page, getFeatures));
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(name,));
     }
 
     @GetMapping("/by-category")
