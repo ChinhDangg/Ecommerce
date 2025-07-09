@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product_reviews")
+@Table(name = "product_review")
 public class ProductReview {
     @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

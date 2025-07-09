@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "product_descriptions")
+@Table(name = "product_description")
 public class ProductDescription extends BaseContent {
 
     @ManyToOne

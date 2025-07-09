@@ -8,7 +8,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "product_options")
+@Table(name = "product_option")
 public class ProductOption extends BaseOption {
 
     @ManyToOne
@@ -20,10 +20,10 @@ public class ProductOption extends BaseOption {
     @JoinColumn(name = "product_line_id")
     private ProductLine productLine;
 
-    public ProductOption(Product product, ProductLine productLine, String name, String valueOption) {
+    public ProductOption(Product product, ProductLine productLine, String name, String option) {
         this.product = product;
         this.productLine = productLine;
         this.name = name;
-        this.valueOption = valueOption;
+        this.option = option;
     }
 }

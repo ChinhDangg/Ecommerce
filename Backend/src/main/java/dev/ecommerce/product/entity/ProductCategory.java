@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "product_categories")
+@Table(name = "product_category")
 public class ProductCategory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

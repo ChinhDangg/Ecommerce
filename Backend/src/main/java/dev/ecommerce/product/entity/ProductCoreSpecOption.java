@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "product_core_spec_options")
+@Table(name = "product_core_spec_option")
 @NoArgsConstructor
 public class ProductCoreSpecOption {
 
