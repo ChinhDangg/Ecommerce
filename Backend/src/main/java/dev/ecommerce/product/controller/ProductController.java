@@ -1,6 +1,8 @@
 package dev.ecommerce.product.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.ecommerce.product.DTO.ProductDTO;
+import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
@@ -16,7 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -31,11 +35,21 @@ public class ProductController {
     }
 
     @GetMapping("/by-name")
-    public ResponseEntity<Page<ShortProductDTO>> searchProducts(
-            @RequestParam(defaultValue = "") String name,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "false") boolean getFeatures) {
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(name,));
+    public ResponseEntity<ProductSearchResultDTO> searchProducts(@RequestParam Map<String, String> allParams) throws JsonProcessingException {
+        String searchString = allParams.remove("search");
+        String pageStr = allParams.remove("page");
+        int page = Integer.parseInt(pageStr != null ? pageStr : "0");
+        String featureStr = allParams.remove("feature");
+        boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
+
+        Map<String, String> selectedFilters = new HashMap<>(allParams);
+
+        System.out.println(searchString);
+        System.out.println(page);
+        System.out.println(getFeatures);
+        System.out.println(selectedFilters);
+
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, selectedFilters, page, getFeatures));
     }
 
     @GetMapping("/by-category")
