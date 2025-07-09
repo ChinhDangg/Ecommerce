@@ -287,7 +287,7 @@ public class ProductService {
             if (currentOptionMap.containsKey(dto.name())) {
                 T option = currentOptionMap.get(dto.name());
                 if (!dto.valueOption().equals(option.getName()))
-                    option.setValueOption(dto.valueOption());
+                    option.setOption(dto.valueOption());
                 updatedOptionList.add(option);
             } else {
                 T newOption = newOptionFactory.apply(dto);
