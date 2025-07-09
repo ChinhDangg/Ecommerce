@@ -7,6 +7,7 @@ import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.entity.Product;
+import dev.ecommerce.product.entity.ProductCoreSpecification;
 import dev.ecommerce.product.entity.ProductSpecification;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -76,13 +77,13 @@ public class ProductSearchService {
         ProductCoreSpecs productCoreSpecList = specFuture.join();
         productMainDetailsAndCount.filters.putAll(productCoreSpecList.specs);
 
-        Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count.longValue(), getFeatures);
+        Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
 
         return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
     }
 
     @Transactional(readOnly = true)
-    private Page<ShortProductDTO> findProductByName(String[] words, Map<String, String> selectedSpecs, int page, int size, long total, boolean getFeatures) {
+    protected Page<ShortProductDTO> findProductByName(String[] words, Map<String, String> selectedSpecs, int page, int size, long total, boolean getFeatures) {
         Pageable pageable = PageRequest.of(page, size);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -90,7 +91,8 @@ public class ProductSearchService {
         // --------- Main Query ---------
         CriteriaQuery<Product> query = cb.createQuery(Product.class);
         Root<Product> root = query.from(Product.class);
-        Join<Product, ProductSpecification> specJoin = root.join("product_specifications", JoinType.INNER);
+        Join<Product, ProductSpecification> specJoin = root.join("specifications", JoinType.INNER);
+        Join<ProductSpecification, ProductCoreSpecification> coreSpecJoin = specJoin.join("productCoreSpecification", JoinType.INNER);
 
         // create the predicates
         List<Predicate> predicates = new ArrayList<>();
@@ -112,8 +114,11 @@ public class ProductSearchService {
         // create the query
         query.select(root)
                 .where(cb.and(predicates.toArray(new Predicate[0])))
-                .groupBy(root.get("id"))
-                .having(cb.equal(cb.countDistinct(specJoin.get("name")), selectedSpecs.size()));
+                .groupBy(root.get("id"));
+
+        if (selectedSpecs != null && !selectedSpecs.isEmpty()) { // handle when no selected specs
+            query.having(cb.equal(cb.countDistinct(specJoin.get("name")), selectedSpecs.size()));
+        }
 
         TypedQuery<Product> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
@@ -134,7 +139,7 @@ public class ProductSearchService {
 //        // --------- Count Query ---------
 //        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
 //        Root<Product> countRoot = countQuery.from(Product.class);
-//        Join<Product, ProductSpecification> countSpecJoin = countRoot.join("product_specifications", JoinType.INNER);
+//        Join<Product, ProductSpecification> countSpecJoin = countRoot.join("specifications", JoinType.INNER);
 //
 //        List<Predicate> countPredicates = buildSearchPredicates(cb, countRoot, countSpecJoin, words, selectedSpecs);
 //
@@ -153,18 +158,20 @@ public class ProductSearchService {
             return new ProductCoreSpecs(null);
 
         StringBuilder sql = new StringBuilder("""
-           SELECT ps.name,
-           jsonb_agg(
-               jsonb_build_object(
-                 'option', ps.option,
-                 'count', COUNT(DISTINCT p.id)
-               )
-               ORDER BY ps.option
-           ) AS option_counts
-           FROM product p
-           JOIN product_specification ps ON ps.product_id = p.id
-           JOIN product_core_specification cps on cps.id = ps.core_specification_id
-           WHERE 1=1
+            SELECT
+            ps_group.name,
+            jsonb_agg(
+                jsonb_build_object(
+                    'option', ps_group.option,
+                    'count', ps_group.count
+                ) ORDER BY ps_group.option
+            ) AS option_counts
+                FROM (
+                SELECT ps.name, ps.option, COUNT(DISTINCT p.id) AS count
+                FROM product p
+                JOIN product_specification ps ON ps.product_id = p.id
+                JOIN product_core_specification cps ON cps.id = ps.core_specification_id
+                WHERE 1=1
         """);
 
         Map<String, Object> parameters = new HashMap<>();
@@ -189,7 +196,12 @@ public class ProductSearchService {
             i++;
         }
 
-        sql.append(" GROUP BY ps.name ORDER BY ps.name");
+        sql.append(""" 
+                GROUP BY ps.name, ps.option
+            ) ps_group
+            GROUP BY ps_group.name
+            ORDER BY ps_group.name
+        """);
 
         Query query = entityManager.createNativeQuery(sql.toString());
 
@@ -219,7 +231,7 @@ public class ProductSearchService {
 
         StringBuilder sql = new StringBuilder("""
             WITH filtered_products AS (
-               SELECT p.id, p.brand, p.quantity, p.price, pc.name AS category
+               SELECT p.id, p.brand, p.price, pc.name AS category
                FROM product p
                JOIN product_category pc ON pc.id = p.category_id
                JOIN product_specification ps ON ps.product_id = p.id
@@ -257,16 +269,19 @@ public class ProductSearchService {
                 SELECT 'category', category FROM filtered_products
                 UNION ALL
                 SELECT 'price', price::text FROM filtered_products
-                UNION ALL
-                SELECT 'quantity', quantity::text FROM filtered_products
+            ),
+            value_grouped AS (
+                SELECT field, value, COUNT(*) AS count
+                FROM flattened
+                GROUP BY field, value
             ),
             value_counts AS (
                 SELECT field,
-                jsonb_agg(
-                    jsonb_build_object('value', value, 'count', COUNT(*))
-                    ORDER BY value
-                ) AS value_counts
-                FROM flattened
+                    jsonb_agg(
+                        jsonb_build_object('value', value, 'count', count)
+                        ORDER BY value
+                    ) AS value_counts
+                FROM value_grouped
                 GROUP BY field
             ),
             total_products AS (
@@ -274,9 +289,20 @@ public class ProductSearchService {
             )
             SELECT
                 (SELECT total FROM total_products) AS product_count,
-                jsonb_object_agg(field, value_counts) AS all_counts
+                field,
+                value_counts
             FROM value_counts;
         """);
+
+        /*
+        get id, brand, quantity, price, category.name with filters
+        flatten the result into 2 columns: field | value
+                                           brand | Lenovo
+                                           brand | ASUS
+                                           category | gaming laptop
+                                           category | notebook
+
+         */
 
         Query query = entityManager.createNativeQuery(sql.toString());
 
@@ -287,28 +313,34 @@ public class ProductSearchService {
         List<Object[]> rows = query.getResultList();
         ObjectMapper objectMapper = new ObjectMapper();
         /*
-         * {
-         *   "product_count": 18,
-         *   "filters": {
-         *     "brand": [{"value": "Lenovo", "count": 10}, {"value": "Dell", "count": 8}],
-         *     "category": [...]
-         *   }
-         * }
+     *      {
+         *      "product_count": 18,
+         *      "field": "brand",
+         *      "value_counts" : [{"value": "Lenovo", "count": 10}, {"value": "Dell", "count": 8}],
+         *  },
+         *  {
+         *      "product_count": 10,
+         *      "field": "category",
+         *      "value_counts": [{"value": "gaming laptop", "count": 10}, {"value": "notebook", "count": 8}],
+         *  }
          */
         if (!rows.isEmpty()) {
-            Object[] result = rows.getFirst();
-            BigInteger productCount = (BigInteger) result[0];
-            String json = result[1].toString(); // or cast to PGobject then getValue()
+            int productCount = ((Number) rows.getFirst()[0]).intValue();
 
-            Map<String, List<Map<String, Object>>> filters =
-                    objectMapper.readValue(json, new TypeReference<>() {});
+            Map<String, List<Map<String, Object>>> filters = new HashMap<>();
+            for (Object[] row : rows) {
+                String field = (String) row[1];
+                String json = (String) row[2]; // assuming value_counts is returned as JSON string
+                List<Map<String, Object>> valueCounts = objectMapper.readValue(json, new TypeReference<>() {});
+                filters.put(field, valueCounts);
+            }
             return new ProductCountAndDetails(productCount, filters);
         }
-        return new ProductCountAndDetails(new BigInteger("0"), null);
+        return new ProductCountAndDetails(0, null);
     }
 
     private record ProductCountAndDetails(
-            BigInteger count,
+            int count,
             Map<String, List<Map<String, Object>>> filters
     ) {}
 }
