@@ -230,13 +230,12 @@ public class ProductSearchService {
             return null;
 
         StringBuilder sql = new StringBuilder("""
-            WITH filtered_products AS (
-               SELECT p.id, p.brand, p.price, pc.name AS category
-               FROM product p
-               JOIN product_category pc ON pc.id = p.category_id
-               JOIN product_specification ps ON ps.product_id = p.id
-               JOIN product_core_specification cps on cps.id = ps.core_specification_id
-               WHERE 1=1
+            WITH matched_ids AS (
+                SELECT DISTINCT p.id
+                FROM product p
+                JOIN product_specification ps ON ps.product_id = p.id
+                JOIN product_core_specification cps ON cps.id = ps.core_specification_id
+                WHERE 1=1
         """);
 
         Map<String, Object> parameters = new HashMap<>();
@@ -262,6 +261,12 @@ public class ProductSearchService {
         }
 
         sql.append("""
+            ),
+            filtered_products AS (
+                SELECT p.id, p.brand, p.price, pc.name AS category
+                FROM product p
+                JOIN product_category pc ON pc.id = p.category_id
+                WHERE p.id IN (SELECT id FROM matched_ids)
             ),
             flattened AS (
                 SELECT 'brand' AS field, brand AS value FROM filtered_products
