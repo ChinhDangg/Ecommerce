@@ -29,6 +29,9 @@ public class ShortProductDTO {
     @Setter
     private BigDecimal discountedPrice;
 
+    @Setter
+    private boolean newRelease;
+
     public ShortProductDTO(Integer productLineId, Long id, String manufacturerId, String name,
                            Integer quantity, BigDecimal price, List<String> features) {
         this.productLineId = productLineId;
