@@ -90,26 +90,27 @@
             </div>
 
             <!-- Product Listings -->
-            <div class="space-y-6">
+            <div id="product-item-container" class="space-y-6">
                 <!-- Product Item 1 -->
-                <div class="max-w-4xl mx-auto p-4 border rounded-lg shadow-md bg-white">
+                <div class="product-item max-w-4xl mx-auto p-4 border rounded-lg shadow-md bg-white">
                     <div class="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-start">
                         <div class="flex flex-col items-center space-y-2">
-                            <img src="https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500/https://static.bhphoto.com/images/multiple_images/images500x500/1740478260_IMG_2440028.jpg" alt="Lenovo Legion Pro 7i" class="w-48 object-contain" />
+                            <img src="https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500/https://static.bhphoto.com/images/multiple_images/images500x500/1740478260_IMG_2440028.jpg" alt="Lenovo Legion Pro 7i"
+                                 class="product-img w-48 object-contain" />
                             <label class="inline-flex items-center space-x-2 text-sm text-gray-700">
                                 <input type="checkbox" class="form-checkbox rounded border-gray-300 text-blue-600" />
                                 <span>Add to Compare</span>
                             </label>
                         </div>
                         <div class="space-y-2">
-                            <h2 class="text-xl font-bold text-gray-900">Lenovo 16" Legion Pro 7i Gaming Laptop</h2>
-                            <p class="text-sm text-gray-500">B&H # LE83F50018US | MFR # 83F50018US</p>
+                            <h2 class="product-name text-xl font-bold text-gray-900">Lenovo 16" Legion Pro 7i Gaming Laptop</h2>
+                            <p class="product-id text-sm text-gray-500">B&H # LE83F50018US | MFR # 83F50018US</p>
                             <div class="flex items-center text-yellow-500 text-sm">
                                 ★★★★★ <span class="ml-2 text-gray-700">(155 Reviews)</span>
                             </div>
                             <div class="leading-none space-y-1">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-0 leading-none">Key Features</h3>
-                                <ul class="text-sm text-gray-800 list-disc list-inside leading-tight">
+                                <ul class="product-feature-list text-sm text-gray-800 list-disc list-inside leading-tight">
                                     <li>2.7 GHz Intel Core Ultra 9 24-Core</li>
                                     <li>32GB of DDR5 RAM | 2TB M.2 SSD Storage</li>
                                     <li>16" 2560 x 1600 OLED 240 Hz Display</li>
@@ -122,20 +123,20 @@
                             <div class="mb-6 border-b border-gray-200 pb-4">
                                 <div class="flex items-start">
                                     <div class="text-left">
-                                        <span id="sale-price" class="text-2xl font-bold text-gray-900 block">$3,599.99</span>
-                                        <span id="saved-price" class="text-sm font-semibold text-green-600 block mt-1">Save $400.00</span>
+                                        <span class="sale-price text-2xl font-bold text-gray-900 block">$3,599.99</span>
+                                        <span class="saved-price text-sm font-semibold text-green-600 block mt-1">Save $400.00</span>
                                     </div>
-                                    <span id="price" class="text-sm text-gray-500 line-through ml-2 mt-1">$3,999.99</span>
+                                    <span class="price text-sm text-gray-500 line-through ml-2 mt-1">$3,999.99</span>
                                 </div>
-                                <p id="price-end-date" class="text-sm text-gray-600 mt-2">Special pricing ends in 3 days</p>
+                                <p class="price-end-date text-sm text-gray-600 mt-2">Limited time offer</p>
                             </div>
                             <button class="w-48 px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
                                 Add to Cart
                             </button>
                             <div class="flex items-center">
-                                <span class="rounded bg-blue-600 px-2 mr-2 py-1 text-xs font-semibold text-white">New Release</span>
-                                <span id="in-stock-label" class="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">In Stock</span>
-                                <span id="out-stock-label" class="hidden rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">Out of Stock</span>
+                                <span class="new-release-label rounded bg-blue-600 px-2 mr-2 py-1 text-xs font-semibold text-white">New Release</span>
+                                <span class="in-stock-label rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">In Stock</span>
+                                <span class="out-stock-label hidden rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">Out of Stock</span>
                                 <button class="ml-2 text-blue-600 hover:text-blue-800">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
