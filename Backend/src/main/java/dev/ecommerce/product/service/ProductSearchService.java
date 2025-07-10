@@ -20,8 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -133,6 +133,8 @@ public class ProductSearchService {
             current.setDiscountedPrice(
                     product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
             );
+            long daysDifference = ChronoUnit.DAYS.between(product.getSaleEndDate(), LocalDate.now());
+            current.setNewRelease(daysDifference >= 0 && daysDifference < 8);
             shortProductDTOList.add(current);
         }
 
