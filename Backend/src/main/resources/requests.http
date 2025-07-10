@@ -14,3 +14,6 @@ GET http://localhost:8080/api/product/search?
 
 ###
 GET http://localhost:8080/api/product/2
+
+###
+GET http://localhost:8080/api/product/by-name?search=1&page=0&feature=true

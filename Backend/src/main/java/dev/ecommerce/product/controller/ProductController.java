@@ -44,11 +44,6 @@ public class ProductController {
 
         Map<String, String> selectedFilters = new HashMap<>(allParams);
 
-        System.out.println(searchString);
-        System.out.println(page);
-        System.out.println(getFeatures);
-        System.out.println(selectedFilters);
-
         return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, selectedFilters, page, getFeatures));
     }
 
