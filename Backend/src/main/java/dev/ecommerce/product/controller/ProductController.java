@@ -42,7 +42,21 @@ public class ProductController {
         String featureStr = allParams.remove("feature");
         boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
 
-        Map<String, String> selectedFilters = new HashMap<>(allParams);
+        String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
+
+        Map<String, List<String>> selectedFilters = new HashMap<>();
+
+        if (filterParam != null && !filterParam.isEmpty()) {
+            String[] filterPairs = filterParam.split(",");
+            for (String pair : filterPairs) {
+                String[] parts = pair.split(":");
+                if (parts.length == 2) {
+                    String name = parts[0];
+                    List<String> values = Arrays.asList(parts[1].split("\\|"));
+                    selectedFilters.put(name, values);
+                }
+            }
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, selectedFilters, page, getFeatures));
     }
