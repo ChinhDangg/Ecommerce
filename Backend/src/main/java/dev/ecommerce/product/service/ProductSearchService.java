@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -40,7 +37,7 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    public ProductSearchResultDTO searchProductByName(String searchString, Map<String, String> selectedSpecs, int page, boolean getFeatures) throws JsonProcessingException {
+    public ProductSearchResultDTO searchProductByName(String searchString, Map<String, List<String>> selectedSpecs, int page, boolean getFeatures) throws JsonProcessingException {
         String refined = searchString.replaceAll("[^a-zA-Z0-9 ]", "");
         if (refined.isEmpty())
             return null;
@@ -67,14 +64,68 @@ public class ProductSearchService {
                     }
                 });
 
-        // Wait for both to finish
-        CompletableFuture<Void> allDone = CompletableFuture.allOf(detailsAndCountFuture, specFuture);
+        CompletableFuture<Void> allDone;
+
+        if (selectedSpecs != null && !selectedSpecs.isEmpty()) {
+            CompletableFuture<ProductCoreSpecs> fullSpecFuture =
+                    CompletableFuture.supplyAsync(() -> {
+                        try {
+                            return getProductCoreSpecListByName(words, null);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+            allDone = CompletableFuture.allOf(detailsAndCountFuture, specFuture, fullSpecFuture);
+            allDone.join();
+
+            ProductCountAndDetails productMainDetailsAndCount = detailsAndCountFuture.join();
+            Map<String, List<Map<String, Object>>> newSpecList = specFuture.join().specs;
+            Map<String, List<Map<String, Object>>> fullCoreSpecList = fullSpecFuture.join().specs;
+
+
+            for (Map.Entry<String, List<Map<String, Object>>> entry : fullCoreSpecList.entrySet()) {
+                String filter = entry.getKey();
+
+                // Skip the selected filter if it is the only one which is the main branch one
+                if (selectedSpecs.size() == 1) {
+                    String selectedFilter = selectedSpecs.keySet().iterator().next();
+                    if (filter.equals(selectedFilter))
+                        continue;
+                }
+
+                List<Map<String, Object>> fullList = entry.getValue();
+                List<Map<String, Object>> newList = newSpecList.getOrDefault(filter, Collections.emptyList());
+
+                // Build a name → count map from the new list
+                Map<String, Integer> nameToCount = new HashMap<>();
+                for (Map<String, Object> map : newList) {
+                    String name = (String) map.get("name");
+                    Integer count = (Integer) map.get("count");
+                    nameToCount.put(name, count);
+                }
+
+                // Update the full list
+                for (Map<String, Object> item : fullList) {
+                    String name = (String) item.get("name");
+                    item.put("count", nameToCount.getOrDefault(name, 0));
+                }
+            }
+
+
+
+        } else {
+            allDone = CompletableFuture.allOf(detailsAndCountFuture, specFuture);
+        }
 
         allDone.join();
 
         // retrieve the results
         ProductCountAndDetails productMainDetailsAndCount = detailsAndCountFuture.join();
         ProductCoreSpecs productCoreSpecList = specFuture.join();
+
+
+
+
         productMainDetailsAndCount.filters.putAll(productCoreSpecList.specs);
 
         Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
@@ -83,7 +134,7 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    protected Page<ShortProductDTO> findProductByName(String[] words, Map<String, String> selectedSpecs, int page, int size, long total, boolean getFeatures) {
+    protected Page<ShortProductDTO> findProductByName(String[] words, Map<String, List<String>> selectedSpecs, int page, int size, long total, boolean getFeatures) {
         Pageable pageable = PageRequest.of(page, size);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -102,13 +153,26 @@ public class ProductSearchService {
         }
         // Spec filters
         if (selectedSpecs != null && !selectedSpecs.isEmpty()) {
-            List<Predicate> specConditions = new ArrayList<>();
-            for (Map.Entry<String, String> entry : selectedSpecs.entrySet()) {
-                Predicate nameMatch = cb.equal(cb.lower(specJoin.get("name")), entry.getKey().toLowerCase());
-                Predicate optionMatch = cb.equal(cb.lower(specJoin.get("option")), entry.getValue().toLowerCase());
-                specConditions.add(cb.and(nameMatch, optionMatch));
+            List<Predicate> specGroupPredicates = new ArrayList<>();
+
+            for (Map.Entry<String, List<String>> entry : selectedSpecs.entrySet()) {
+                String name = entry.getKey().toLowerCase();
+                List<String> options = entry.getValue();
+
+                Predicate nameMatch = cb.equal(cb.lower(specJoin.get("name")), name);
+
+                // Each option becomes a separate predicate
+                List<Predicate> optionMatches = options.stream()
+                        .map(opt -> cb.equal(cb.lower(specJoin.get("option")), opt.toLowerCase()))
+                        .toList();
+
+                // Combine into: (name = 'ram' AND (option = '16gb' OR option = '48gb'))
+                Predicate fullMatch = cb.and(nameMatch, cb.or(optionMatches.toArray(new Predicate[0])));
+                specGroupPredicates.add(fullMatch);
             }
-            predicates.add(cb.or(specConditions.toArray(new Predicate[0])));
+
+            // Add to the global predicate list: all spec groups must be satisfied
+            predicates.add(cb.or(specGroupPredicates.toArray(new Predicate[0])));
         }
 
         // create the query
@@ -155,7 +219,7 @@ public class ProductSearchService {
         return new PageImpl<>(shortProductDTOList, pageable, total);
     }
 
-    private ProductCoreSpecs getProductCoreSpecListByName(String[] keywords, Map<String, String> specs) throws JsonProcessingException {
+    private ProductCoreSpecs getProductCoreSpecListByName(String[] keywords, Map<String, List<String>> specs) throws JsonProcessingException {
         if (keywords.length == 0)
             return new ProductCoreSpecs(null);
 
@@ -184,17 +248,25 @@ public class ProductSearchService {
         }
 
         int i = 0;
-        for (Map.Entry<String, String> entry : specs.entrySet()) {
-            sql.append("""
-                AND EXISTS (
-                    SELECT 1 FROM product_specification ps_sub
-                    WHERE ps_sub.product_id = p.id
-                      AND LOWER(ps_sub.name) = :specName""").append(i).append("""
-                    AND LOWER(ps_sub.option) = :specOption""").append(i).append("""
-                )
-            """);
-            parameters.put("specName" + i, entry.getKey().toLowerCase());
-            parameters.put("specOption" + i, entry.getValue().toLowerCase());
+        for (Map.Entry<String, List<String>> entry : specs.entrySet()) {
+            String specName = entry.getKey().toLowerCase();
+            List<String> options = entry.getValue();
+            sql.append(" AND EXISTS (")
+                    .append(" SELECT 1 FROM product_specification ps_sub")
+                    .append(" WHERE ps_sub.product_id = p.id")
+                    .append(" AND LOWER(ps_sub.name) = :specName").append(i)
+                    .append(" AND (");
+
+            for (int j = 0; j < options.size(); j++) {
+                if (j > 0) sql.append(" OR ");
+                sql.append("LOWER(ps_sub.option) = :specOption")
+                        .append(i).append("_").append(j);
+                parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
+            }
+
+            sql.append(")) "); // close EXISTS
+
+            parameters.put("specName" + i, specName);
             i++;
         }
 
@@ -227,7 +299,7 @@ public class ProductSearchService {
 
     private record ProductCoreSpecs(Map<String, List<Map<String, Object>>> specs) {}
 
-    private ProductCountAndDetails getProductDetailsAndCountByName(String[] keywords, Map<String, String> specs) throws JsonProcessingException {
+    private ProductCountAndDetails getProductDetailsAndCountByName(String[] keywords, Map<String, List<String>> specs) throws JsonProcessingException {
         if (keywords.length == 0)
             return null;
 
@@ -248,17 +320,25 @@ public class ProductSearchService {
         }
 
         int i = 0;
-        for (Map.Entry<String, String> entry : specs.entrySet()) {
-            sql.append("""
-                AND EXISTS (
-                    SELECT 1 FROM product_specification ps_sub
-                    WHERE ps_sub.product_id = p.id
-                        AND LOWER(ps_sub.name) = :specName""").append(i).append("""
-                    AND LOWER(ps_sub.option) = :specOption""").append(i).append("""
-                )
-            """);
-            parameters.put("specName" + i, entry.getKey().toLowerCase());
-            parameters.put("specOption" + i, entry.getValue().toLowerCase());
+        for (Map.Entry<String, List<String>> entry : specs.entrySet()) {
+            String specName = entry.getKey().toLowerCase();
+            List<String> options = entry.getValue();
+            sql.append(" AND EXISTS (")
+                    .append(" SELECT 1 FROM product_specification ps_sub")
+                    .append(" WHERE ps_sub.product_id = p.id")
+                    .append(" AND LOWER(ps_sub.name) = :specName").append(i)
+                    .append(" AND (");
+
+            for (int j = 0; j < options.size(); j++) {
+                if (j > 0) sql.append(" OR ");
+                sql.append("LOWER(ps_sub.option) = :specOption")
+                        .append(i).append("_").append(j);
+                parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
+            }
+
+            sql.append(")) "); // close EXISTS
+
+            parameters.put("specName" + i, specName);
             i++;
         }
 
@@ -308,7 +388,12 @@ public class ProductSearchService {
                                            brand | ASUS
                                            category | gaming laptop
                                            category | notebook
-
+        group by field and value, and get field, value, and count of them
+                                            field | value | count
+                                            brand | ASUS  | 4
+        group by field and get field and value_counts
+                                            field | value_grouped
+                                            brand | [{'value':'ASUS', 'count':4},{'value':'Lenovo','count':5}]
          */
 
         Query query = entityManager.createNativeQuery(sql.toString());
