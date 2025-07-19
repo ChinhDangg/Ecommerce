@@ -37,7 +37,8 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    public ProductSearchResultDTO searchProductByName(String searchString, Map<String, List<String>> selectedSpecs, int page, boolean getFeatures) throws JsonProcessingException {
+    public ProductSearchResultDTO searchProductByName(String searchString, Map<String, List<String>> selectedSpecs, int page,
+                                                      boolean getFeatures) {
         String refined = searchString.replaceAll("[^a-zA-Z0-9 ]", "");
         if (refined.isEmpty())
             return null;
@@ -111,26 +112,22 @@ public class ProductSearchService {
                 }
             }
 
-
+            productMainDetailsAndCount.filters.putAll(fullCoreSpecList);
+            Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
+            return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
 
         } else {
             allDone = CompletableFuture.allOf(detailsAndCountFuture, specFuture);
+            allDone.join();
+
+            // retrieve the results
+            ProductCountAndDetails productMainDetailsAndCount = detailsAndCountFuture.join();
+            ProductCoreSpecs productCoreSpecList = specFuture.join();
+
+            productMainDetailsAndCount.filters.putAll(productCoreSpecList.specs);
+            Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
+            return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
         }
-
-        allDone.join();
-
-        // retrieve the results
-        ProductCountAndDetails productMainDetailsAndCount = detailsAndCountFuture.join();
-        ProductCoreSpecs productCoreSpecList = specFuture.join();
-
-
-
-
-        productMainDetailsAndCount.filters.putAll(productCoreSpecList.specs);
-
-        Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
-
-        return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
     }
 
     @Transactional(readOnly = true)
