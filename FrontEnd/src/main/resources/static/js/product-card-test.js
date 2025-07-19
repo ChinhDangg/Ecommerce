@@ -1,6 +1,18 @@
-const productId = document.getElementById('product-id').innerText;
+async function initiate() {
+    initializeProductInfoTabs();
 
-console.log('productId: ', productId);
+    const productId = document.getElementById('product-id').innerText;
+    document.getElementById('product-id').remove();
+    const productInfo = await fetchProductInfo(productId);
+    showProductDetails(productInfo);
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    window.addEventListener("popstate", async () => {
+        await initiate();
+    });
+    await initiate();
+});
 
 async function fetchProductInfo(productId) {
     // if (!productId) {
@@ -371,8 +383,6 @@ function selectThisTabButton(button) {
     button.classList.remove('border-transparent', 'text-gray-600');
 }
 
-initializeProductInfoTabs();
-
 function getDayDifference(jsonDate) {
     // Parse the JSON date string into a Date object
     const givenDate = new Date(jsonDate);
@@ -389,10 +399,3 @@ function getDayDifference(jsonDate) {
     // Return the rounded day difference (negative if given date is in the past)
     return Math.round(diffInDays);
 }
-
-async function show() {
-    const productInfo = await fetchProductInfo(1);
-    showProductDetails(productInfo);
-}
-
-show();
