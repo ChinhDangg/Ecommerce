@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
+
 @Controller
 @RequestMapping("/product")
 public class ProductController {
@@ -21,11 +23,21 @@ public class ProductController {
 
     @GetMapping("/search")
     public String getProductSearch(
-            @RequestParam(defaultValue = "") String name,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam Map<String, String> allParams,
             Model model) {
-        model.addAttribute("name", name);
+
+        String searchString = allParams.remove("q");
+        String pageStr = allParams.remove("page");
+        int page = Integer.parseInt(pageStr != null ? pageStr : "0");
+        String featureStr = allParams.remove("feature");
+        boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
+
+        String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
+
+        model.addAttribute("search_string", searchString);
         model.addAttribute("page", page);
+        model.addAttribute("feature", getFeatures);
+        model.addAttribute("filters", filterParam);
         return "/product-search-draft";
     }
     

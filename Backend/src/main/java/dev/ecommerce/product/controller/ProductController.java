@@ -35,8 +35,8 @@ public class ProductController {
     }
 
     @GetMapping("/by-name")
-    public ResponseEntity<ProductSearchResultDTO> searchProducts(@RequestParam Map<String, String> allParams) throws JsonProcessingException {
-        String searchString = allParams.remove("search");
+    public ResponseEntity<ProductSearchResultDTO> searchProducts(@RequestParam Map<String, String> allParams) {
+        String searchString = allParams.remove("q");
         String pageStr = allParams.remove("page");
         int page = Integer.parseInt(pageStr != null ? pageStr : "0");
         String featureStr = allParams.remove("feature");
