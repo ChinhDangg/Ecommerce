@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
+import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.entity.ProductCoreSpecification;
 import dev.ecommerce.product.entity.ProductSpecification;
@@ -37,8 +38,8 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    public ProductSearchResultDTO searchProductByName(String searchString, Map<String, List<String>> selectedSpecs, int page,
-                                                      boolean getFeatures) {
+    public ProductSearchResultDTO searchProductByName(String searchString, int page, boolean getFeatures, SortOption sortBy,
+                                                      Map<String, List<String>> selectedSpecs) {
         String refined = searchString.replaceAll("[^a-zA-Z0-9 ]", "");
         if (refined.isEmpty())
             return null;
@@ -113,7 +114,7 @@ public class ProductSearchService {
             }
 
             productMainDetailsAndCount.filters.putAll(fullCoreSpecList);
-            Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
+            Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures, sortBy);
             return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
 
         } else {
@@ -125,13 +126,14 @@ public class ProductSearchService {
             ProductCoreSpecs productCoreSpecList = specFuture.join();
 
             productMainDetailsAndCount.filters.putAll(productCoreSpecList.specs);
-            Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures);
+            Page<ShortProductDTO> products = findProductByName(words, selectedSpecs, page, 10, productMainDetailsAndCount.count, getFeatures, sortBy);
             return new ProductSearchResultDTO(productMainDetailsAndCount.filters, products);
         }
     }
 
     @Transactional(readOnly = true)
-    protected Page<ShortProductDTO> findProductByName(String[] words, Map<String, List<String>> selectedSpecs, int page, int size, long total, boolean getFeatures) {
+    protected Page<ShortProductDTO> findProductByName(String[] words, Map<String, List<String>> selectedSpecs, int page,
+                                                      int size, long total, boolean getFeatures, SortOption sortBy) {
         Pageable pageable = PageRequest.of(page, size);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -181,6 +183,15 @@ public class ProductSearchService {
             query.having(cb.equal(cb.countDistinct(specJoin.get("name")), selectedSpecs.size()));
         }
 
+        switch (sortBy) {
+            case PRICE_ASC -> query.orderBy(cb.asc(root.get("price")));
+            case PRICE_DESC -> query.orderBy(cb.desc(root.get("price")));
+            case NEWEST -> query.orderBy(cb.desc(root.get("addedDate")));
+            case TOP_RATED -> query.orderBy(cb.desc(root.get("totalRatings")));
+            case MOST_RATED -> query.orderBy(cb.desc(root.get("totalReviews")));
+            case BEST_SELLING -> query.orderBy(cb.desc(root.get("totalSold")));
+        }
+
         TypedQuery<Product> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
@@ -198,20 +209,6 @@ public class ProductSearchService {
             current.setNewRelease(daysDifference >= 0 && daysDifference < 8);
             shortProductDTOList.add(current);
         }
-
-//        // --------- Count Query ---------
-//        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-//        Root<Product> countRoot = countQuery.from(Product.class);
-//        Join<Product, ProductSpecification> countSpecJoin = countRoot.join("specifications", JoinType.INNER);
-//
-//        List<Predicate> countPredicates = buildSearchPredicates(cb, countRoot, countSpecJoin, words, selectedSpecs);
-//
-//        countQuery.select(countRoot.get("id"))
-//                .where(cb.and(countPredicates.toArray(new Predicate[0])))
-//                .groupBy(countRoot.get("id"))
-//                .having(cb.equal(cb.countDistinct(countSpecJoin.get("name")), selectedSpecs.size()));
-//
-//        long total = entityManager.createQuery(countQuery).getResultList().size();
 
         return new PageImpl<>(shortProductDTOList, pageable, total);
     }

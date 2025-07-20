@@ -31,13 +31,15 @@ public class ProductController {
         int page = Integer.parseInt(pageStr != null ? pageStr : "0");
         String featureStr = allParams.remove("feature");
         boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
+        String sortStr = allParams.remove("sort");
 
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
 
         model.addAttribute("search_string", searchString);
         model.addAttribute("page", page);
         model.addAttribute("feature", getFeatures);
-        model.addAttribute("filters", filterParam);
+        model.addAttribute("sort", sortStr);
+        model.addAttribute("filter", filterParam);
         return "/product-search-draft";
     }
     

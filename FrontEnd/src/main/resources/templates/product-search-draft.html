@@ -12,7 +12,8 @@
         <span>Search Results for "</span><span id="current-search-string" th:text="${search_string}">Gaming Laptop</span><span>"</span>
         <span id="current-page" class="hidden" th:text="${page}">0</span>
         <span id="get-feature" class="hidden" th:text="${feature}">true</span>
-        <span id="current-filter" class="hidden" th:text="${filters}">0</span>
+        <span id="current-sort" class="hidden" th:text="${sort}">RELEVANCE</span>
+        <span id="current-filter" class="hidden" th:text="${filter}">0</span>
     </h1>
 
     <!-- Filters -->
@@ -61,12 +62,15 @@
                 <!-- Right: Sort + View -->
                 <div class="flex items-center gap-4">
                     <!-- Sort Dropdown -->
-                    <select class="border rounded px-3 py-2 text-sm">
-                        <option>Sort by: Relevance</option>
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
-                        <option>Customer Rating</option>
-                        <option>Brand: All</option>
+                    <label for="sort-by-selection">Sort by:</label>
+                    <select id="sort-by-selection" class="border rounded px-3 py-2 text-sm">
+                        <option value="RELEVANCE">Relevance</option>
+                        <option value="PRICE_ASC">Price: Low to High</option>
+                        <option value="PRICE_DESC">Price: High to Low</option>
+                        <option value="MOST_RATED">Most rated</option>
+                        <option value="TOP_RATED">Top rated</option>
+                        <option value="NEWEST">Newest</option>
+                        <option value="BEST_SELLING">Best selling</option>
                     </select>
 
                     <!-- View Toggle -->

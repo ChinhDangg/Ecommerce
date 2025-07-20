@@ -7,16 +7,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 const currentSearchString = document.getElementById('current-search-string').innerText;
 const currentPage = document.getElementById('current-page').innerText;
+let currentSort = document.getElementById('current-sort').innerText;
 
 const selectedFilters = {};
-// called at beginning only otherwise overwrite
+// called at the beginning only otherwise overwrite
 async function initiate() {
     const getFeature = document.getElementById('get-feature').innerText;
     const currentFilter = document.getElementById('current-filter').innerText;
 
     // document.getElementById('current-page').remove();
     // document.getElementById('get-feature').remove();
+    // document.getElementById('current-sort').remove();
     // document.getElementById('current-filter').remove();
+
+    const sortSelection = document.getElementById('sort-by-selection');
+    if (currentSort) {
+        sortSelection.value = currentSort;
+        if (!sortSelection.value)
+            sortSelection.selectedIndex = 0;
+    }
 
     currentFilter.split(',').forEach(pair => {
         const [key, valueString] = pair.split(':');
@@ -28,8 +37,12 @@ async function initiate() {
         name: currentSearchString.slice(0, 100), // max 100 chars only
         page: currentPage.toString(),
         feature: getFeature,
-        filters: currentFilter,
     });
+    if (currentSort)
+        queryParams.append('sort', currentSort);
+    if (currentFilter)
+        queryParams.append('filters', currentFilter);
+
     await searchProduct(queryParams);
 }
 
@@ -141,6 +154,12 @@ async function searchProduct(queryParams) {
     }
 }
 
+document.getElementById('sort-by-selection').addEventListener('change', function (event) {
+    currentSort = event.target.value;
+    currentSort = currentSort === this.options[0].value ? null : currentSort;
+    window.location.href = createUrl(null, null, null);
+});
+
 function displayFilterOptions(filters) {
     const filterContainer = document.getElementById('filter-container');
     const filterItemTem = filterContainer.querySelector('.filter-item');
@@ -149,6 +168,7 @@ function displayFilterOptions(filters) {
         filterItem.querySelector('.filter-title').textContent = key.charAt(0).toUpperCase() + key.slice(1);
         const filterOptionTem = filterItem.querySelector('.filter-option');
         const filterOptionContainer = filterItem.querySelector('.filter-option-container');
+        let containCheckedInput = false;
         values.forEach(value => {
             const filterOption = filterOptionTem.cloneNode(true);
             const optionInput = filterOption.querySelector('#filter-option-input');
@@ -160,21 +180,20 @@ function displayFilterOptions(filters) {
             filterOptionContainer.appendChild(filterOption);
 
             optionInput.checked = selectedFilters[key] && selectedFilters[key].includes(value.option);
-            filterOption.querySelector('a').href = createTempUrl(currentSearchString, currentPage, key, value.option);
-            if (selectedFilters[key] && selectedFilters[key].includes(value.option)) {
-                console.log(key);
-                console.log(value);
-            }
+            if (optionInput.checked)
+                containCheckedInput = true;
+            filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option);
             optionInput.addEventListener('change', function(event) {
-                const url = createUrl(currentSearchString, currentPage, key, value.option, event.target.checked);
-                console.log(url);
-                window.location.href = url;
+                window.location.href = createUrl(key, value.option, event.target.checked);
             });
         });
         filterItem.querySelector('.filter-btn').addEventListener('click', function() {
             filterOptionContainer.classList.toggle('hidden');
             this.querySelector('.vertical-line').classList.toggle('rotate-90');
         });
+        if (containCheckedInput)
+            filterItem.querySelector('.filter-btn').click();
+
         filterOptionTem.remove();
         filterContainer.appendChild(filterItem);
     });
@@ -334,7 +353,7 @@ function displayPageInfo(page) {
             const pageLinkItem = pageLinkItemTem.cloneNode(true);
             pageLinkItem.classList.remove('hidden');
             pageLinkItem.innerHTML = i + 1;
-            pageLinkItem.href = createTempUrl(currentSearchString, i, null, null);
+            pageLinkItem.href = createTempUrl(i, currentSort, null, null);
             if (i === parseInt(currentPage)) {
                 pageLinkItem.classList.add('bg-blue-200');
                 pageLinkItem.addEventListener('click', (event) => {
@@ -353,7 +372,7 @@ function displayNoSearchResult(content) {
 
 }
 
-function createUrl(searchString, page, key, value, included) {
+function createUrl(key, value, included) {
     if (included) {
         if (!selectedFilters[key]) {
             selectedFilters[key] = [];
@@ -376,15 +395,18 @@ function createUrl(searchString, page, key, value, included) {
 
     const baseUrl = 'http://localhost:8081/product/search';
     const queryParams = new URLSearchParams({
-        q: searchString.slice(0, 100), // max 100 chars only
-        page: page.toString(),
+        q: currentSearchString.slice(0, 100), // max 100 chars only
+        page: currentPage.toString(),
         feature: true,
-        filters: filterString
     });
+    if (currentSort)
+        queryParams.append('sort', currentSort);
+    if (filterString)
+        queryParams.append('filters', filterString);
     return `${baseUrl}?${queryParams.toString()}`;
 }
 
-function createTempUrl(searchString, page, key, value) {
+function createTempUrl(page, sortBy, key, value) {
     let filterString = Object.entries(selectedFilters)
         .map(([key, values]) => `${key}:${values.join('|')}`)
         .join(',');
@@ -392,10 +414,12 @@ function createTempUrl(searchString, page, key, value) {
         filterString += `,${key}|${value}`;
     const baseUrl = 'http://localhost:8081/product/search';
     const queryParams = new URLSearchParams({
-        q: searchString.slice(0, 100), // max 100 chars only
+        q: currentSearchString.slice(0, 100), // max 100 chars only
         page: page.toString(),
         feature: true,
         filters: filterString
     });
+    if (currentSort)
+        queryParams.append('sort', sortBy);
     return `${baseUrl}?${queryParams.toString()}`;
 }

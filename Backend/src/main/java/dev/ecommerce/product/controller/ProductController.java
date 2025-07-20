@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
+import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -41,6 +42,15 @@ public class ProductController {
         int page = Integer.parseInt(pageStr != null ? pageStr : "0");
         String featureStr = allParams.remove("feature");
         boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
+        String sortStr = allParams.remove("sort");
+        SortOption sortBy = null;
+        if (sortStr != null) {
+            try {
+                sortBy = SortOption.valueOf(sortStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                sortBy = SortOption.RELEVANCE;
+            }
+        }
 
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
 
@@ -58,7 +68,7 @@ public class ProductController {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, selectedFilters, page, getFeatures));
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, page, getFeatures, sortBy, selectedFilters));
     }
 
     @GetMapping("/by-category")

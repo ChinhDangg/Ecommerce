@@ -1,5 +1,6 @@
 package dev.ecommerce.product.entity;
 
+import dev.ecommerce.product.constant.ConditionType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -99,6 +100,8 @@ public class Product {
     private Integer totalRatings;
 
     private Integer totalReviews;
+
+    private Integer totalSold;
 
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
