@@ -1,6 +1,6 @@
 package dev.ecommerce.product.DTO;
 
-import dev.ecommerce.product.entity.ConditionType;
+import dev.ecommerce.product.constant.ConditionType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

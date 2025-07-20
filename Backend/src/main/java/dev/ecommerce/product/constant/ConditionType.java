@@ -1,8 +1,8 @@
-package dev.ecommerce.product.entity;
+package dev.ecommerce.product.constant;
 
 public enum ConditionType {
     NEW,
-    OPENBOX,
+    OPEN_BOX,
     REFURBISHED,
     USED
 }

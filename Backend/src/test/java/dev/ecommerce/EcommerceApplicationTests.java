@@ -2,7 +2,7 @@ package dev.ecommerce;
 
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
-import dev.ecommerce.product.entity.ContentType;
+import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.ProductLine;
 import dev.ecommerce.product.entity.ProductLineDescription;
 import dev.ecommerce.product.entity.ProductLineMedia;

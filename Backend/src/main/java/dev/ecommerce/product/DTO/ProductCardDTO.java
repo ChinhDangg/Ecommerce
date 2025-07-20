@@ -1,6 +1,6 @@
 package dev.ecommerce.product.DTO;
 
-import dev.ecommerce.product.entity.ConditionType;
+import dev.ecommerce.product.constant.ConditionType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package dev.ecommerce.product.DTO;
 
-import dev.ecommerce.product.entity.ContentType;
+import dev.ecommerce.product.constant.ContentType;
 
 public record ContentDTO(
         Long id,

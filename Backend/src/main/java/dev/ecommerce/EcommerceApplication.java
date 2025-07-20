@@ -1,5 +1,7 @@
 package dev.ecommerce;
 
+import dev.ecommerce.product.constant.ConditionType;
+import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.product.service.ProductService;
