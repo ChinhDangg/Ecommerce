@@ -12,11 +12,9 @@ let currentSort = document.getElementById('current-sort').innerText;
 const selectedFilters = {};
 // called at the beginning only otherwise overwrite
 async function initiate() {
-    const getFeature = document.getElementById('get-feature').innerText;
     const currentFilter = document.getElementById('current-filter').innerText;
 
     // document.getElementById('current-page').remove();
-    // document.getElementById('get-feature').remove();
     // document.getElementById('current-sort').remove();
     // document.getElementById('current-filter').remove();
 
@@ -36,7 +34,7 @@ async function initiate() {
     const queryParams = new URLSearchParams({
         name: currentSearchString.slice(0, 100), // max 100 chars only
         page: currentPage.toString(),
-        feature: getFeature,
+        feature: true,
     });
     if (currentSort)
         queryParams.append('sort', currentSort);
@@ -45,6 +43,30 @@ async function initiate() {
 
     await searchProduct(queryParams);
 }
+
+document.getElementById('search-bar-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const searchInput = document.getElementById('search-input');
+    console.log('Search input: ', searchInput.value);
+    if (searchInput.value) {
+        const filterString = Object.entries(selectedFilters)
+            .map(([key, values]) => `${key}:${values.join('|')}`)
+            .join(',');
+
+        const queryParams = new URLSearchParams({
+            q: searchInput.value.slice(0, 100), // max 100 chars only
+            page: currentPage.toString(),
+            feature: true,
+        });
+        if (currentSort)
+            queryParams.append('sort', currentSort);
+        if (filterString)
+            queryParams.append('filters', filterString);
+        await searchProduct(queryParams);
+    }
+    else {
+    }
+});
 
 async function searchProduct(queryParams) {
     try {
@@ -141,6 +163,7 @@ async function searchProduct(queryParams) {
             }
         }
         if (searchResult.productResults.page.totalElements) {
+            console.log(searchResult.filterSpecs);
             displayFilterOptions(searchResult.filterSpecs);
             displayResultPageInfo(searchResult.productResults.page);
             displaySearchResult(searchResult.productResults.content);
