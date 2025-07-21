@@ -6,12 +6,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+
+<header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
+</header>
+
 <div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Header -->
     <h1 class="text-1xl font-bold text-gray-900 mb-6">
         <span>Search Results for "</span><span id="current-search-string" th:text="${search_string}">Gaming Laptop</span><span>"</span>
         <span id="current-page" class="hidden" th:text="${page}">0</span>
-        <span id="get-feature" class="hidden" th:text="${feature}">true</span>
         <span id="current-sort" class="hidden" th:text="${sort}">RELEVANCE</span>
         <span id="current-filter" class="hidden" th:text="${filter}">0</span>
     </h1>
