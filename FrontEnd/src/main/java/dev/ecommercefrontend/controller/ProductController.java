@@ -1,7 +1,5 @@
 package dev.ecommercefrontend.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +16,7 @@ public class ProductController {
     @GetMapping("/card/{id}")
     public String getProductCard(@PathVariable Long id, Model model) {
         model.addAttribute("productId", id);
-        return "/product-card-draft-template";
+        return "/product-page/product-card-draft";
     }
 
     @GetMapping("/search")
@@ -40,7 +38,7 @@ public class ProductController {
         model.addAttribute("feature", getFeatures);
         model.addAttribute("sort", sortStr);
         model.addAttribute("filter", filterParam);
-        return "/product-search-draft";
+        return "/product-page/product-search-draft";
     }
     
 }
