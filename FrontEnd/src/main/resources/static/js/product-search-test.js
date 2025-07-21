@@ -49,20 +49,7 @@ document.getElementById('search-bar-form').addEventListener('submit', async (e) 
     const searchInput = document.getElementById('search-input');
     console.log('Search input: ', searchInput.value);
     if (searchInput.value) {
-        const filterString = Object.entries(selectedFilters)
-            .map(([key, values]) => `${key}:${values.join('|')}`)
-            .join(',');
-
-        const queryParams = new URLSearchParams({
-            q: searchInput.value.slice(0, 100), // max 100 chars only
-            page: currentPage.toString(),
-            feature: true,
-        });
-        if (currentSort)
-            queryParams.append('sort', currentSort);
-        if (filterString)
-            queryParams.append('filters', filterString);
-        await searchProduct(queryParams);
+        window.location.href = createTempUrl(currentPage, currentSort, null, null, searchInput.value);
     }
     else {
     }
@@ -429,7 +416,7 @@ function createUrl(key, value, included) {
     return `${baseUrl}?${queryParams.toString()}`;
 }
 
-function createTempUrl(page, sortBy, key, value) {
+function createTempUrl(page, sortBy, key, value, searchString = currentSearchString) {
     let filterString = Object.entries(selectedFilters)
         .map(([key, values]) => `${key}:${values.join('|')}`)
         .join(',');
@@ -437,12 +424,13 @@ function createTempUrl(page, sortBy, key, value) {
         filterString += `,${key}|${value}`;
     const baseUrl = 'http://localhost:8081/product/search';
     const queryParams = new URLSearchParams({
-        q: currentSearchString.slice(0, 100), // max 100 chars only
+        q: searchString.slice(0, 100), // max 100 chars only
         page: page.toString(),
-        feature: true,
-        filters: filterString
+        feature: true
     });
     if (currentSort)
         queryParams.append('sort', sortBy);
+    if (filterString)
+        queryParams.append('filters', filterString);
     return `${baseUrl}?${queryParams.toString()}`;
 }
