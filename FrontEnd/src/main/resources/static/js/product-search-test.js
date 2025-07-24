@@ -3,6 +3,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         await initiate();
     });
     await initiate();
+    const form = document.getElementById('search-bar-form');
+    const newForm = form.cloneNode(true);
+    form.replaceWith(newForm); // to remove default listener
+    newForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const searchInput = document.getElementById('search-input');
+        console.log('Search input: ', searchInput.value);
+        if (searchInput.value) {
+            window.location.href = createTempUrl(currentPage, currentSort, null, null, searchInput.value);
+        }
+        else {
+            window.location.href = '/';
+        }
+    });
 });
 
 const currentSearchString = document.getElementById('current-search-string').innerText;
@@ -43,17 +57,6 @@ async function initiate() {
 
     await searchProduct(queryParams);
 }
-
-document.getElementById('search-bar-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const searchInput = document.getElementById('search-input');
-    console.log('Search input: ', searchInput.value);
-    if (searchInput.value) {
-        window.location.href = createTempUrl(currentPage, currentSort, null, null, searchInput.value);
-    }
-    else {
-    }
-});
 
 async function searchProduct(queryParams) {
     try {
