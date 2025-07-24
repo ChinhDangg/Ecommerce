@@ -61,10 +61,14 @@
   <!-- Navigation Section (Desktop) with Full-Width Background -->
   <div class="bt-blue-500 border-t">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 hidden text-gray-500 md:flex justify-end space-x-4 py-2">
-      <a href="/products" class="text-sm hover:text-blue-700 transition duration-200 py-1">Products</a>
-      <a href="/categories" class="text-sm hover:text-blue-700 transition duration-200 py-1">Categories</a>
-      <a href="/about" class="text-sm hover:text-blue-700 transition duration-200 py-1">About</a>
-      <a href="/contact" class="text-sm hover:text-blue-700 transition duration-200 py-1">Contact</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Consumer Electronics</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Computers & Accessories</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Smart Home & IoT</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Audio Equipment</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Power & Batteries</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Tools & DIY Electronics</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Automotive Electronics</a>
+      <a href="" class="text-sm hover:text-blue-700 transition duration-200 py-1">Office Electronics</a>
     </nav>
   </div>
 
@@ -84,6 +88,26 @@
   document.getElementById('mobile-menu-button').addEventListener('click', () => {
     const mobileMenu = document.getElementById('mobile-menu');
     mobileMenu.classList.toggle('hidden');
+  });
+  function submitHandler(event) {
+    event.preventDefault();
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput.value) {
+      window.location.href = '/';
+      return;
+    }
+    const baseUrl = 'http://localhost:8081/product/search';
+    const queryParams = new URLSearchParams({
+      q: searchInput.value.slice(0, 100), // max 100 chars only
+      page: 0,
+      feature: true
+    });
+    window.location.href = `${baseUrl}?${queryParams.toString()}`;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("search-bar-form");
+    form.addEventListener("submit", submitHandler);
   });
 </script>
 
