@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopNow - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+<body class="bg-gray-100">
+
+<header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
+</header>
+
+
+
+<!-- Responsive Category Grid -->
+<div class="container mx-auto py-4 mt-4 mb-4 bg-transparent">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+
+        <!-- Category Item -->
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/61n0lmxP5-L._AC_SX679_.jpg" alt="Consumer Electronics" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Consumer Electronics</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/61LoxJ701dL._AC_SX679_.jpg" alt="Computers & Accessories" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Computers & Accessories</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/518e5A5FNgL._SX522_.jpg" alt="Smart Home & IoT" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Smart Home & IoT</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/71v1Rl3RBUL._AC_SX679_.jpg" alt="Audio Equipment" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Audio Equipment</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/61OE8Wu2tUL._AC_SX679_.jpg" alt="Power & Batteries" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Power & Batteries</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/71tL4MF6N2L._AC_SX679_PIbundle-40,TopRight,0,0_SH20_.jpg" alt="Tools & DIY Electronics" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Tools & DIY Electronics</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/71xYmXWkXFL._AC_SX679_.jpg" alt="Automotive Electronics" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Automotive Electronics</span>
+            </div>
+        </a>
+
+        <a href="#">
+            <div class="rounded-lg p-2 hover:shadow-md transition bg-white flex flex-col justify-between items-center w-full h-36">
+                <img src="/images/61DLzqzP6mL._AC_SX679_.jpg" alt="Office Electronics" class="w-20 h-20 object-cover mt-2">
+                <span class="text-center text-xs font-medium text-gray-700 mb-1">Office Electronics</span>
+            </div>
+        </a>
+
+    </div>
+</div>
+
+
+
+<section class="relative w-full bg-black text-white mb-8">
+    <!-- Swiper Container -->
+    <div class="swiper">
+        <div class="swiper-wrapper">
+
+            <!-- Slide 1 -->
+            <div class="swiper-slide">
+                <div class="max-w-screen-2xl mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-12">
+                    <!-- Text -->
+                    <div class="lg:w-1/4">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                            Galaxy Ultra Pro 2024
+                        </h1>
+                        <p class="text-lg text-gray-300 mb-6">
+                            AI-enhanced power with ultra-bright OLED, pro-grade GPU & 2TB storage.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="#" class="bg-white text-black px-6 py-3 font-semibold rounded hover:bg-gray-200 transition">
+                                Buy Now
+                            </a>
+                            <a href="#" class="text-white border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="w-full lg:w-3/4 flex justify-center">
+                        <div class="h-[450px] w-full flex justify-center items-center">
+                            <img src="/images/9100-PRO_02_Performance_PC_1440xVar.jpg"
+                                 alt="ASUS ROG OLED Monitor"
+                                 class="max-h-full max-w-full object-contain drop-shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="swiper-slide">
+                <div class="max-w-screen-2xl mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-6">
+                    <!-- Text -->
+                    <div class="lg:w-1/3">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                            ASUS ROG OLED Monitor
+                        </h1>
+                        <p class="text-lg text-gray-300 mb-6">
+                            4K OLED, 240Hz refresh, 0.03ms — made for elite gamers.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="#" class="bg-white text-black px-6 py-3 font-semibold rounded hover:bg-gray-200 transition">
+                                Shop Now
+                            </a>
+                            <a href="#" class="text-white border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition">
+                                View Specs
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="w-full lg:w-3/4 flex justify-center">
+                        <div class="h-[450px] w-full flex justify-center items-center">
+                            <img src="/images/Screenshot%202025-07-23%20140812.png"
+                                 alt="ASUS ROG OLED Monitor"
+                                 class="max-h-full max-w-full object-contain drop-shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="swiper-slide">
+                <div class="max-w-screen-2xl mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-6">
+                    <!-- Text -->
+                    <div class="lg:w-1/3">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                            ASUS ROG OLED Monitor
+                        </h1>
+                        <p class="text-lg text-gray-300 mb-6">
+                            4K OLED, 240Hz refresh, 0.03ms — made for elite gamers.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="#" class="bg-white text-black px-6 py-3 font-semibold rounded hover:bg-gray-200 transition">
+                                Shop Now
+                            </a>
+                            <a href="#" class="text-white border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition">
+                                View Specs
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="w-full lg:w-3/4 flex justify-center">
+                        <div class="h-[450px] w-full flex justify-center items-center">
+                            <img src="/images/Screenshot%202025-07-23%20140323.png"
+                                 alt="ASUS ROG OLED Monitor"
+                                 class="max-h-full max-w-full object-contain drop-shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="swiper-slide">
+                <div class="max-w-screen-2xl mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-6">
+                    <!-- Text -->
+                    <div class="lg:w-1/3">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                            ASUS ROG OLED Monitor
+                        </h1>
+                        <p class="text-lg text-gray-300 mb-6">
+                            4K OLED, 240Hz refresh, 0.03ms — made for elite gamers.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="#" class="bg-white text-black px-6 py-3 font-semibold rounded hover:bg-gray-200 transition">
+                                Shop Now
+                            </a>
+                            <a href="#" class="text-white border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition">
+                                View Specs
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="w-full lg:w-3/4 flex justify-center">
+                        <div class="h-[450px] w-full flex justify-center items-center">
+                            <img src="/images/Screenshot%202025-07-23%20135852.png"
+                                 alt="ASUS ROG OLED Monitor"
+                                 class="max-h-full max-w-full object-contain drop-shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="swiper-slide">
+                <div class="max-w-screen-2xl mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-6">
+                    <!-- Text -->
+                    <div class="lg:w-1/3">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                            ASUS ROG OLED Monitor
+                        </h1>
+                        <p class="text-lg text-gray-300 mb-6">
+                            4K OLED, 240Hz refresh, 0.03ms — made for elite gamers.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="#" class="bg-white text-black px-6 py-3 font-semibold rounded hover:bg-gray-200 transition">
+                                Shop Now
+                            </a>
+                            <a href="#" class="text-white border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition">
+                                View Specs
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="w-full lg:w-3/4 flex justify-center">
+                        <div class="h-[450px] w-full flex justify-center items-center">
+                            <img src="/images/Screenshot%202025-07-23%20135441.png"
+                                 alt="ASUS ROG OLED Monitor"
+                                 class="max-h-full max-w-full object-contain drop-shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6 -->
+            <div class="swiper-slide">
+                <div class="max-w-screen-2xl mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-6">
+                    <!-- Text -->
+                    <div class="lg:w-1/3">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                            ASUS ROG OLED Monitor
+                        </h1>
+                        <p class="text-lg text-gray-300 mb-6">
+                            4K OLED, 240Hz refresh, 0.03ms — made for elite gamers.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="#" class="bg-white text-black px-6 py-3 font-semibold rounded hover:bg-gray-200 transition">
+                                Shop Now
+                            </a>
+                            <a href="#" class="text-white border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition">
+                                View Specs
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="w-full lg:w-3/4 flex justify-center">
+                        <div class="h-[450px] w-full flex justify-center items-center">
+                            <img src="/images/Screenshot%202025-07-23%20135317.png"
+                                 alt="ASUS ROG OLED Monitor"
+                                 class="max-h-full max-w-full object-contain drop-shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="swiper-button-prev text-white"></div>
+        <div class="swiper-button-next text-white"></div>
+    </div>
+</section>
+
+
+
+<!-- Featured Products -->
+<div class="container mx-auto py-6 bg-white rounded-lg shadow-md mb-8">
+    <a href="#" class="text-xl font-semibold mb-6 text-left px-6 block text-blue-700">Featured</a>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6">
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/71OWtcxKgvL._AC_SX679_.jpg" alt="ssd" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">
+                    Samsung 990 PRO SSD NVMe M.2 PCIe Gen4, M.2 2280 Internal Solid State Hard Drive, Seq. Read Speeds Up to 7,450 MB/s for High End Computing, Gaming, and Heavy Duty Workstations, MZ-V9P2T0B/AM
+                </h3>
+                <p class="text-gray-600 text-sm">Storage</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/61Mc6kTOz+L._AC_SX679_.jpg" alt="ram" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">Kingston FURY Impact 64GB (2x32GB) 5600MT/s DDR5 CL40 Laptop Memory Kit of 2 | Lower Power Consumption | Intel XMP 3.0 | Plug N Play | KF556S40IBK2-64</h3>
+                <p class="text-gray-600 text-sm">Storage</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/71r35dByysL._AC_SX679_.jpg" alt="cooler" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">nubia RedMagic Magnetic Cell Phone Cooler 5 Pro with Clip, Cellphone Radiator Fan for Phone with RGB LED Semiconductor Heatsink Cooling 36W Mobile Phone Cooling Fan for Phone Gaming, Live Streaming</h3>
+                <p class="text-gray-600 text-sm">Cooler</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/61xN2pNXswL._AC_SX679_.jpg" alt="ssd enclosure" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">ORICO 40Gbps M.2 NVMe SSD Enclosure with Thermostatic Cooling Fan, Supports up to 8TB, Thunderbolt 4 / 3 & USB4 Compatible, Backward Compatible with USB 3.2/3.1, M-Key SSD</h3>
+                <p class="text-gray-600 text-sm">Electronics</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/517p8Pb2GHL._AC_SX679_.jpg" alt="Office Chair" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">Lenovo Legion Pro 7i Gen 10 16" Gaming Laptop (2025 Model) Intel Core Ultra 9 275HX 24C, NVIDIA GeForce RTX 5090 24GB, 64GB RAM, 2TB (1TB+1TB) NVMe SSD, 16.0" WQXGA OLED 500 nits 240Hz, Windows 11 Pro</h3>
+                <p class="text-gray-600 text-sm">Gaming Laptop</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/811IbTkEvnL._AC_SX679_.jpg" alt="Security Camera" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">ASUS ROG Astral GeForce RTX™ 5090 OC Edition Gaming Graphics Card (PCIe® 5.0, 32GB GDDR7, HDMI®/DP 2.1, 3.8-Slot, 4-Fan Design, Axial-tech Fans, Patented Vapor Chamber, Phase-Change GPU Thermal pad)</h3>
+                <p class="text-gray-600 text-sm">Graphics Card</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/51xxm7JkJ6L._AC_SX679_.jpg" alt="Security Camera" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">Intel® Core™ Ultra 9 Desktop Processor 285K 24 cores (8 P-cores + 16 E-cores) up to 5.7 GHz</h3>
+                <p class="text-gray-600 text-sm">Processors</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/81MDzB7gqwL._AC_SX679_.jpg" alt="Security Camera" class="w-full h-48 object-contain rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">ASUS ROG Strix X870E-E Gaming WiFi AMD AM5 X870 ATX Motherboard 18+2+2 Power Stages, Dynamic OC Switcher, Core Flex, DDR5 AEMP, WiFi 7, 5X M.2, PCIe® 5.0, Q-Release Slim, USB4®, AI OCing & Networking</h3>
+                <p class="text-gray-600 text-sm">Motherboard</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+
+
+<!-- Promotional Section -->
+<div class="container bg-white mx-auto mb-8">
+    <!-- Banner -->
+    <div class="bg-blue-500 text-white py-6 rounded-lg text-center mb-8">
+        <h2 class="text-xl font-semibold mb-3">Limited Time Offer!</h2>
+        <p class="text-base mb-5">Get deals on top products</p>
+        <a href="#"
+           class="bg-yellow-400 text-black px-6 py-2 rounded-lg font-medium hover:bg-yellow-500 transition">
+            Shop Deals Now
+        </a>
+    </div>
+
+    <!-- Promotional Items -->
+    <div class="grid md:grid-cols-3 gap-6 items-stretch">
+
+        <!-- Promo Item -->
+        <a href="">
+            <div class="flex bg-white rounded-lg shadow p-4 hover:shadow-xl h-full">
+                <img src="/images/91t16+g29KL._AC_SX679_.jpg" alt="Lenovo Laptop" class="w-28 h-28 object-contain bg-white rounded mr-4">
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900 line-clamp-2">
+                        ASUS ROG Swift 32” 4K OLED Gaming Monitor (PG32UCDM) - UHD (3840 x 2160), QD-OLED, 240Hz, 0.03ms, G-SYNC Compatible, Custom Heatsink, Graphene Film, 99% DCI-P3, True 10-bit, 90W USB-C
+                    </h2>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                        ★★★★★ <span class="ml-2 text-gray-700">(155 Reviews)</span>
+                    </div>
+                    <div class="flex items-start mt-2">
+                        <div class="text-left">
+                            <span class="text-xl font-bold text-gray-900 block">$1,199.99</span>
+                            <span class="text-xs font-semibold text-green-600 block mt-1">Save $400.00</span>
+                        </div>
+                        <span class="text-xs text-gray-500 line-through ml-2 mt-1">$1,599.99</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Promo Item -->
+        <a href="">
+            <div class="flex bg-white rounded-lg shadow p-4 hover:shadow-xl h-full">
+                <img src="/images/81SwAwK09VL._AC_SX679_.jpg" alt="Samsung Monitor" class="w-28 h-28 object-contain bg-white rounded mr-4">
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900 line-clamp-2">
+                        ASUS ROG Thor 1600W Titanium (1600 Watt, Fully Modular Power Supply, 80+ Titanium, Lambda A++ Certified, GaN MOSFETs, Digital Power Control, ROG heatsinks, 135mm PWM Fan, 0dB Mode, OLED Panel)
+                    </h2>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                        ★★★★☆ <span class="ml-2 text-gray-700">(98 Reviews)</span>
+                    </div>
+                    <div class="flex items-start mt-2">
+                        <div class="text-left">
+                            <span class="text-xl font-bold text-gray-900 block">$749.99</span>
+                            <span class="text-xs font-semibold text-green-600 block mt-1">Save $150.00</span>
+                        </div>
+                        <span class="text-xs text-gray-500 line-through ml-2 mt-1">$899.99</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Promo Item -->
+        <a href="">
+            <div class="flex bg-white rounded-lg shadow p-4 hover:shadow-xl h-full">
+                <img src="/images/615y53Ws-NL._AC_SX679_.jpg" alt="Sony Headphones" class="w-28 h-28 object-contain bg-white rounded mr-4">
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900 line-clamp-2">
+                        Apple 2024 Mac mini Desktop Computer with M4 chip with 10‑core CPU and 10‑core GPU: Built for Apple Intelligence, 16GB Unified Memory, 256GB SSD Storage, Gigabit Ethernet. Works with iPhone/iPad
+                    </h2>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                        ★★★★★ <span class="ml-2 text-gray-700">(412 Reviews)</span>
+                    </div>
+                    <div class="flex items-start mt-2">
+                        <div class="text-left">
+                            <span class="text-xl font-bold text-gray-900 block">$299.99</span>
+                            <span class="text-xs font-semibold text-green-600 block mt-1">Save $100.00</span>
+                        </div>
+                        <span class="text-xs text-gray-500 line-through ml-2 mt-1">$399.99</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+
+    </div>
+</div>
+
+
+
+<!-- New Arrivals -->
+<div class="container mx-auto py-6 bg-white rounded-lg shadow-md mb-8">
+    <a href="#" class="text-xl font-semibold mb-6 text-left px-6 block text-blue-700">New Arrivals</a>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 px-6">
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/51QJeTnjs2L._AC_SX679_.jpg" alt="display" class="w-full h-48 object-contain bg-white rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">Apple Studio Display - Standard Glass - Tilt-Adjustable Stand</h3>
+                <p class="text-gray-600 text-sm">Displays</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/817QHxxq34L._AC_SX679_.jpg" alt="Water Bottle" class="w-full h-48 object-contain bg-white rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">Samsung Galaxy Watch Ultra (2024) 47mm LTE AI Smartwatch w/Energy Score, Wellness Tips, Heart Rate Tracking, Sleep Monitor, Fitness Tracker, GPS,Titanium Silver [US Version, 1Yr Manufacturer Warranty]</h3>
+                <p class="text-gray-600 text-sm">Smart watches</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/61FSW2xhjRL._AC_SX679_.jpg" alt="Charging Pad" class="w-full h-48 object-contain bg-white rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">REDMAGIC Astra Gaming Tablet 12G+256G Eclipse (NEEA)</h3>
+                <p class="text-gray-600 text-sm">Tablets</p>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border rounded-lg p-4 hover:shadow-xl transition bg-white h-full">
+                <img src="/images/71BVLQNOlmL._AC_SX679_.jpg" alt="Skincare Set" class="w-full h-48 object-contain bg-white rounded-md mb-4">
+                <h3 class="text-lg font-semibold line-clamp-2">SABRENT Rocket 2230 1TB NVMe SSD – PCIe Gen4 M.2 2230 Internal SSD for Steam Deck, Surface Pro, Ultrabook, HTPC – DRAM-Less with HMB, Up to 5GB/s [SB-2130-1TB]</h3>
+                <p class="text-gray-600 text-sm">Storages</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    const swiper = new Swiper('.swiper', {
+        loop: true,
+        autoplay: {
+            delay: 5000,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
+</script>
+
+
+</body>
+</html>
