@@ -7,8 +7,10 @@ import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.constant.SortOption;
+import dev.ecommerce.product.constant.SpecialFilters;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.entity.ProductCoreSpecification;
+import dev.ecommerce.product.entity.ProductMedia;
 import dev.ecommerce.product.entity.ProductSpecification;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -150,8 +152,21 @@ public class ProductSearchService {
         for (String word : words) {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + word.toLowerCase() + "%"));
         }
+
         // Spec filters
         if (selectedSpecs != null && !selectedSpecs.isEmpty()) {
+
+            SpecialFilters[] sFilterList = SpecialFilters.values();
+            for (SpecialFilters sFilters : sFilterList) {
+                List<String> sFilter = selectedSpecs.remove(sFilters.name().toLowerCase());
+                if (sFilter == null || sFilter.isEmpty())
+                    continue;
+                List<Predicate> brandMatches = sFilter.stream()
+                        .map(sF -> cb.equal(cb.lower(root.get("brand")), sF.toLowerCase()))
+                        .toList();
+                predicates.add(cb.or(brandMatches.toArray(new Predicate[0])));
+            }
+
             List<Predicate> specGroupPredicates = new ArrayList<>();
 
             for (Map.Entry<String, List<String>> entry : selectedSpecs.entrySet()) {
@@ -180,7 +195,11 @@ public class ProductSearchService {
                 .groupBy(root.get("id"));
 
         if (selectedSpecs != null && !selectedSpecs.isEmpty()) { // handle when no selected specs
-            query.having(cb.equal(cb.countDistinct(specJoin.get("name")), selectedSpecs.size()));
+            long specFilterCount = selectedSpecs.entrySet().stream()
+                    .filter(e -> !List.of("brand", "price", "category").contains(e.getKey()))
+                    .count();
+            if (specFilterCount > 0)
+                query.having(cb.equal(cb.countDistinct(specJoin.get("name")), specFilterCount));
         }
 
         switch (sortBy) {
@@ -201,12 +220,16 @@ public class ProductSearchService {
         for (Product product : resultList) {
             ShortProductDTO current = (getFeatures) ? productMapper.toShortProductWithFeaturesDTO(product)
                     : productMapper.toShortProductWithoutFeaturesDTO(product);
-            current.setImageName(product.getMedia().isEmpty() ? null : product.getMedia().getFirst().getContent());
+            current.setImageName(product.getMedia().stream().findFirst().map(ProductMedia::getContent).orElse(null));
             current.setDiscountedPrice(
                     product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
             );
-            long daysDifference = ChronoUnit.DAYS.between(product.getSaleEndDate(), LocalDate.now());
-            current.setNewRelease(daysDifference >= 0 && daysDifference < 8);
+            if (product.getSaleEndDate() != null) {
+                long daysDifference = ChronoUnit.DAYS.between(product.getSaleEndDate(), LocalDate.now());
+                current.setNewRelease(daysDifference >= 0 && daysDifference < 8);
+            } else {
+                current.setNewRelease(false);
+            }
             shortProductDTOList.add(current);
         }
 
@@ -231,6 +254,12 @@ public class ProductSearchService {
                 FROM product p
                 JOIN product_specification ps ON ps.product_id = p.id
                 JOIN product_core_specification cps ON cps.id = ps.core_specification_id
+        """);
+
+
+
+
+        sql.append("""
                 WHERE 1=1
         """);
 
