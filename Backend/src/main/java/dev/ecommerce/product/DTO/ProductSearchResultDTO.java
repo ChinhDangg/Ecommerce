@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public record ProductSearchResultDTO(
-        Map<String, List<Map<String, Object>>> filterSpecs,
+        Map<String, List<Map<String, Object>>> specFilters,
         Page<ShortProductDTO> productResults
 ) {
 }
