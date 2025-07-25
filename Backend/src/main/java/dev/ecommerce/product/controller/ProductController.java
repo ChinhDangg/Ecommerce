@@ -53,7 +53,11 @@ public class ProductController {
         }
 
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
+        Map<String, List<String>> selectedFilters = parseFilterParam(filterParam);
 
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, page, getFeatures, sortBy, selectedFilters));
+    }
+    private Map<String, List<String>> parseFilterParam(String filterParam) {
         Map<String, List<String>> selectedFilters = new HashMap<>();
 
         if (filterParam != null && !filterParam.isEmpty()) {
@@ -67,8 +71,7 @@ public class ProductController {
                 }
             }
         }
-
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, page, getFeatures, sortBy, selectedFilters));
+        return selectedFilters;
     }
 
     @GetMapping("/by-category")
