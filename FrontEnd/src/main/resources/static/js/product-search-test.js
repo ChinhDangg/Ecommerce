@@ -3,33 +3,36 @@ document.addEventListener("DOMContentLoaded", async () => {
         await initiate();
     });
     await initiate();
-    const form = document.getElementById('search-bar-form');
-    const newForm = form.cloneNode(true);
-    form.replaceWith(newForm); // to remove default listener
-    newForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const searchInput = document.getElementById('search-input');
-        console.log('Search input: ', searchInput.value);
-        if (searchInput.value) {
-            window.location.href = createTempUrl(currentPage, currentSort, null, null, searchInput.value);
-        }
-        else {
-            window.location.href = '/';
-        }
-    });
+    // const form = document.getElementById('search-bar-form');
+    // const newForm = form.cloneNode(true);
+    // form.replaceWith(newForm); // to remove default listener
+    // newForm.addEventListener('submit', async (e) => {
+    //     e.preventDefault();
+    //     const searchInput = document.getElementById('search-input');
+    //     console.log('Search input: ', searchInput.value);
+    //     if (searchInput.value) {
+    //         window.location.href = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value);
+    //     }
+    //     else {
+    //         window.location.href = '/';
+    //     }
+    // });
 });
 
 const currentSearchString = document.getElementById('current-search-string').innerText;
 const currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
 
-const selectedFilters = {};
+const selectedSpecialFilters = {};
+const selectedSpecFilters = {};
 // called at the beginning only otherwise overwrite
 async function initiate() {
+    const currentSpecialFilter = document.getElementById('current-s-filter').innerText;
     const currentFilter = document.getElementById('current-filter').innerText;
 
     // document.getElementById('current-page').remove();
     // document.getElementById('current-sort').remove();
+    // document.getElementById('current-s-filter').remove();
     // document.getElementById('current-filter').remove();
 
     const sortSelection = document.getElementById('sort-by-selection');
@@ -39,12 +42,20 @@ async function initiate() {
             sortSelection.selectedIndex = 0;
     }
 
+    currentSpecialFilter.split(',').forEach(pair => {
+        const [key, valueString] = pair.split(':');
+        if (key && valueString) {
+            selectedSpecialFilters[key] = valueString.split('|');
+        }
+    });
+
     currentFilter.split(',').forEach(pair => {
         const [key, valueString] = pair.split(':');
         if (key && valueString) {
-            selectedFilters[key] = valueString.split('|');
+            selectedSpecFilters[key] = valueString.split('|');
         }
     });
+
     const queryParams = new URLSearchParams({
         name: currentSearchString.slice(0, 100), // max 100 chars only
         page: currentPage.toString(),
@@ -52,6 +63,8 @@ async function initiate() {
     });
     if (currentSort)
         queryParams.append('sort', currentSort);
+    if (currentSpecialFilter)
+        queryParams.append('s-filters', currentSpecialFilter);
     if (currentFilter)
         queryParams.append('filters', currentFilter);
 
@@ -69,21 +82,11 @@ async function searchProduct(queryParams) {
         // }
         // const searchResult = await response.json();
         const searchResult = {
-            "filterSpecs": {
+            "specialFilters": {
                 "price": [
                     {
                         "count": 1,
                         "option": "100.00"
-                    }
-                ],
-                "CPU": [
-                    {
-                        "count": 1,
-                        "option": "Core i9"
-                    },
-                    {
-                        "count": 1,
-                        "option": "Core i7"
                     }
                 ],
                 "category": [
@@ -96,6 +99,18 @@ async function searchProduct(queryParams) {
                     {
                         "count": 1,
                         "option": "Brand 1"
+                    }
+                ],
+            },
+            "specFilters": {
+                "CPU": [
+                    {
+                        "count": 1,
+                        "option": "Core i9"
+                    },
+                    {
+                        "count": 1,
+                        "option": "Core i7"
                     }
                 ],
                 "RAM": [
@@ -153,8 +168,8 @@ async function searchProduct(queryParams) {
             }
         }
         if (searchResult.productResults.page.totalElements) {
-            console.log(searchResult.filterSpecs);
-            displayFilterOptions(searchResult.filterSpecs);
+            displayFilterOptions(searchResult.specialFilters, false, selectedSpecialFilters);
+            displayFilterOptions(searchResult.specFilters, true, selectedSpecFilters);
             displayResultPageInfo(searchResult.productResults.page);
             displaySearchResult(searchResult.productResults.content);
             displayPageInfo(searchResult.productResults.page);
@@ -170,10 +185,10 @@ async function searchProduct(queryParams) {
 document.getElementById('sort-by-selection').addEventListener('change', function (event) {
     currentSort = event.target.value;
     currentSort = currentSort === this.options[0].value ? null : currentSort;
-    window.location.href = createUrl(null, null, null);
+    window.location.href = createUrl(null, null, null, null);
 });
 
-function displayFilterOptions(filters) {
+function displayFilterOptions(filters, clear = false, selectedFilters) {
     const filterContainer = document.getElementById('filter-container');
     const filterItemTem = filterContainer.querySelector('.filter-item');
     Object.entries(filters).forEach(([key, values]) => {
@@ -195,22 +210,22 @@ function displayFilterOptions(filters) {
             optionInput.checked = selectedFilters[key] && selectedFilters[key].includes(value.option);
             if (optionInput.checked)
                 containCheckedInput = true;
-            filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option);
+            filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option, selectedFilters);
             optionInput.addEventListener('change', function(event) {
-                window.location.href = createUrl(key, value.option, event.target.checked);
+                window.location.href = createUrl(key, value.option, event.target.checked, selectedFilters);
             });
         });
+        filterOptionTem.remove();
         filterItem.querySelector('.filter-btn').addEventListener('click', function() {
             filterOptionContainer.classList.toggle('hidden');
             this.querySelector('.vertical-line').classList.toggle('rotate-90');
         });
         if (containCheckedInput)
             filterItem.querySelector('.filter-btn').click();
-
-        filterOptionTem.remove();
         filterContainer.appendChild(filterItem);
     });
-    filterItemTem.remove();
+    if (clear)
+        filterItemTem.remove();
 }
 
 function displaySearchResult(content) {
@@ -366,7 +381,7 @@ function displayPageInfo(page) {
             const pageLinkItem = pageLinkItemTem.cloneNode(true);
             pageLinkItem.classList.remove('hidden');
             pageLinkItem.innerHTML = i + 1;
-            pageLinkItem.href = createTempUrl(i, currentSort, null, null);
+            pageLinkItem.href = createTempUrl(i, currentSort, null, null, null);
             if (i === parseInt(currentPage)) {
                 pageLinkItem.classList.add('bg-blue-200');
                 pageLinkItem.addEventListener('click', (event) => {
@@ -385,13 +400,13 @@ function displayNoSearchResult(content) {
 
 }
 
-function createUrl(key, value, included) {
+function createUrl(key, value, included, selectedFilters) {
     if (included) {
         if (!selectedFilters[key]) {
             selectedFilters[key] = [];
         }
         selectedFilters[key].push(value);
-    } else {
+    } else if (included != null) {
         if (selectedFilters[key]) {
             selectedFilters[key] = selectedFilters[key].filter(v => v !== value);
 
@@ -402,29 +417,25 @@ function createUrl(key, value, included) {
         }
     }
 
-    const filterString = Object.entries(selectedFilters)
-        .map(([key, values]) => `${key}:${values.join('|')}`)
-        .join(',');
-
-    const baseUrl = 'http://localhost:8081/product/search';
-    const queryParams = new URLSearchParams({
-        q: currentSearchString.slice(0, 100), // max 100 chars only
-        page: currentPage.toString(),
-        feature: true,
-    });
-    if (currentSort)
-        queryParams.append('sort', currentSort);
-    if (filterString)
-        queryParams.append('filters', filterString);
-    return `${baseUrl}?${queryParams.toString()}`;
+    return createTempUrl(currentPage, currentSort, null, null, null, currentSearchString);
 }
 
-function createTempUrl(page, sortBy, key, value, searchString = currentSearchString) {
-    let filterString = Object.entries(selectedFilters)
+function createTempUrl(page, sortBy, key, value, selectedFilters, searchString = currentSearchString) {
+    let specialFilterString = Object.entries(selectedSpecialFilters)
         .map(([key, values]) => `${key}:${values.join('|')}`)
         .join(',');
-    if (key && value && !(selectedFilters[key] && selectedFilters[key].includes(value)))
-        filterString += `,${key}|${value}`;
+
+    let filterString = Object.entries(selectedSpecFilters)
+        .map(([key, values]) => `${key}:${values.join('|')}`)
+        .join(',');
+
+    if (key && value) {
+        if (!selectedFilters)
+            throw new Error('selectedFilters is required');
+        if (!(selectedFilters[key] && selectedFilters[key].includes(value)))
+            filterString += `,${key}|${value}`;
+    }
+
     const baseUrl = 'http://localhost:8081/product/search';
     const queryParams = new URLSearchParams({
         q: searchString.slice(0, 100), // max 100 chars only
@@ -433,6 +444,8 @@ function createTempUrl(page, sortBy, key, value, searchString = currentSearchStr
     });
     if (currentSort)
         queryParams.append('sort', sortBy);
+    if (specialFilterString)
+        queryParams.append('s-filters', specialFilterString);
     if (filterString)
         queryParams.append('filters', filterString);
     return `${baseUrl}?${queryParams.toString()}`;
