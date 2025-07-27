@@ -31,12 +31,14 @@ public class ProductController {
         boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
         String sortStr = allParams.remove("sort");
 
+        String specialFilterParam = allParams.remove("s-filters");
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
 
         model.addAttribute("search_string", searchString);
         model.addAttribute("page", page);
         model.addAttribute("feature", getFeatures);
         model.addAttribute("sort", sortStr);
+        model.addAttribute("special_filter", specialFilterParam);
         model.addAttribute("filter", filterParam);
         return "/product-page/product-search-draft";
     }

@@ -52,10 +52,13 @@ public class ProductController {
             }
         }
 
+        String specialFilterParam = allParams.remove("s-filters");
+        Map<String, List<String>> specialFilters = parseFilterParam(specialFilterParam);
+
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
         Map<String, List<String>> selectedFilters = parseFilterParam(filterParam);
 
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, page, getFeatures, sortBy, selectedFilters));
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, page, getFeatures, sortBy, specialFilters, selectedFilters));
     }
     private Map<String, List<String>> parseFilterParam(String filterParam) {
         Map<String, List<String>> selectedFilters = new HashMap<>();
