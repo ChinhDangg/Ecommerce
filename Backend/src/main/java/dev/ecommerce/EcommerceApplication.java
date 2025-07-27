@@ -158,7 +158,7 @@ public class EcommerceApplication {
                     5,
                     ConditionType.NEW,
                     LocalDate.now(),
-                    new BigDecimal("100"),
+                    new BigDecimal("150"),
                     null,
                     null,
                     savedProductLine,

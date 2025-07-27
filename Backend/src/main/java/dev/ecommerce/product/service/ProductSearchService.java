@@ -99,7 +99,7 @@ public class ProductSearchService {
             futureMap.put("fullSpec", fullSpecFuture);
         }
 
-        CompletableFuture<Void> allDone = CompletableFuture.allOf(futureMap.entrySet().toArray(new CompletableFuture[0]));
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(futureMap.values().toArray(new CompletableFuture[0]));
         allDone.join();
 
         ProductCountAndDetails newProductCountAndDetails = ((ProductCountAndDetails) futureMap.get("special").join());
@@ -223,14 +223,15 @@ public class ProductSearchService {
             query.having(cb.equal(cb.countDistinct(specJoin.get("name")), selectedSpecs.size()));
         }
 
-        switch (sortBy) {
-            case PRICE_ASC -> query.orderBy(cb.asc(root.get("price")));
-            case PRICE_DESC -> query.orderBy(cb.desc(root.get("price")));
-            case NEWEST -> query.orderBy(cb.desc(root.get("addedDate")));
-            case TOP_RATED -> query.orderBy(cb.desc(root.get("totalRatings")));
-            case MOST_RATED -> query.orderBy(cb.desc(root.get("totalReviews")));
-            case BEST_SELLING -> query.orderBy(cb.desc(root.get("totalSold")));
-        }
+        if (sortBy != null)
+            switch (sortBy) {
+                case PRICE_ASC -> query.orderBy(cb.asc(root.get("price")));
+                case PRICE_DESC -> query.orderBy(cb.desc(root.get("price")));
+                case NEWEST -> query.orderBy(cb.desc(root.get("addedDate")));
+                case TOP_RATED -> query.orderBy(cb.desc(root.get("totalRatings")));
+                case MOST_RATED -> query.orderBy(cb.desc(root.get("totalReviews")));
+                case BEST_SELLING -> query.orderBy(cb.desc(root.get("totalSold")));
+            }
 
         TypedQuery<Product> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
@@ -316,27 +317,29 @@ public class ProductSearchService {
             parameters.put("keyword" + i, "%" + keywords[i].toLowerCase() + "%");
         }
 
-        int i = 0;
-        for (Map.Entry<String, List<String>> entry : specs.entrySet()) {
-            String specName = entry.getKey().toLowerCase();
-            List<String> options = entry.getValue();
-            sql.append(" AND EXISTS (")
-                    .append(" SELECT 1 FROM product_specification ps_sub")
-                    .append(" WHERE ps_sub.product_id = p.id")
-                    .append(" AND LOWER(ps_sub.name) = :specName").append(i)
-                    .append(" AND (");
+        if (specs != null && !specs.isEmpty()) {
+            int i = 0;
+            for (Map.Entry<String, List<String>> entry : specs.entrySet()) {
+                String specName = entry.getKey().toLowerCase();
+                List<String> options = entry.getValue();
+                sql.append(" AND EXISTS (")
+                        .append(" SELECT 1 FROM product_specification ps_sub")
+                        .append(" WHERE ps_sub.product_id = p.id")
+                        .append(" AND LOWER(ps_sub.name) = :specName").append(i)
+                        .append(" AND (");
 
-            for (int j = 0; j < options.size(); j++) {
-                if (j > 0) sql.append(" OR ");
-                sql.append("LOWER(ps_sub.option) = :specOption")
-                        .append(i).append("_").append(j);
-                parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
+                for (int j = 0; j < options.size(); j++) {
+                    if (j > 0) sql.append(" OR ");
+                    sql.append("LOWER(ps_sub.option) = :specOption")
+                            .append(i).append("_").append(j);
+                    parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
+                }
+
+                sql.append(")) "); // close EXISTS
+
+                parameters.put("specName" + i, specName);
+                i++;
             }
-
-            sql.append(")) "); // close EXISTS
-
-            parameters.put("specName" + i, specName);
-            i++;
         }
 
         sql.append(""" 
@@ -419,27 +422,29 @@ public class ProductSearchService {
             parameters.put("keyword" + i, "%" + keywords[i].toLowerCase() + "%");
         }
 
-        int i = 0;
-        for (Map.Entry<String, List<String>> entry : specs.entrySet()) {
-            String specName = entry.getKey().toLowerCase();
-            List<String> options = entry.getValue();
-            sql.append(" AND EXISTS (")
-                    .append(" SELECT 1 FROM product_specification ps_sub")
-                    .append(" WHERE ps_sub.product_id = p.id")
-                    .append(" AND LOWER(ps_sub.name) = :specName").append(i)
-                    .append(" AND (");
+        if (specs != null && !specs.isEmpty()) {
+            int i = 0;
+            for (Map.Entry<String, List<String>> entry : specs.entrySet()) {
+                String specName = entry.getKey().toLowerCase();
+                List<String> options = entry.getValue();
+                sql.append(" AND EXISTS (")
+                        .append(" SELECT 1 FROM product_specification ps_sub")
+                        .append(" WHERE ps_sub.product_id = p.id")
+                        .append(" AND LOWER(ps_sub.name) = :specName").append(i)
+                        .append(" AND (");
 
-            for (int j = 0; j < options.size(); j++) {
-                if (j > 0) sql.append(" OR ");
-                sql.append("LOWER(ps_sub.option) = :specOption")
-                        .append(i).append("_").append(j);
-                parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
+                for (int j = 0; j < options.size(); j++) {
+                    if (j > 0) sql.append(" OR ");
+                    sql.append("LOWER(ps_sub.option) = :specOption")
+                            .append(i).append("_").append(j);
+                    parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
+                }
+
+                sql.append(")) "); // close EXISTS
+
+                parameters.put("specName" + i, specName);
+                i++;
             }
-
-            sql.append(")) "); // close EXISTS
-
-            parameters.put("specName" + i, specName);
-            i++;
         }
 
         sql.append("""
