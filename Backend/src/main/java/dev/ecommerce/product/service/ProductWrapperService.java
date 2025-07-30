@@ -16,12 +16,16 @@ public class ProductWrapperService {
 
     private final ProductLineService productLineService;
     private final ProductService productService;
+    private final ProductCategoryService productCategoryService;
     private final ProductMapper productMapper;
 
-    public ProductWrapperService(ProductLineService productLineService, ProductService productService
-    , ProductMapper productMapper) {
+    public ProductWrapperService(ProductLineService productLineService,
+                                 ProductService productService,
+                                 ProductCategoryService productCategoryService,
+                                 ProductMapper productMapper) {
         this.productLineService = productLineService;
         this.productService = productService;
+        this.productCategoryService = productCategoryService;
         this.productMapper = productMapper;
     }
 
@@ -45,10 +49,10 @@ public class ProductWrapperService {
 
     @Transactional(readOnly = true)
     public ProductCardDTO getProductCardById(Long id) {
-        Product product = productService.getProductById(id);
+        Product product = productService.findProductById(id);
         ProductCardDTO cardDTO = productMapper.toProductCardDTO(product);
-        cardDTO.setProductGroupedOptions(productLineService.findProductGroupedOptions(product.getProductLine().getId()));
-        cardDTO.setProductCategoryChain(productService.getProductCategoryChain(product.getId()));
+        cardDTO.setProductGroupedOptions(productLineService.getProductGroupedOptions(product.getProductLine().getId()));
+        cardDTO.setProductCategoryChain(productCategoryService.getProductParentCategoryChain(product.getId()));
         return cardDTO;
     }
 

@@ -1,22 +1,10 @@
 package dev.ecommerce.product.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +52,7 @@ public class ProductService {
         this.productMapper = productMapper;
     }
 
-    public Product getProductById(Long id) {
+    public Product findProductById(Long id) {
         if (id == null)
             throw new IllegalArgumentException("Product id is null");
         return productRepository.findById(id)
@@ -72,27 +60,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductCategoryDTO> getProductCategoryChain(Long id) {
-        Product product = getProductById(id);
-        List<ProductCategoryDTO> productCategoryChain = new ArrayList<>();
-        ProductCategory parentCategory = product.getCategory();
-        while (parentCategory != null) {
-            productCategoryChain.add(productMapper.toProductCategoryDTO(parentCategory));
-            parentCategory = parentCategory.getParentProductCategory();
-        }
-        return productCategoryChain.reversed();
-    }
-
-    @Transactional
-    public Page<ShortProductDTO> findProductsByCategory(Integer id, int page) {
-        Pageable pageable = PageRequest.of(page, 10);
-        Page<Product> productPage = productRepository.findByCategoryId(id, pageable);
-        return productPage.map(productMapper::toShortProductWithFeaturesDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public ProductDTO findProductById(Long id) {
-        Product foundProduct = getProductById(id);
+    public ProductDTO getProductDTOById(Long id) {
+        Product foundProduct = findProductById(id);
         foundProduct.getProductLine();
         foundProduct.getCategory().getId();
         foundProduct.getOptions().size();
@@ -183,7 +152,7 @@ public class ProductService {
 
     @Transactional
     public Long updateProductInfo(ProductDTO productDTO) {
-        Product product = getProductById(productDTO.getId());
+        Product product = findProductById(productDTO.getId());
 
         // update basic info
         if (!productDTO.getManufacturerId().equals(product.getManufacturerId()))
@@ -325,7 +294,7 @@ public class ProductService {
 
     @Transactional
     public void deleteProductById(Long id) {
-        Product product = getProductById(id);
+        Product product = findProductById(id);
         productRepository.delete(product);
     }
 }

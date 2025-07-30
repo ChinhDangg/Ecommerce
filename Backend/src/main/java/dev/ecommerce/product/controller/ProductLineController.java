@@ -19,7 +19,7 @@ public class ProductLineController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductLineDTO> getProductLine(@PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(productLineService.findProductLineById(id));
+        return ResponseEntity.status(HttpStatus.OK).body(productLineService.getProductLineDTOById(id));
     }
 
     @PostMapping()

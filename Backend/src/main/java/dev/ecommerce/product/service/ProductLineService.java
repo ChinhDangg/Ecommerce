@@ -41,7 +41,7 @@ public class ProductLineService {
         this.productMapper = productMapper;
     }
 
-    private ProductLine getProductLineById(Integer id) {
+    private ProductLine findProductLineById(Integer id) {
         if (id == null)
             throw new IllegalArgumentException("Product line id is null");
         return productLineRepository.findById(id)
@@ -49,15 +49,15 @@ public class ProductLineService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductOptionDTO> findProductGroupedOptions(Integer productLineId) {
-        ProductLine productLine = getProductLineById(productLineId);
+    public List<ProductOptionDTO> getProductGroupedOptions(Integer productLineId) {
+        ProductLine productLine = findProductLineById(productLineId);
         List<ProductOption> productOptions = productLine.getProductOptions();
         return productMapper.toProductOptionDTOList(productOptions);
     }
 
     @Transactional(readOnly = true)
-    public ProductLineDTO findProductLineById(Integer id) {
-        ProductLine productLine = getProductLineById(id);
+    public ProductLineDTO getProductLineDTOById(Integer id) {
+        ProductLine productLine = findProductLineById(id);
 
         productLine.getDescriptions().size();
         productLine.getMedia().size();
@@ -100,7 +100,7 @@ public class ProductLineService {
 
     @Transactional // will leverage entity manager to update by retrieving the entity itself
     public Integer updateProductLineInfo(ProductLineDTO productLineDTO) {
-        ProductLine productLine = getProductLineById(productLineDTO.getId());
+        ProductLine productLine = findProductLineById(productLineDTO.getId());
 
         if (productLineDTO.getName().isEmpty())
             throw new IllegalArgumentException("Product line name is empty");
@@ -135,7 +135,7 @@ public class ProductLineService {
 
     @Transactional
     public void deleteProductLineById(Integer id) {
-        ProductLine productLine = getProductLineById(id);
+        ProductLine productLine = findProductLineById(id);
         productLine.getProducts().forEach(product -> product.setProductLine(null));
         productLine.getProductOptions().forEach(option -> option.setProductLine(null));
         productLineRepository.delete(productLine);
