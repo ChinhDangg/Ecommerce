@@ -32,6 +32,35 @@ public class ProductCategoryService {
         this.productMapper = productMapper;
     }
 
+    public List<ProductCategory> getChildrenCategoryChain(int categoryId, ProductCategory topCategory) {
+        ProductCategory category = findProductCategoryById(categoryId, topCategory);
+        List<ProductCategory> categoryChain = new ArrayList<>();
+        categoryChain.add(category);
+        for (ProductCategory subCategory : category.getSubcategories()) {
+            categoryChain.addAll(getChildrenCategoryChain(subCategory.getId(), subCategory));
+        }
+        return categoryChain;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductCategoryDTO> getProductParentCategoryChain(Long productId) {
+        Product product = productService.findProductById(productId);
+        List<ProductCategoryDTO> productCategoryChain = new ArrayList<>();
+        ProductCategory parentCategory = product.getCategory();
+        while (parentCategory != null) {
+            productCategoryChain.add(productMapper.toProductCategoryDTO(parentCategory));
+            parentCategory = parentCategory.getParentProductCategory();
+        }
+        return productCategoryChain.reversed();
+    }
+
+    private ProductCategory findProductCategoryById(Integer id, ProductCategory category) {
+        if (category != null && category.getId().equals(id)) {
+            return category;
+        }
+        return findProductCategoryById(id, false);
+    }
+
     private ProductCategory findProductCategoryById(Integer id, boolean nullable) {
         Optional<ProductCategory> productCategory = productCategoryRepository.findById(id);
         return (nullable)
@@ -44,7 +73,7 @@ public class ProductCategoryService {
     }
 
     public List<ProductCategoryDTO> findCategorySameParentCategoriesById(Long id) {
-        ProductCategory productCategory = productService.getProductById(id).getCategory();
+        ProductCategory productCategory = productService.findProductById(id).getCategory();
 
         ProductCategory parentCategory = productCategory.getParentProductCategory();
         return (parentCategory == null)
@@ -60,7 +89,7 @@ public class ProductCategoryService {
 
     @Transactional
     public ProductCategoryDTO saveProductCategory(ProductCategoryDTO productCategoryDTO) {
-        Integer id = productCategoryDTO.getId();
+        Integer id = productCategoryDTO.getId(); // the retrieved id if not null must be the parent or higher level category
         ProductCategory parentCategory = (id == null) ? null : findProductCategoryById(id, true);
         ProductCategory newCategory = new ProductCategory(
                 productCategoryDTO.getName(),
@@ -76,7 +105,7 @@ public class ProductCategoryService {
         ProductCategory category = findProductCategoryById(categoryId, false);
         List<Long> updatedProductIds = new ArrayList<>();
         for (Long productId : productIds) {
-            Product product = productService.getProductById(productId);
+            Product product = productService.findProductById(productId);
             product.setCategory(category);
             updatedProductIds.add(productRepository.save(product).getId());
         }
