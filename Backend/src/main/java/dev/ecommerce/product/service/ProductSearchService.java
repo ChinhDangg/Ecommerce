@@ -8,10 +8,7 @@ import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.constant.SpecialFilters;
-import dev.ecommerce.product.entity.Product;
-import dev.ecommerce.product.entity.ProductCoreSpecification;
-import dev.ecommerce.product.entity.ProductMedia;
-import dev.ecommerce.product.entity.ProductSpecification;
+import dev.ecommerce.product.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -33,27 +30,48 @@ public class ProductSearchService {
 
     private final EntityManager entityManager;
     private final ProductMapper productMapper;
+    private final ProductCategoryService productCategoryService;
 
-    public ProductSearchService(EntityManager entityManager, ProductMapper productMapper) {
+    public ProductSearchService(EntityManager entityManager, ProductMapper productMapper,
+                                ProductCategoryService productCategoryService) {
         this.entityManager = entityManager;
         this.productMapper = productMapper;
+        this.productCategoryService = productCategoryService;
+    }
+
+    @Transactional
+    public ProductSearchResultDTO findProductsByCategory(Integer id, int page) {
+        List<ProductCategory> categories = productCategoryService.getChildrenCategoryChain(id, null);
+        Map<String, List<String>> selectedFiltersOfCategory = new HashMap<>();
+        selectedFiltersOfCategory.put(SpecialFilters.CATEGORY.name().toLowerCase(), categories.stream().map(ProductCategory::getName).toList());
+
+        System.out.println(selectedFiltersOfCategory);
+
+        return searchProductByName(null, page, true, null, selectedFiltersOfCategory, null);
+    }
+
+    private void checkProductSearch(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs, String test) {
+        if ((keywords == null || keywords.length == 0)
+                && (selectedFilters == null || selectedFilters.isEmpty())
+                && (selectedSpecs == null || selectedSpecs.isEmpty())) {
+            System.out.println(test);
+            throw new IllegalArgumentException("At least one of keywords, selectedFilters, or specs must be provided");
+        }
     }
 
     @Transactional(readOnly = true)
     public ProductSearchResultDTO searchProductByName(String searchString, int page, boolean getFeatures, SortOption sortBy,
-                                                      Map<String, List<String>> specialFilters, Map<String, List<String>> selectedSpecs) {
-        String refined = searchString.replaceAll("[^a-zA-Z0-9 ]", "");
-        if (refined.isEmpty())
-            return null;
+                                                      Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
+        String refined = searchString == null ? null : searchString.replaceAll("[^a-zA-Z0-9 ]", "");
 
-        String[] words = refined.toLowerCase().split("\\s+");
-        if (words.length == 0)
-            return null;
+        String[] words = refined == null ? null : refined.toLowerCase().split("\\s+");
+
+        checkProductSearch(words, selectedFilters, selectedSpecs, "searchProductByName");
 
         CompletableFuture<ProductCountAndDetails> specialFiltersAndCountFuture =
                 CompletableFuture.supplyAsync(() -> {
                     try {
-                        return getProductDetailsAndCountByName(words, specialFilters, selectedSpecs);
+                        return getProductDetailsAndCountByName(words, selectedFilters, selectedSpecs);
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
@@ -62,7 +80,7 @@ public class ProductSearchService {
         CompletableFuture<ProductCoreSpecs> specFuture =
                 CompletableFuture.supplyAsync(() -> {
                     try {
-                        return getProductCoreSpecListByName(words, specialFilters, selectedSpecs);
+                        return getProductCoreSpecListByName(words, selectedFilters, selectedSpecs);
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
@@ -72,14 +90,14 @@ public class ProductSearchService {
         futureMap.put("special", specialFiltersAndCountFuture);
         futureMap.put("spec", specFuture);
 
-        boolean hasSpecialFilters = specialFilters != null && !specialFilters.isEmpty();
+        boolean hasSpecialFilters = selectedFilters != null && !selectedFilters.isEmpty();
         boolean hasSelectedSpecs = selectedSpecs != null && !selectedSpecs.isEmpty();
 
         if (hasSpecialFilters) {
             CompletableFuture<ProductCountAndDetails> fullSpecialFiltersAndCountFuture =
                     CompletableFuture.supplyAsync(() -> {
                         try {
-                            return getProductDetailsAndCountByName(words, null, selectedSpecs);
+                            return getProductDetailsAndCountByName(words, null, null);
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
                         }
@@ -91,7 +109,7 @@ public class ProductSearchService {
             CompletableFuture<ProductCoreSpecs> fullSpecFuture =
                     CompletableFuture.supplyAsync(() -> {
                         try {
-                            return getProductCoreSpecListByName(words, specialFilters,null);
+                            return getProductCoreSpecListByName(words, null,null);
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
                         }
@@ -103,16 +121,16 @@ public class ProductSearchService {
         allDone.join();
 
         ProductCountAndDetails newProductCountAndDetails = ((ProductCountAndDetails) futureMap.get("special").join());
-        if (hasSpecialFilters) {
+        if (hasSpecialFilters && !newProductCountAndDetails.filters.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecialFilterList = ((ProductCountAndDetails) futureMap.get("fullSpecial").join()).filters;
 
-            updateFullFilters(fullSpecialFilterList, newProductCountAndDetails.filters, specialFilters);
+            updateFullFilters(fullSpecialFilterList, newProductCountAndDetails.filters, selectedFilters);
             newProductCountAndDetails.filters.clear();
             newProductCountAndDetails.filters.putAll(fullSpecialFilterList);
         }
 
         ProductCoreSpecs newSpecList = ((ProductCoreSpecs) futureMap.get("spec").join());
-        if (hasSelectedSpecs) {
+        if (hasSelectedSpecs && !newSpecList.specs.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecList = ((ProductCoreSpecs) futureMap.get("fullSpec").join()).specs();
 
             updateFullFilters(fullSpecList, newSpecList.specs, selectedSpecs); // update spec filters
@@ -120,7 +138,7 @@ public class ProductSearchService {
             newSpecList.specs.putAll(fullSpecList);
         }
 
-        Page<ShortProductDTO> products = findProductByName(words, specialFilters, selectedSpecs, page, 10, newProductCountAndDetails.count, getFeatures, sortBy);
+        Page<ShortProductDTO> products = findProductByName(words, selectedFilters, selectedSpecs, page, 10, newProductCountAndDetails.count, getFeatures, sortBy);
         return new ProductSearchResultDTO(newProductCountAndDetails.filters, newSpecList.specs, products);
     }
 
@@ -157,8 +175,10 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    protected Page<ShortProductDTO> findProductByName(String[] words, Map<String, List<String>> specialFilers, Map<String, List<String>> selectedSpecs, int page,
+    protected Page<ShortProductDTO> findProductByName(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs, int page,
                                                       int size, long total, boolean getFeatures, SortOption sortBy) {
+        checkProductSearch(keywords, selectedFilters, selectedSpecs, "findProductByName");
+
         Pageable pageable = PageRequest.of(page, size);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -172,22 +192,44 @@ public class ProductSearchService {
         // create the predicates
         List<Predicate> predicates = new ArrayList<>();
         // Keyword match
-        for (String word : words) {
-            predicates.add(cb.like(cb.lower(root.get("name")), "%" + word.toLowerCase() + "%"));
-        }
+        if (keywords != null)
+            for (String word : keywords) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + word.toLowerCase() + "%"));
+            }
 
         // special filters
-        if (specialFilers != null && !specialFilers.isEmpty()) {
-            SpecialFilters[] sFilterList = SpecialFilters.values();
-            for (SpecialFilters sFilter : sFilterList) {
-                List<String> sFilterOptions = specialFilers.remove(sFilter.name().toLowerCase());
-                if (sFilterOptions == null || sFilterOptions.isEmpty())
-                    continue;
-                List<Predicate> sFilterMatches = sFilterOptions.stream()
-                        .map(sFOption -> cb.equal(cb.lower(root.get(sFilter.name().toLowerCase())), sFOption.toLowerCase()))
-                        .toList();
-                predicates.add(cb.or(sFilterMatches.toArray(new Predicate[0])));
+        if (selectedFilters != null && !selectedFilters.isEmpty()) {
+            List<Predicate> specialFilterPredicates = new ArrayList<>();
+
+            Map<SpecialFilters, Path<?>> joinedPaths = new HashMap<>();
+            for (SpecialFilters filter : SpecialFilters.values()) {
+                if (filter.isRequiresJoin()) {
+                    // Only join once
+                    if (!joinedPaths.containsKey(filter)) {
+                        // split by . - category.name = category , name
+                        Join<?, ?> join = root.join(filter.getPath().split("\\.")[0], JoinType.LEFT); // join with category
+                        joinedPaths.put(filter, join.get(filter.getPath().split("\\.")[1])); // category - key | name - value
+                    }
+                } else {
+                    joinedPaths.put(filter, root.get(filter.getPath()));
+                }
+
+                List<String> options = selectedFilters.get(filter.name().toLowerCase());
+                if (options != null && !options.isEmpty()) {
+                    List<Predicate> filterMatches = options.stream()
+                            .map(opt -> {
+                                Path<?> path = joinedPaths.get(filter);
+                                if (String.class.equals(path.getJavaType())) {
+                                    return cb.equal(cb.lower(path.as(String.class)), opt.toLowerCase());
+                                } else {
+                                    return cb.equal(path, convertToProperType(opt, path.getJavaType()));
+                                }
+                            })
+                            .toList();
+                    specialFilterPredicates.add(cb.or(filterMatches.toArray(new Predicate[0])));
+                }
             }
+            predicates.add(cb.and(specialFilterPredicates.toArray(new Predicate[0])));
         }
 
         // Spec filters
@@ -258,10 +300,16 @@ public class ProductSearchService {
         return new PageImpl<>(shortProductDTOList, pageable, total);
     }
 
-    // Map<String, List<Map<String, Object>>> specs
+    private Object convertToProperType(String value, Class<?> type) {
+        if (type.equals(Integer.class)) return Integer.valueOf(value);
+        if (type.equals(Long.class)) return Long.valueOf(value);
+        if (type.equals(Double.class)) return Double.valueOf(value);
+        if (type.equals(Boolean.class)) return Boolean.valueOf(value);
+        return value; // fallback to string
+    }
+
     private ProductCoreSpecs getProductCoreSpecListByName(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> specs) throws JsonProcessingException {
-        if (keywords.length == 0)
-            return new ProductCoreSpecs(null);
+        checkProductSearch(keywords, selectedFilters, specs, "getProductCoreSpecListByName");
 
         StringBuilder sql = new StringBuilder("""
             SELECT
@@ -294,7 +342,7 @@ public class ProductSearchService {
             int i = 0;
             for (SpecialFilters filter : SpecialFilters.values()) {
                 String key = filter.name().toLowerCase();
-                List<String> options = selectedFilters.remove(key);
+                List<String> options = selectedFilters.get(key);
                 if (options == null || options.isEmpty())
                     continue;
 
@@ -302,8 +350,10 @@ public class ProductSearchService {
                 for (int j = 0; j < options.size(); j++) {
                     if (j > 0) sql.append(" OR ");
                     sql.append("LOWER(")
+                            .append("CAST(")
                             .append(filter.getColumnName())
-                            .append(") = :filter")
+                            .append(" AS TEXT))")
+                            .append(" = :filter")
                             .append(i).append("_").append(j);
                     parameters.put("filter" + i + "_" + j, options.get(j).toLowerCase());
                 }
@@ -312,10 +362,11 @@ public class ProductSearchService {
             }
         }
 
-        for (int i = 0; i < keywords.length; i++) {
-            sql.append(" AND LOWER(p.name) LIKE :keyword").append(i);
-            parameters.put("keyword" + i, "%" + keywords[i].toLowerCase() + "%");
-        }
+        if (keywords != null)
+            for (int i = 0; i < keywords.length; i++) {
+                sql.append(" AND LOWER(p.name) LIKE :keyword").append(i);
+                parameters.put("keyword" + i, "%" + keywords[i].toLowerCase() + "%");
+            }
 
         if (specs != null && !specs.isEmpty()) {
             int i = 0;
@@ -373,8 +424,7 @@ public class ProductSearchService {
 
     private ProductCountAndDetails getProductDetailsAndCountByName(String[] keywords, Map<String, List<String>> selectedFilters,
                                                                    Map<String, List<String>> specs) throws JsonProcessingException {
-        if (keywords.length == 0)
-            return null;
+        checkProductSearch(keywords, selectedFilters, specs, "getProductDetailsAndCountByName");
 
         StringBuilder sql = new StringBuilder("""
             WITH matched_ids AS (
@@ -399,7 +449,7 @@ public class ProductSearchService {
             int i = 0;
             for (SpecialFilters filter : SpecialFilters.values()) {
                 String key = filter.name().toLowerCase();
-                List<String> options = selectedFilters.remove(key);
+                List<String> options = selectedFilters.get(key);
                 if (options == null || options.isEmpty())
                     continue;
 
@@ -407,8 +457,10 @@ public class ProductSearchService {
                 for (int j = 0; j < options.size(); j++) {
                     if (j > 0) sql.append(" OR ");
                     sql.append("LOWER(")
+                            .append("CAST(")
                             .append(filter.getColumnName())
-                            .append(") = :filter")
+                            .append(" AS TEXT))")
+                            .append(" = :filter")
                             .append(i).append("_").append(j);
                     parameters.put("filter" + i + "_" + j, options.get(j).toLowerCase());
                 }
@@ -417,10 +469,11 @@ public class ProductSearchService {
             }
         }
 
-        for (int i = 0; i < keywords.length; i++) {
-            sql.append(" AND LOWER(p.name) LIKE :keyword").append(i);
-            parameters.put("keyword" + i, "%" + keywords[i].toLowerCase() + "%");
-        }
+        if (keywords != null)
+            for (int i = 0; i < keywords.length; i++) {
+                sql.append(" AND LOWER(p.name) LIKE :keyword").append(i);
+                parameters.put("keyword" + i, "%" + keywords[i].toLowerCase() + "%");
+            }
 
         if (specs != null && !specs.isEmpty()) {
             int i = 0;
@@ -533,7 +586,7 @@ public class ProductSearchService {
             }
             return new ProductCountAndDetails(productCount, filters);
         }
-        return new ProductCountAndDetails(0, null);
+        return new ProductCountAndDetails(0, new HashMap<>());
     }
 
     private record ProductCountAndDetails(
