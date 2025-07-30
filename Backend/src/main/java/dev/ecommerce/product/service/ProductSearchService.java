@@ -40,14 +40,14 @@ public class ProductSearchService {
     }
 
     @Transactional
-    public ProductSearchResultDTO findProductsByCategory(Integer id, int page) {
+    public ProductSearchResultDTO findProductsByCategory(Integer id, int page, int size) {
         List<ProductCategory> categories = productCategoryService.getChildrenCategoryChain(id, null);
         Map<String, List<String>> selectedFiltersOfCategory = new HashMap<>();
         selectedFiltersOfCategory.put(SpecialFilters.CATEGORY.name().toLowerCase(), categories.stream().map(ProductCategory::getName).toList());
 
         System.out.println(selectedFiltersOfCategory);
 
-        return searchProductByName(null, page, true, null, selectedFiltersOfCategory, null);
+        return searchProductByName(null, page, size,true, null, selectedFiltersOfCategory, null);
     }
 
     private void checkProductSearch(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
@@ -59,13 +59,16 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    public ProductSearchResultDTO searchProductByName(String searchString, int page, boolean getFeatures, SortOption sortBy,
+    public ProductSearchResultDTO searchProductByName(String searchString, int page, int size, boolean getFeatures, SortOption sortBy,
                                                       Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
         String refined = searchString == null ? null : searchString.replaceAll("[^a-zA-Z0-9 ]", "");
 
         String[] words = refined == null ? null : refined.toLowerCase().split("\\s+");
 
-        checkProductSearch(words, selectedFilters, selectedSpecs);
+        List<ShortProductDTO> products = findProductByName(words, selectedFilters, selectedSpecs, page, size, getFeatures, sortBy);
+        if (products.isEmpty()) {
+            return new ProductSearchResultDTO(new HashMap<>(), new HashMap<>(), new PageImpl<>(Collections.emptyList()));
+        }
 
         CompletableFuture<ProductCountAndDetails> specialFiltersAndCountFuture =
                 CompletableFuture.supplyAsync(() -> {
@@ -137,8 +140,10 @@ public class ProductSearchService {
             newSpecList.specs.putAll(fullSpecList);
         }
 
-        Page<ShortProductDTO> products = findProductByName(words, selectedFilters, selectedSpecs, page, 10, newProductCountAndDetails.count, getFeatures, sortBy);
-        return new ProductSearchResultDTO(newProductCountAndDetails.filters, newSpecList.specs, products);
+        return new ProductSearchResultDTO(
+                newProductCountAndDetails.filters,
+                newSpecList.specs,
+                new PageImpl<>(products, PageRequest.of(page, size), newProductCountAndDetails.count));
     }
 
     private void updateFullFilters(Map<String, List<Map<String, Object>>> fullSelectedList,
@@ -174,8 +179,8 @@ public class ProductSearchService {
     }
 
     @Transactional(readOnly = true)
-    protected Page<ShortProductDTO> findProductByName(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs, int page,
-                                                      int size, long total, boolean getFeatures, SortOption sortBy) {
+    protected List<ShortProductDTO> findProductByName(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs, int page,
+                                                      int size, boolean getFeatures, SortOption sortBy) {
         checkProductSearch(keywords, selectedFilters, selectedSpecs);
 
         Pageable pageable = PageRequest.of(page, size);
@@ -296,7 +301,7 @@ public class ProductSearchService {
             shortProductDTOList.add(current);
         }
 
-        return new PageImpl<>(shortProductDTOList, pageable, total);
+        return shortProductDTOList;
     }
 
     private Object convertToProperType(String value, Class<?> type) {

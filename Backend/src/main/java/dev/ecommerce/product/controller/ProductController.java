@@ -60,7 +60,8 @@ public class ProductController {
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
         Map<String, List<String>> selectedFilters = parseFilterParam(filterParam);
 
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.searchProductByName(searchString, page, getFeatures, sortBy, specialFilters, selectedFilters));
+        return ResponseEntity.status(HttpStatus.OK).body(
+                productSearchService.searchProductByName(searchString, page, 10, getFeatures, sortBy, specialFilters, selectedFilters));
     }
     private Map<String, List<String>> parseFilterParam(String filterParam) {
         Map<String, List<String>> selectedFilters = new HashMap<>();
@@ -84,7 +85,7 @@ public class ProductController {
             @RequestParam(defaultValue = "1") Integer id,
             @RequestParam(defaultValue = "0") int page
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(id, page));
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(id, page, 10));
     }
 
     @GetMapping("/{id}")
