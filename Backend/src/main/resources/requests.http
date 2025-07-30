@@ -16,4 +16,7 @@ GET http://localhost:8080/api/product/search?
 GET http://localhost:8080/api/product/2
 
 ###
-GET http://localhost:8080/api/product/by-name?search=1&page=0&feature=true
+GET http://localhost:8080/api/product/by-name?q=Product&page=0&feature=true&sort=PRICE_DESC&filters=RAM:16GB
+
+###
+GET http://localhost:8080/api/product/by-category?id=1&page=0

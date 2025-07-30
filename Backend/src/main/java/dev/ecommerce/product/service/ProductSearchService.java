@@ -50,11 +50,10 @@ public class ProductSearchService {
         return searchProductByName(null, page, true, null, selectedFiltersOfCategory, null);
     }
 
-    private void checkProductSearch(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs, String test) {
+    private void checkProductSearch(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
         if ((keywords == null || keywords.length == 0)
                 && (selectedFilters == null || selectedFilters.isEmpty())
                 && (selectedSpecs == null || selectedSpecs.isEmpty())) {
-            System.out.println(test);
             throw new IllegalArgumentException("At least one of keywords, selectedFilters, or specs must be provided");
         }
     }
@@ -66,7 +65,7 @@ public class ProductSearchService {
 
         String[] words = refined == null ? null : refined.toLowerCase().split("\\s+");
 
-        checkProductSearch(words, selectedFilters, selectedSpecs, "searchProductByName");
+        checkProductSearch(words, selectedFilters, selectedSpecs);
 
         CompletableFuture<ProductCountAndDetails> specialFiltersAndCountFuture =
                 CompletableFuture.supplyAsync(() -> {
@@ -93,7 +92,7 @@ public class ProductSearchService {
         boolean hasSpecialFilters = selectedFilters != null && !selectedFilters.isEmpty();
         boolean hasSelectedSpecs = selectedSpecs != null && !selectedSpecs.isEmpty();
 
-        if (hasSpecialFilters) {
+        if (hasSpecialFilters || hasSelectedSpecs) {
             CompletableFuture<ProductCountAndDetails> fullSpecialFiltersAndCountFuture =
                     CompletableFuture.supplyAsync(() -> {
                         try {
@@ -105,7 +104,7 @@ public class ProductSearchService {
             futureMap.put("fullSpecial", fullSpecialFiltersAndCountFuture);
         }
 
-        if (hasSelectedSpecs) {
+        if (hasSelectedSpecs || hasSpecialFilters) {
             CompletableFuture<ProductCoreSpecs> fullSpecFuture =
                     CompletableFuture.supplyAsync(() -> {
                         try {
@@ -121,7 +120,7 @@ public class ProductSearchService {
         allDone.join();
 
         ProductCountAndDetails newProductCountAndDetails = ((ProductCountAndDetails) futureMap.get("special").join());
-        if (hasSpecialFilters && !newProductCountAndDetails.filters.isEmpty()) {
+        if ((hasSpecialFilters || hasSelectedSpecs) && !newProductCountAndDetails.filters.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecialFilterList = ((ProductCountAndDetails) futureMap.get("fullSpecial").join()).filters;
 
             updateFullFilters(fullSpecialFilterList, newProductCountAndDetails.filters, selectedFilters);
@@ -130,7 +129,7 @@ public class ProductSearchService {
         }
 
         ProductCoreSpecs newSpecList = ((ProductCoreSpecs) futureMap.get("spec").join());
-        if (hasSelectedSpecs && !newSpecList.specs.isEmpty()) {
+        if ((hasSelectedSpecs || hasSpecialFilters) && !newSpecList.specs.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecList = ((ProductCoreSpecs) futureMap.get("fullSpec").join()).specs();
 
             updateFullFilters(fullSpecList, newSpecList.specs, selectedSpecs); // update spec filters
@@ -177,7 +176,7 @@ public class ProductSearchService {
     @Transactional(readOnly = true)
     protected Page<ShortProductDTO> findProductByName(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs, int page,
                                                       int size, long total, boolean getFeatures, SortOption sortBy) {
-        checkProductSearch(keywords, selectedFilters, selectedSpecs, "findProductByName");
+        checkProductSearch(keywords, selectedFilters, selectedSpecs);
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -309,7 +308,7 @@ public class ProductSearchService {
     }
 
     private ProductCoreSpecs getProductCoreSpecListByName(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> specs) throws JsonProcessingException {
-        checkProductSearch(keywords, selectedFilters, specs, "getProductCoreSpecListByName");
+        checkProductSearch(keywords, selectedFilters, specs);
 
         StringBuilder sql = new StringBuilder("""
             SELECT
@@ -424,7 +423,7 @@ public class ProductSearchService {
 
     private ProductCountAndDetails getProductDetailsAndCountByName(String[] keywords, Map<String, List<String>> selectedFilters,
                                                                    Map<String, List<String>> specs) throws JsonProcessingException {
-        checkProductSearch(keywords, selectedFilters, specs, "getProductDetailsAndCountByName");
+        checkProductSearch(keywords, selectedFilters, specs);
 
         StringBuilder sql = new StringBuilder("""
             WITH matched_ids AS (
