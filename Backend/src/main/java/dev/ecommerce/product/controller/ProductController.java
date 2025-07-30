@@ -1,14 +1,11 @@
 package dev.ecommerce.product.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
-import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +35,11 @@ public class ProductController {
     @GetMapping("/by-name")
     public ResponseEntity<ProductSearchResultDTO> searchProducts(@RequestParam Map<String, String> allParams) {
         String searchString = allParams.remove("q");
+
+        if (searchString == null || searchString.isEmpty()) {
+            ResponseEntity.status(HttpStatus.OK).body(null);
+        }
+
         String pageStr = allParams.remove("page");
         int page = Integer.parseInt(pageStr != null ? pageStr : "0");
         String featureStr = allParams.remove("feature");
@@ -78,16 +80,16 @@ public class ProductController {
     }
 
     @GetMapping("/by-category")
-    public ResponseEntity<Page<ShortProductDTO>> searchProductsByCategory(
+    public ResponseEntity<ProductSearchResultDTO> searchProductsByCategory(
             @RequestParam(defaultValue = "1") Integer id,
             @RequestParam(defaultValue = "0") int page
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductsByCategory(id, page));
+        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(id, page));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
-        ProductDTO productDTO = productService.findProductById(id);
+        ProductDTO productDTO = productService.getProductDTOById(id);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
