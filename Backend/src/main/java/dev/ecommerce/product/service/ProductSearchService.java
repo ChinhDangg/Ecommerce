@@ -13,7 +13,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +46,7 @@ public class ProductSearchService {
 
         System.out.println(selectedFiltersOfCategory);
 
-        return searchProductByName(null, page, size,true, null, selectedFiltersOfCategory, null);
+        return searchProductByName(null, page, size,true, null, selectedFiltersOfCategory, new HashMap<>());
     }
 
     private void checkProductSearch(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
@@ -58,6 +57,16 @@ public class ProductSearchService {
         }
     }
 
+    /**
+     * Search products by keywords in product name - %word1% and %word2%.
+     * Also get product specs (name and count) grouped specName.
+     * Also get product special details like category, filter (name and count) grouped by detailName (category).
+     * Must provide searchString or selectedFilters or selectedSpecs.
+     * If selectedFilter or selectedSpecs are provided, then also get a full list of them plus an updated list within,
+     * count = 0 are from the old list with just search string, while non-zero counts are the new updated list.
+     * Can search with just selectedFilter or selectedSpec to search with special filters or product specs.
+     * Search without searchString will skip getting the full selectedFilter and selectedSpec list as irrelevant.
+     */
     @Transactional(readOnly = true)
     public ProductSearchResultDTO searchProductByName(String searchString, int page, int size, boolean getFeatures, SortOption sortBy,
                                                       Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
@@ -92,10 +101,11 @@ public class ProductSearchService {
         futureMap.put("special", specialFiltersAndCountFuture);
         futureMap.put("spec", specFuture);
 
+        boolean hasKeywords = words != null && words.length > 0;
         boolean hasSpecialFilters = selectedFilters != null && !selectedFilters.isEmpty();
         boolean hasSelectedSpecs = selectedSpecs != null && !selectedSpecs.isEmpty();
 
-        if (hasSpecialFilters || hasSelectedSpecs) {
+        if ((hasSpecialFilters || hasSelectedSpecs) && hasKeywords) {
             CompletableFuture<ProductCountAndDetails> fullSpecialFiltersAndCountFuture =
                     CompletableFuture.supplyAsync(() -> {
                         try {
@@ -107,7 +117,7 @@ public class ProductSearchService {
             futureMap.put("fullSpecial", fullSpecialFiltersAndCountFuture);
         }
 
-        if (hasSelectedSpecs || hasSpecialFilters) {
+        if ((hasSelectedSpecs || hasSpecialFilters) && hasKeywords) {
             CompletableFuture<ProductCoreSpecs> fullSpecFuture =
                     CompletableFuture.supplyAsync(() -> {
                         try {
@@ -123,7 +133,7 @@ public class ProductSearchService {
         allDone.join();
 
         ProductCountAndDetails newProductCountAndDetails = ((ProductCountAndDetails) futureMap.get("special").join());
-        if ((hasSpecialFilters || hasSelectedSpecs) && !newProductCountAndDetails.filters.isEmpty()) {
+        if ((hasSpecialFilters || hasSelectedSpecs) && hasKeywords && !newProductCountAndDetails.filters.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecialFilterList = ((ProductCountAndDetails) futureMap.get("fullSpecial").join()).filters;
 
             updateFullFilters(fullSpecialFilterList, newProductCountAndDetails.filters, selectedFilters);
@@ -132,7 +142,7 @@ public class ProductSearchService {
         }
 
         ProductCoreSpecs newSpecList = ((ProductCoreSpecs) futureMap.get("spec").join());
-        if ((hasSelectedSpecs || hasSpecialFilters) && !newSpecList.specs.isEmpty()) {
+        if ((hasSelectedSpecs || hasSpecialFilters) && hasKeywords && !newSpecList.specs.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecList = ((ProductCoreSpecs) futureMap.get("fullSpec").join()).specs();
 
             updateFullFilters(fullSpecList, newSpecList.specs, selectedSpecs); // update spec filters
