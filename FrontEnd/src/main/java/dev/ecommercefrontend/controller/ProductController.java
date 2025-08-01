@@ -25,22 +25,26 @@ public class ProductController {
             Model model) {
 
         String searchString = allParams.remove("q");
+        String categoryIdStr = allParams.remove("cateId");
+
         String pageStr = allParams.remove("page");
-        int page = Integer.parseInt(pageStr != null ? pageStr : "0");
         String featureStr = allParams.remove("feature");
-        boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
         String sortStr = allParams.remove("sort");
 
         String specialFilterParam = allParams.remove("s-filters");
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
 
         model.addAttribute("search_string", searchString);
-        model.addAttribute("page", page);
-        model.addAttribute("feature", getFeatures);
+        model.addAttribute("category_id", categoryIdStr);
+
+        model.addAttribute("page", pageStr);
+        model.addAttribute("feature", featureStr);
         model.addAttribute("sort", sortStr);
         model.addAttribute("special_filter", specialFilterParam);
         model.addAttribute("filter", filterParam);
+        model.addAttribute("call_url", "http://localhost:8080/api/product/search");
+        model.addAttribute("redirect_url", "http://localhost:8081/product/search");
         return "/product-page/product-search-draft";
     }
-    
+
 }

@@ -21,7 +21,7 @@ public class EcommerceApplication {
         SpringApplication.run(EcommerceApplication.class, args);
     }
 
-    @Bean
+    //@Bean
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
@@ -40,7 +40,7 @@ public class EcommerceApplication {
             ProductCategory computers = new ProductCategory("Computers", electronics);
             ProductCategory display = new ProductCategory("Display", electronics);
             ProductCategory laptops = new ProductCategory("Laptops", computers);
-            ProductCategory gamingLaptops = new ProductCategory("GamingLaptops", laptops);
+            ProductCategory gamingLaptops = new ProductCategory("Gaming Laptops", laptops);
             ProductCategory macs = new ProductCategory("Mac", laptops);
             ProductCategory computerComponent= new ProductCategory("Computer Component", electronics);
             ProductCategory graphicsCard = new ProductCategory("Graphics Card", computerComponent);
@@ -154,7 +154,7 @@ public class EcommerceApplication {
             Product product2 = new Product(
                     "Man part 2",
                     "Product Name 2",
-                    "Brand 1",
+                    "Brand 2",
                     5,
                     ConditionType.NEW,
                     LocalDate.now(),
@@ -162,7 +162,7 @@ public class EcommerceApplication {
                     null,
                     null,
                     savedProductLine,
-                    electronics
+                    gamingLaptops
             );
             productRepository.save(product2);
             ProductOption product2Option1 = new ProductOption(

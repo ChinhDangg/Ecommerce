@@ -15,104 +15,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function fetchProductInfo(productId) {
-    // if (!productId) {
-    //     throw new Error('No product id found.');
-    // }
-    // const response = await fetch(`localhost:8080/api/productWrapper/card/${productId}`);
-    // if (!response.ok) {
-    //     throw new Error('Failed to fetch product');
-    // }
-    // return await response.json();
-    return {
-        productLineId: 1,
-        id: 1,
-        manufacturerId: 'Part num 1',
-        name: 'Product Name 1',
-        brand: 'Product Brand 1',
-        quantity: 5,
-        conditionType: 'NEW',
-
-        productGroupedOptions: [
-            {
-                productId: 2,
-                id: 1,
-                name: 'Option 1',
-                valueOption: 'value 3'
-            },
-            {
-                productId: 3,
-                id: 2,
-                name: 'Option 2',
-                valueOption: 'value 4'
-            }
-        ],
-
-        productCategoryChain: [
-            {
-                id: 1,
-                name: 'Photography',
-            },
-            {
-                id: 2,
-                name: 'Digital Camera'
-            },
-            {
-                id: 3,
-                name: 'DSLR Cameras'
-            }
-        ],
-
-        options: [
-            {
-                name: 'Option 1',
-                valueOption: 'value 1'
-            },
-            {
-                name: 'Option 2',
-                valueOption: 'value 2'
-            }
-        ],
-        price: 20.00,
-        salePrice: 10.00,
-        saleEndDate: '2025-01-01',
-        specifications: [
-            {
-                name: 'Spec 1',
-                valueOption: 'value 1'
-            },
-            {
-                name: 'Spec 2',
-                valueOption: 'value 2'
-            }
-        ],
-        features: [
-            'feature 1', 'feature 2', 'feature 3', 'feature 4', 'feature 5', 'feature 6', 'feature 7', 'feature 8'
-        ],
-        media: [
-            {
-                id: 1,
-                contentType: 'IMAGE',
-                content: '/images/Aqua水淼 - Cantarella (3).jpg'
-            },
-            {
-                id: 2,
-                contentType: 'IMAGE',
-                content: '/images/Aqua水淼 - Cantarella (3).jpg'
-            }
-        ],
-        descriptions: [
-            {
-                id: 1,
-                contentType: 'IMAGE',
-                content: '/images/Aqua水淼 - Cantarella (3).jpg'
-            },
-            {
-                id: 2,
-                contentType: 'TEXT',
-                content: 'Product Description 1',
-            }
-        ]
+    if (!productId) {
+        throw new Error('No product id found.');
     }
+    const response = await fetch(`http://localhost:8080/api/productWrapper/card/${productId}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch product');
+    }
+    return await response.json();
 }
 
 function showProductDetails(productInfo) {
@@ -175,6 +85,7 @@ function showCategoryChainLinks(productCategoryChain) {
         if (index !== productCategoryChain.length - 1) {
             categoryNavContainer.appendChild(fSlashTem.cloneNode(true));
         }
+        link.querySelector('a').href = 'http://localhost:8081/product/search?cateId=' + category.id;
     });
 }
 

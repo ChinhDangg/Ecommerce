@@ -32,18 +32,33 @@ public class ProductController {
         this.productSearchService = productSearchService;
     }
 
-    @GetMapping("/by-name")
+    @GetMapping("/search")
     public ResponseEntity<ProductSearchResultDTO> searchProducts(@RequestParam Map<String, String> allParams) {
         String searchString = allParams.remove("q");
 
-        if (searchString == null || searchString.isEmpty()) {
-            ResponseEntity.status(HttpStatus.OK).body(null);
+        String pageStr = allParams.remove("page");
+        int page = 0;
+        if (pageStr != null) {
+            try {
+                page = Integer.parseInt(pageStr);
+            } catch (IllegalArgumentException _) {}
         }
 
-        String pageStr = allParams.remove("page");
-        int page = Integer.parseInt(pageStr != null ? pageStr : "0");
+        String categoryIdStr = allParams.remove("cateId");
+        if (categoryIdStr != null) {
+            try {
+                int categoryId = Integer.parseInt(categoryIdStr);
+                ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(categoryId, page, 10));
+            } catch (IllegalArgumentException _) {
+                return ResponseEntity.badRequest().body(null);
+            }
+        } else if (searchString == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
         String featureStr = allParams.remove("feature");
         boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
+
         String sortStr = allParams.remove("sort");
         SortOption sortBy = null;
         if (sortStr != null) {
@@ -78,14 +93,6 @@ public class ProductController {
             }
         }
         return selectedFilters;
-    }
-
-    @GetMapping("/by-category")
-    public ResponseEntity<ProductSearchResultDTO> searchProductsByCategory(
-            @RequestParam(defaultValue = "1") Integer id,
-            @RequestParam(defaultValue = "0") int page
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(id, page, 10));
     }
 
     @GetMapping("/{id}")

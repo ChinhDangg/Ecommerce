@@ -13,11 +13,14 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Header -->
     <h1 class="text-1xl font-bold text-gray-900 mb-6">
-        <span>Search Results for "</span><span id="current-search-string" th:text="${search_string}">Gaming Laptop</span><span>"</span>
-        <span id="current-page" class="hidden" th:text="${page}">0</span>
-        <span id="current-sort" class="hidden" th:text="${sort}">RELEVANCE</span>
-        <span id="current-s-filter" class="hidden" th:text="${special_filter}">0</span>
-        <span id="current-filter" class="hidden" th:text="${filter}">0</span>
+        <span>Search Results for "</span><span id="current-search-string" th:text="${search_string}"></span><span>"</span>
+        <span id="current-page" class="hidden" th:text="${page}"></span>
+        <span id="current-sort" class="hidden" th:text="${sort}"></span>
+        <span id="current-s-filter" class="hidden" th:text="${special_filter}"></span>
+        <span id="current-filter" class="hidden" th:text="${filter}"></span>
+        <span id="category-id" class="hidden" th:text="${category_id}"></span>
+        <span id="call-url" class="hidden" th:text="${call_url}">1</span>
+        <span id="redirect-url" class="hidden" th:text="${redirect_url}">1</span>
     </h1>
 
     <!-- Filters -->
@@ -105,7 +108,7 @@
                     <div class="flex flex-col items-center space-y-2">
                         <a class="product-link" href="">
                             <div class="img-container w-48 h-48 flex items-center justify-center overflow-hidden">
-                                <img src="https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500/https://static.bhphoto.com/images/multiple_images/images500x500/1740478260_IMG_2440028.jpg" alt="Lenovo Legion Pro 7i"
+                                <img src="" alt="Product image"
                                      class="product-img max-w-full max-h-full object-contain" />
                             </div>
                         </a>
@@ -114,7 +117,7 @@
                         <a class="product-link" href="">
                             <h2 class="product-name hover:text-blue-600 text-xl font-bold text-gray-900">Lenovo 16" Legion Pro 7i Gaming Laptop</h2>
                         </a>
-                        <p class="product-id text-sm text-gray-500">B&H # LE83F50018US | MFR # 83F50018US</p>
+                        <p class="product-id text-sm text-gray-500"> # LE83F50018US | MFR # 83F50018US</p>
                         <div class="flex items-center text-yellow-500 text-sm">
                             ★★★★★ <span class="ml-2 text-gray-700">(155 Reviews)</span>
                         </div>

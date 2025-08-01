@@ -44,8 +44,6 @@ public class ProductSearchService {
         Map<String, List<String>> selectedFiltersOfCategory = new HashMap<>();
         selectedFiltersOfCategory.put(SpecialFilters.CATEGORY.name().toLowerCase(), categories.stream().map(ProductCategory::getName).toList());
 
-        System.out.println(selectedFiltersOfCategory);
-
         return searchProductByName(null, page, size,true, null, selectedFiltersOfCategory, new HashMap<>());
     }
 

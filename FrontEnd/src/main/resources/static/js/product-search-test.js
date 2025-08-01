@@ -22,18 +22,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 const currentSearchString = document.getElementById('current-search-string').innerText;
 const currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
+const categoryId = document.getElementById('category-id').innerText;
+const redirectUrl = document.getElementById('redirect-url').innerText;
 
 const selectedSpecialFilters = {};
 const selectedSpecFilters = {};
-// called at the beginning only otherwise overwrite
+// called at the beginning once only otherwise overwrite
 async function initiate() {
     const currentSpecialFilter = document.getElementById('current-s-filter').innerText;
     const currentFilter = document.getElementById('current-filter').innerText;
+    const callURL = document.getElementById('call-url').innerText;
 
     // document.getElementById('current-page').remove();
     // document.getElementById('current-sort').remove();
     // document.getElementById('current-s-filter').remove();
     // document.getElementById('current-filter').remove();
+    // document.getElementById('call-url').remove();
+    // document.getElementById('category-id').remove();
+    // document.getElementById('redirect-url').remove();
 
     const sortSelection = document.getElementById('sort-by-selection');
     if (currentSort) {
@@ -57,10 +63,13 @@ async function initiate() {
     });
 
     const queryParams = new URLSearchParams({
-        name: currentSearchString.slice(0, 100), // max 100 chars only
         page: currentPage.toString(),
         feature: true,
     });
+    if (currentSearchString)
+        queryParams.append('q', currentSearchString.slice(0, 100)) // max 100 chars only
+    if (categoryId)
+        queryParams.append('cateId', categoryId);
     if (currentSort)
         queryParams.append('sort', currentSort);
     if (currentSpecialFilter)
@@ -68,105 +77,18 @@ async function initiate() {
     if (currentFilter)
         queryParams.append('filters', currentFilter);
 
-    await searchProduct(queryParams);
+    const url = `${callURL}?${queryParams.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        displayNoSearchResult('Failed searching product');
+        return;
+    }
+    const searchResult = await response.json();
+    showProduct(searchResult);
 }
 
-async function searchProduct(queryParams) {
+function showProduct(searchResult) {
     try {
-        // const baseUrl = 'http://localhost:8080/api/product/by-name';
-        // const url = `${baseUrl}?${queryParams.toString()}`;
-        // const response = await fetch(url);
-        // if (!response.ok) {
-        //     displayNoSearchResult('Failed searching product');
-        //     return;
-        // }
-        // const searchResult = await response.json();
-        const searchResult = {
-            "specialFilters": {
-                "price": [
-                    {
-                        "count": 1,
-                        "option": "100.00"
-                    }
-                ],
-                "category": [
-                    {
-                        "count": 1,
-                        "option": "Electronics"
-                    }
-                ],
-                "brand": [
-                    {
-                        "count": 1,
-                        "option": "Brand 1"
-                    }
-                ],
-            },
-            "specFilters": {
-                "CPU": [
-                    {
-                        "count": 1,
-                        "option": "Core i9"
-                    },
-                    {
-                        "count": 1,
-                        "option": "Core i7"
-                    }
-                ],
-                "RAM": [
-                    {
-                        "count": 1,
-                        "option": "16GB"
-                    }
-                ]
-            },
-            "productResults": {
-                "content": [
-                    {
-                        "productLineId": 1,
-                        "id": 1,
-                        "manufacturerId": "Man part 1",
-                        "name": "Product Name 1",
-                        "quantity": 5,
-                        "price": 100.00,
-                        "features": [
-                            "Product 1 feature 1",
-                            "Product 1 feature 2",
-                            "Product 1 feature 3",
-                            "Product 1 feature 4",
-                            "Product 1 feature 5"
-                        ],
-                        "imageName": "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
-                        "discountedPrice": null,
-                        "newRelease": true
-                    },
-                    {
-                        "productLineId": 1,
-                        "id": 2,
-                        "manufacturerId": "Man part 1",
-                        "name": "Product Name 2",
-                        "quantity": 0,
-                        "price": 100.00,
-                        "features": [
-                            "Product 1 feature 1",
-                            "Product 1 feature 2",
-                            "Product 1 feature 3",
-                            "Product 1 feature 4",
-                            "Product 1 feature 5"
-                        ],
-                        "imageName": "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
-                        "discountedPrice": 50,
-                        "newRelease": true
-                    }
-                ],
-                "page": {
-                    "size": 10,
-                    "number": 0,
-                    "totalElements": 2,
-                    "totalPages": 2
-                }
-            }
-        }
         if (searchResult.productResults.page.totalElements) {
             displayFilterOptions(searchResult.specialFilters, false, selectedSpecialFilters);
             displayFilterOptions(searchResult.specFilters, true, selectedSpecFilters);
@@ -436,17 +358,19 @@ function createTempUrl(page, sortBy, key, value, selectedFilters, searchString =
             filterString += `,${key}|${value}`;
     }
 
-    const baseUrl = 'http://localhost:8081/product/search';
     const queryParams = new URLSearchParams({
-        q: searchString.slice(0, 100), // max 100 chars only
         page: page.toString(),
         feature: true
     });
+    if (currentSearchString)
+        queryParams.append('q', currentSearchString.slice(0, 100)) // max 100 chars only
+    if (categoryId)
+        queryParams.append('cateId', categoryId);
     if (currentSort)
         queryParams.append('sort', sortBy);
     if (specialFilterString)
         queryParams.append('s-filters', specialFilterString);
     if (filterString)
         queryParams.append('filters', filterString);
-    return `${baseUrl}?${queryParams.toString()}`;
+    return `${redirectUrl}?${queryParams.toString()}`;
 }
