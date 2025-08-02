@@ -13,24 +13,26 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Header -->
     <h1 class="text-1xl font-bold text-gray-900 mb-6">
-        <span>Search Results for "</span><span id="current-search-string" th:text="${search_string}"></span><span>"</span>
+        <div id="search-string-container">
+            <span>Search Results for "</span><span id="current-search-string" th:text="${search_string}"></span><span>"</span>
+        </div>
         <span id="current-page" class="hidden" th:text="${page}"></span>
         <span id="current-sort" class="hidden" th:text="${sort}"></span>
         <span id="current-s-filter" class="hidden" th:text="${special_filter}"></span>
         <span id="current-filter" class="hidden" th:text="${filter}"></span>
         <span id="category-id" class="hidden" th:text="${category_id}"></span>
-        <span id="call-url" class="hidden" th:text="${call_url}">1</span>
-        <span id="redirect-url" class="hidden" th:text="${redirect_url}">1</span>
+        <span id="call-url" class="hidden" th:text="${call_url}"></span>
+        <span id="redirect-url" class="hidden" th:text="${redirect_url}"></span>
     </h1>
 
     <!-- Filters -->
-    <div class="mb-6 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
+    <div id="content-container" class="mb-6 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
         <!-- Left: Filters -->
         <div id="filter-container" class="rounded-lg border bg-white p-4 shadow-sm self-start">
             <h2 class="mb-4 text-lg font-semibold text-gray-800">Filter by Configuration</h2>
 
             <!-- Filter Section: Processor -->
-            <div class="filter-item border-t border-gray-300">
+            <div class="filter-item hidden border-t border-gray-300">
                 <!-- Section Title -->
                 <button class="filter-btn flex w-full items-center justify-between px-2 py-3 text-left text-[1.05rem] font-semibold text-gray-800 transition hover:bg-gray-200">
                     <span class="filter-title">Processor</span>
@@ -61,7 +63,7 @@
 
 
         <!-- Right: Top Filters and Results -->
-        <div>
+        <div id="right-content-container">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-4 rounded-lg shadow-sm mb-6">
                 <!-- Left: Results Text -->
                 <p class="text-sm text-gray-600 mb-4 md:mb-0">Showing <span id="start-result-count">1</span>-<span id="end-result-count">10</span> of <span id="total-result">50</span> results</p>
@@ -103,7 +105,7 @@
             <div id="product-item-container" class="space-y-6">
 
                 <!-- Product Item -->
-                <div class="product-item w-full min-w-[14rem] p-4 border rounded-lg shadow-md bg-white flex
+                <div class="product-item hidden w-full min-w-[14rem] p-4 border rounded-lg shadow-md bg-white flex
                     flex-row gap-6 items-start">
                     <div class="flex flex-col items-center space-y-2">
                         <a class="product-link" href="">
@@ -115,7 +117,7 @@
                     </div>
                     <div class="space-y-2 flex-1">
                         <a class="product-link" href="">
-                            <h2 class="product-name hover:text-blue-600 text-xl font-bold text-gray-900">Lenovo 16" Legion Pro 7i Gaming Laptop</h2>
+                            <h2 class="product-name hover:text-blue-600 text-xl font-bold text-gray-900"></h2>
                         </a>
                         <p class="product-id text-sm text-gray-500"> # LE83F50018US | MFR # 83F50018US</p>
                         <div class="flex items-center text-yellow-500 text-sm">

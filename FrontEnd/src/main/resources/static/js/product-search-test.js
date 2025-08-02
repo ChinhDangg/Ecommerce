@@ -96,7 +96,7 @@ function showProduct(searchResult) {
             displaySearchResult(searchResult.productResults.content);
             displayPageInfo(searchResult.productResults.page);
         } else {
-            displayNoSearchResult('No result found with search');
+            displayNoSearchResult('No result found with search string: ' + currentSearchString);
         }
     } catch (error) {
         console.error('Error searching for product:', error);
@@ -115,6 +115,7 @@ function displayFilterOptions(filters, clear = false, selectedFilters) {
     const filterItemTem = filterContainer.querySelector('.filter-item');
     Object.entries(filters).forEach(([key, values]) => {
         const filterItem = filterItemTem.cloneNode(true);
+        filterItem.classList.remove('hidden');
         filterItem.querySelector('.filter-title').textContent = key.charAt(0).toUpperCase() + key.slice(1);
         const filterOptionTem = filterItem.querySelector('.filter-option');
         const filterOptionContainer = filterItem.querySelector('.filter-option-container');
@@ -127,15 +128,21 @@ function displayFilterOptions(filters, clear = false, selectedFilters) {
             filterOptionLabel.setAttribute('for', value.option);
             filterOption.querySelector('.option-name').innerText = value.option;
             filterOption.querySelector('.option-count').innerText = value.count;
+            if (!value.count) {
+                optionInput.disabled = true;
+                filterOption.classList.remove('hover:bg-gray-200', 'text-gray-700');
+                filterOption.classList.add('text-gray-300');
+            } else {
+                filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option, selectedFilters);
+                optionInput.addEventListener('change', function(event) {
+                    window.location.href = createUrl(key, value.option, event.target.checked, selectedFilters);
+                });
+            }
             filterOptionContainer.appendChild(filterOption);
 
             optionInput.checked = selectedFilters[key] && selectedFilters[key].includes(value.option);
             if (optionInput.checked)
                 containCheckedInput = true;
-            filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option, selectedFilters);
-            optionInput.addEventListener('change', function(event) {
-                window.location.href = createUrl(key, value.option, event.target.checked, selectedFilters);
-            });
         });
         filterOptionTem.remove();
         filterItem.querySelector('.filter-btn').addEventListener('click', function() {
@@ -319,7 +326,9 @@ function displayPageInfo(page) {
 }
 
 function displayNoSearchResult(content) {
-
+    document.getElementById('content-container').remove();
+    document.getElementById('pagination-container').remove();
+    document.getElementById('search-string-container').innerText = content;
 }
 
 function createUrl(key, value, included, selectedFilters) {
