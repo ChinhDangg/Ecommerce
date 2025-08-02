@@ -44,18 +44,6 @@ public class ProductController {
             } catch (IllegalArgumentException _) {}
         }
 
-        String categoryIdStr = allParams.remove("cateId");
-        if (categoryIdStr != null) {
-            try {
-                int categoryId = Integer.parseInt(categoryIdStr);
-                ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(categoryId, page, 10));
-            } catch (IllegalArgumentException _) {
-                return ResponseEntity.badRequest().body(null);
-            }
-        } else if (searchString == null) {
-            return ResponseEntity.badRequest().body(null);
-        }
-
         String featureStr = allParams.remove("feature");
         boolean getFeatures = Boolean.parseBoolean(featureStr != null ? featureStr : "false");
 
@@ -74,6 +62,19 @@ public class ProductController {
 
         String filterParam = allParams.remove("filters"); // e.g., GPU:4090|4080,RAM:32GB|64GB
         Map<String, List<String>> selectedFilters = parseFilterParam(filterParam);
+
+        String categoryIdStr = allParams.remove("cateId");
+        if (categoryIdStr != null) {
+            try {
+                int categoryId = Integer.parseInt(categoryIdStr);
+                return ResponseEntity.status(HttpStatus.OK).body(productSearchService.findProductsByCategory(
+                        categoryId, page, 10, getFeatures, sortBy, specialFilters, selectedFilters));
+            } catch (IllegalArgumentException _) {
+                return ResponseEntity.badRequest().body(null);
+            }
+        } else if (searchString == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 productSearchService.searchProductByName(searchString, page, 10, getFeatures, sortBy, specialFilters, selectedFilters));

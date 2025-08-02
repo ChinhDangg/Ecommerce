@@ -39,12 +39,25 @@ public class ProductSearchService {
     }
 
     @Transactional
-    public ProductSearchResultDTO findProductsByCategory(Integer id, int page, int size) {
+    public ProductSearchResultDTO findProductsByCategory(Integer id, int page, int size, boolean getFeatures, SortOption sortBy,
+                                                         Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
         List<ProductCategory> categories = productCategoryService.getChildrenCategoryChain(id, null);
         Map<String, List<String>> selectedFiltersOfCategory = new HashMap<>();
-        selectedFiltersOfCategory.put(SpecialFilters.CATEGORY.name().toLowerCase(), categories.stream().map(ProductCategory::getName).toList());
 
-        return searchProductByName(null, page, size,true, null, selectedFiltersOfCategory, new HashMap<>());
+        String categoryKey = SpecialFilters.CATEGORY.name().toLowerCase();
+        selectedFiltersOfCategory.put(categoryKey, categories.stream().map(ProductCategory::getName).toList());
+
+        if (selectedFilters != null) {
+            selectedFiltersOfCategory.putAll(selectedFilters);
+            if (selectedFilters.containsKey(categoryKey)) {
+                List<String> categoryFilter = new ArrayList<>(selectedFilters.get(categoryKey));
+                categoryFilter.addAll(selectedFiltersOfCategory.get(categoryKey));
+                List<String> uniqueCategoryFilter = categoryFilter.stream().distinct().toList();
+                selectedFiltersOfCategory.put(categoryKey, uniqueCategoryFilter);
+            }
+        }
+
+        return searchProductByName(null, page, size, getFeatures, sortBy, selectedFiltersOfCategory, selectedSpecs);
     }
 
     private void checkProductSearch(String[] keywords, Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {

@@ -85,7 +85,7 @@ function showCategoryChainLinks(productCategoryChain) {
         if (index !== productCategoryChain.length - 1) {
             categoryNavContainer.appendChild(fSlashTem.cloneNode(true));
         }
-        link.querySelector('a').href = 'http://localhost:8081/product/search?cateId=' + category.id;
+        link.querySelector('a').href = `http://localhost:8081/product/search?q=Category - ${category.name}&cateId=${category.id}`;
     });
 }
 
