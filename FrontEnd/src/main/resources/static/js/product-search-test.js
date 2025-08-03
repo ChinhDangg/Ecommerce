@@ -3,27 +3,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         await initiate();
     });
     await initiate();
-    // const form = document.getElementById('search-bar-form');
-    // const newForm = form.cloneNode(true);
-    // form.replaceWith(newForm); // to remove default listener
-    // newForm.addEventListener('submit', async (e) => {
-    //     e.preventDefault();
-    //     const searchInput = document.getElementById('search-input');
-    //     console.log('Search input: ', searchInput.value);
-    //     if (searchInput.value) {
-    //         window.location.href = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value);
-    //     }
-    //     else {
-    //         window.location.href = '/';
-    //     }
-    // });
+    const form = document.getElementById('search-bar-form');
+    const newForm = form.cloneNode(true);
+    form.replaceWith(newForm); // to remove default listener
+    newForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const searchInput = document.getElementById('search-input');
+        if (searchInput.value) {
+            currentSearchString = searchInput.value;
+            const url = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, callURL);
+            history.pushState({ search: ''}, '', createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, redirectUrl));
+            await searchProduct(url);
+        }
+        else {
+            window.location.href = '/';
+        }
+    });
 });
 
-const currentSearchString = document.getElementById('current-search-string').innerText;
+let currentSearchString = document.getElementById('current-search-string').innerText;
 const currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
 const categoryId = document.getElementById('category-id').innerText;
 const redirectUrl = document.getElementById('redirect-url').innerText;
+const callURL = document.getElementById('call-url').innerText;
 
 const selectedSpecialFilters = {};
 const selectedSpecFilters = {};
@@ -31,7 +34,6 @@ const selectedSpecFilters = {};
 async function initiate() {
     const currentSpecialFilter = document.getElementById('current-s-filter').innerText;
     const currentFilter = document.getElementById('current-filter').innerText;
-    const callURL = document.getElementById('call-url').innerText;
 
     // document.getElementById('current-page').remove();
     // document.getElementById('current-sort').remove();
@@ -40,6 +42,8 @@ async function initiate() {
     // document.getElementById('call-url').remove();
     // document.getElementById('category-id').remove();
     // document.getElementById('redirect-url').remove();
+
+    const searchInput = document.getElementById('search-input').value = currentSearchString;
 
     const sortSelection = document.getElementById('sort-by-selection');
     if (currentSort) {
@@ -63,11 +67,12 @@ async function initiate() {
     });
 
     const queryParams = new URLSearchParams({
-        page: currentPage.toString(),
         feature: true,
     });
+    if (currentPage)
+        queryParams.append('page', currentPage.toString());
     if (currentSearchString)
-        queryParams.append('q', currentSearchString.slice(0, 100)) // max 100 chars only
+        queryParams.append('q', getValidatedSearchString(currentSearchString)) // max 100 chars only
     if (categoryId)
         queryParams.append('cateId', categoryId);
     if (currentSort)
@@ -78,6 +83,10 @@ async function initiate() {
         queryParams.append('filters', currentFilter);
 
     const url = `${callURL}?${queryParams.toString()}`;
+    await searchProduct(url);
+}
+
+async function searchProduct(url) {
     const response = await fetch(url);
     if (!response.ok) {
         displayNoSearchResult('Failed searching product');
@@ -89,14 +98,17 @@ async function initiate() {
 
 function showProduct(searchResult) {
     try {
+        clearFilterSelection();
+        clearProductSelection();
+        clearPageSelection();
         if (searchResult.productResults.page.totalElements) {
-            displayFilterOptions(searchResult.specialFilters, false, selectedSpecialFilters);
-            displayFilterOptions(searchResult.specFilters, true, selectedSpecFilters);
+            displayFilterOptions(searchResult.specialFilters, selectedSpecialFilters);
+            displayFilterOptions(searchResult.specFilters, selectedSpecFilters);
             displayResultPageInfo(searchResult.productResults.page);
-            displaySearchResult(searchResult.productResults.content);
+            displayProductSearchResult(searchResult.productResults.content);
             displayPageInfo(searchResult.productResults.page);
         } else {
-            displayNoSearchResult('No result found with search string: ' + currentSearchString);
+            displayNoSearchResult('No result found with search: ' + currentSearchString);
         }
     } catch (error) {
         console.error('Error searching for product:', error);
@@ -110,7 +122,7 @@ document.getElementById('sort-by-selection').addEventListener('change', function
     window.location.href = createUrl(null, null, null, null);
 });
 
-function displayFilterOptions(filters, clear = false, selectedFilters) {
+function displayFilterOptions(filters, selectedFilters) {
     const filterContainer = document.getElementById('filter-container');
     const filterItemTem = filterContainer.querySelector('.filter-item');
     Object.entries(filters).forEach(([key, values]) => {
@@ -134,8 +146,10 @@ function displayFilterOptions(filters, clear = false, selectedFilters) {
                 filterOption.classList.add('text-gray-300');
             } else {
                 filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option, selectedFilters);
-                optionInput.addEventListener('change', function(event) {
-                    window.location.href = createUrl(key, value.option, event.target.checked, selectedFilters);
+                optionInput.addEventListener('change', async function(event) {
+                    const url =  createUrl(key, value.option, event.target.checked, selectedFilters, callURL);
+                    history.pushState({ filter_search: ''}, '', createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, redirectUrl));
+                    await searchProduct(url);
                 });
             }
             filterOptionContainer.appendChild(filterOption);
@@ -153,11 +167,10 @@ function displayFilterOptions(filters, clear = false, selectedFilters) {
             filterItem.querySelector('.filter-btn').click();
         filterContainer.appendChild(filterItem);
     });
-    if (clear)
-        filterItemTem.remove();
 }
 
-function displaySearchResult(content) {
+function displayProductSearchResult(content) {
+    document.getElementById('content-container').classList.remove('hidden');
     const productItemContainer = document.getElementById('product-item-container');
     const productItemTem = productItemContainer.querySelector('.product-item');
     content.forEach((item) => {
@@ -227,7 +240,24 @@ function displaySearchResult(content) {
         }
         productItemContainer.appendChild(productItem);
     });
-    productItemTem.remove();
+}
+
+function clearFilterSelection() {
+    const items = Array.from(document.getElementById('filter-container')
+        .querySelectorAll('.filter-item'));
+    items.slice(1).forEach(item => item.remove());
+}
+
+function clearProductSelection() {
+    const items = Array.from(document.getElementById('product-item-container')
+        .querySelectorAll('.product-item'));
+    items.slice(1).forEach(item => item.remove());
+}
+
+function clearPageSelection() {
+    const items = Array.from(document.getElementById('page-link-container')
+        .querySelectorAll('.page-link-item'));
+    items.slice(1).forEach(item => item.remove());
 }
 
 let currentView = document.getElementById('list-view-btn');
@@ -303,15 +333,16 @@ function displayResultPageInfo(page) {
 }
 
 function displayPageInfo(page) {
+    document.getElementById('pagination-container').classList.remove('hidden');
     if (page.totalElements > 0) {
         const pageLinkContainer = document.getElementById('page-link-container');
         const pageLinkItemTem = pageLinkContainer.querySelector('.page-link-item');
         for (let i = 0  ; i < page.totalPages; i++) {
             const pageLinkItem = pageLinkItemTem.cloneNode(true);
-            pageLinkItem.classList.remove('hidden');
+            pageLinkItem.classList.remove('hidden')
             pageLinkItem.innerHTML = i + 1;
             pageLinkItem.href = createTempUrl(i, currentSort, null, null, null);
-            if (i === parseInt(currentPage)) {
+            if (i === parseInt(currentPage) || (i === 0 && !currentPage)) {
                 pageLinkItem.classList.add('bg-blue-200');
                 pageLinkItem.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -326,12 +357,12 @@ function displayPageInfo(page) {
 }
 
 function displayNoSearchResult(content) {
-    document.getElementById('content-container').remove();
-    document.getElementById('pagination-container').remove();
+    document.getElementById('content-container').classList.add('hidden');
+    document.getElementById('pagination-container').classList.add('hidden');
     document.getElementById('search-string-container').innerText = content;
 }
 
-function createUrl(key, value, included, selectedFilters) {
+function createUrl(key, value, included, selectedFilters, url = redirectUrl) {
     if (included) {
         if (!selectedFilters[key]) {
             selectedFilters[key] = [];
@@ -348,10 +379,10 @@ function createUrl(key, value, included, selectedFilters) {
         }
     }
 
-    return createTempUrl(currentPage, currentSort, null, null, null, currentSearchString);
+    return createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, url);
 }
 
-function createTempUrl(page, sortBy, key, value, selectedFilters, searchString = currentSearchString) {
+function createTempUrl(page, sortBy, key, value, selectedFilters, searchString = currentSearchString, url = redirectUrl) {
     let specialFilterString = Object.entries(selectedSpecialFilters)
         .map(([key, values]) => `${key}:${values.join('|')}`)
         .join(',');
@@ -368,11 +399,12 @@ function createTempUrl(page, sortBy, key, value, selectedFilters, searchString =
     }
 
     const queryParams = new URLSearchParams({
-        page: page.toString(),
-        feature: true
+        feature: true,
     });
-    if (currentSearchString)
-        queryParams.append('q', currentSearchString.slice(0, 100)) // max 100 chars only
+    if (currentPage)
+        queryParams.append('page', currentPage.toString());
+    if (searchString)
+        queryParams.append('q', getValidatedSearchString(searchString)) // max 100 chars only
     if (categoryId)
         queryParams.append('cateId', categoryId);
     if (currentSort)
@@ -381,5 +413,14 @@ function createTempUrl(page, sortBy, key, value, selectedFilters, searchString =
         queryParams.append('s-filters', specialFilterString);
     if (filterString)
         queryParams.append('filters', filterString);
-    return `${redirectUrl}?${queryParams.toString()}`;
+    return `${url}?${queryParams.toString()}`;
 }
+
+function getValidatedSearchString(searchString) {
+    if (searchString) {
+        return searchString.slice(0, 100);
+    }
+    return false;
+}
+
+// TODO - single page for the filter link too, and sort by, and next page
