@@ -44,6 +44,7 @@ public class ProductController {
         model.addAttribute("filter", filterParam);
         model.addAttribute("call_url", "http://localhost:8080/api/product/search");
         model.addAttribute("redirect_url", "http://localhost:8081/product/search");
+        model.addAttribute("card_url", "http://localhost:8081/product/card/");
         return "/product-page/product-search-draft";
     }
 

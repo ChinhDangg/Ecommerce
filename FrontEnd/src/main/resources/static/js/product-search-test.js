@@ -27,6 +27,7 @@ let currentSort = document.getElementById('current-sort').innerText;
 const categoryId = document.getElementById('category-id').innerText;
 const redirectUrl = document.getElementById('redirect-url').innerText;
 const callURL = document.getElementById('call-url').innerText;
+const cardURL = document.getElementById('card-url').innerText;
 
 const selectedSpecialFilters = {};
 const selectedSpecFilters = {};
@@ -42,6 +43,7 @@ async function initiate() {
     // document.getElementById('call-url').remove();
     // document.getElementById('category-id').remove();
     // document.getElementById('redirect-url').remove();
+    // document.getElementById('card-url').remove();
 
     const searchInput = document.getElementById('search-input').value = currentSearchString;
 
@@ -178,7 +180,7 @@ function displayProductSearchResult(content) {
         productItem.classList.remove('hidden');
         productItem.dataset.productId = item.id;
         productItem.querySelectorAll('.product-link').forEach(link => {
-            link.href = `http://localhost:8081/product/card/${item.id}`;
+            link.href = `${cardURL}${item.id}`;
         });
         productItem.querySelector('.product-img').src = item.imageName;
         productItem.querySelector('.product-name').innerHTML = item.name;
