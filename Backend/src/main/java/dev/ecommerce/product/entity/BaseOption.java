@@ -17,6 +17,6 @@ public abstract class BaseOption {
     protected String name;
 
     @Setter
-    protected String option;
+    protected String valueOption;
 
 }

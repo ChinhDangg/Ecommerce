@@ -20,10 +20,10 @@ public class ProductOption extends BaseOption {
     @JoinColumn(name = "product_line_id")
     private ProductLine productLine;
 
-    public ProductOption(Product product, ProductLine productLine, String name, String option) {
+    public ProductOption(Product product, ProductLine productLine, String name, String valueOption) {
         this.product = product;
         this.productLine = productLine;
         this.name = name;
-        this.option = option;
+        this.valueOption = valueOption;
     }
 }

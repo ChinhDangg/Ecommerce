@@ -18,10 +18,10 @@ public class ProductSpecification extends BaseOption {
     @JoinColumn(name = "core_specification_id")
     private ProductCoreSpecification productCoreSpecification;
 
-    public ProductSpecification(Product product, ProductCoreSpecification productCoreSpecification, String name, String option) {
+    public ProductSpecification(Product product, ProductCoreSpecification productCoreSpecification, String name, String valueOption) {
         this.product = product;
         this.productCoreSpecification = productCoreSpecification;
         this.name = name;
-        this.option = option;
+        this.valueOption = valueOption;
     }
 }
