@@ -115,6 +115,11 @@ public class ProductSearchService {
         boolean hasKeywords = words != null && words.length > 0;
         boolean hasSpecialFilters = selectedFilters != null && !selectedFilters.isEmpty();
         boolean hasSelectedSpecs = selectedSpecs != null && !selectedSpecs.isEmpty();
+        Map<String, List<String>> allSelectedFilters = new HashMap<>();
+        if (hasSpecialFilters)
+            allSelectedFilters.putAll(selectedFilters);
+        if (hasSelectedSpecs)
+            allSelectedFilters.putAll(selectedSpecs);
 
         if ((hasSpecialFilters || hasSelectedSpecs) && hasKeywords) {
             CompletableFuture<ProductCountAndDetails> fullSpecialFiltersAndCountFuture =
@@ -147,7 +152,7 @@ public class ProductSearchService {
         if ((hasSpecialFilters || hasSelectedSpecs) && hasKeywords && !newProductCountAndDetails.filters.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecialFilterList = ((ProductCountAndDetails) futureMap.get("fullSpecial").join()).filters;
 
-            updateFullFilters(fullSpecialFilterList, newProductCountAndDetails.filters, selectedFilters);
+            updateFullFilters(fullSpecialFilterList, newProductCountAndDetails.filters, allSelectedFilters);
             newProductCountAndDetails.filters.clear();
             newProductCountAndDetails.filters.putAll(fullSpecialFilterList);
         }
@@ -156,7 +161,7 @@ public class ProductSearchService {
         if ((hasSelectedSpecs || hasSpecialFilters) && hasKeywords && !newSpecList.specs.isEmpty()) {
             Map<String, List<Map<String, Object>>> fullSpecList = ((ProductCoreSpecs) futureMap.get("fullSpec").join()).specs();
 
-            updateFullFilters(fullSpecList, newSpecList.specs, selectedSpecs); // update spec filters
+            updateFullFilters(fullSpecList, newSpecList.specs, allSelectedFilters); // update spec filters
             newSpecList.specs.clear();
             newSpecList.specs.putAll(fullSpecList);
         }
@@ -269,7 +274,7 @@ public class ProductSearchService {
 
                 // Each option becomes a separate predicate
                 List<Predicate> optionMatches = options.stream()
-                        .map(opt -> cb.equal(cb.lower(specJoin.get("option")), opt.toLowerCase()))
+                        .map(opt -> cb.equal(cb.lower(specJoin.get("valueOption")), opt.toLowerCase()))
                         .toList();
 
                 // Combine into: (name = 'ram' AND (option = '16gb' OR option = '48gb'))
@@ -341,12 +346,12 @@ public class ProductSearchService {
             ps_group.name,
             jsonb_agg(
                 jsonb_build_object(
-                    'option', ps_group.option,
+                    'option', ps_group.value_option,
                     'count', ps_group.count
-                ) ORDER BY ps_group.option
+                ) ORDER BY ps_group.value_option
             ) AS option_counts
                 FROM (
-                SELECT ps.name, ps.option, COUNT(DISTINCT p.id) AS count
+                SELECT ps.name, ps.value_option, COUNT(DISTINCT p.id) AS count
                 FROM product p
                 JOIN product_specification ps ON ps.product_id = p.id
                 JOIN product_core_specification cps ON cps.id = ps.core_specification_id
@@ -406,7 +411,7 @@ public class ProductSearchService {
 
                 for (int j = 0; j < options.size(); j++) {
                     if (j > 0) sql.append(" OR ");
-                    sql.append("LOWER(ps_sub.option) = :specOption")
+                    sql.append("LOWER(ps_sub.value_option) = :specOption")
                             .append(i).append("_").append(j);
                     parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
                 }
@@ -419,7 +424,7 @@ public class ProductSearchService {
         }
 
         sql.append(""" 
-                GROUP BY ps.name, ps.option
+                GROUP BY ps.name, ps.value_option
             ) ps_group
             GROUP BY ps_group.name
             ORDER BY ps_group.name
@@ -513,7 +518,7 @@ public class ProductSearchService {
 
                 for (int j = 0; j < options.size(); j++) {
                     if (j > 0) sql.append(" OR ");
-                    sql.append("LOWER(ps_sub.option) = :specOption")
+                    sql.append("LOWER(ps_sub.value_option) = :specOption")
                             .append(i).append("_").append(j);
                     parameters.put("specOption" + i + "_" + j, options.get(j).toLowerCase());
                 }
