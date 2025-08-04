@@ -1,28 +1,28 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    window.addEventListener("popstate", async () => {
-        await initiate();
+    window.addEventListener("popstate", async (event) => {
+        console.log('called');
+        await initiate(event.state);
     });
     await initiate();
-    const form = document.getElementById('search-bar-form');
-    const newForm = form.cloneNode(true);
-    form.replaceWith(newForm); // to remove default listener
-    newForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const searchInput = document.getElementById('search-input');
-        if (searchInput.value) {
-            currentSearchString = searchInput.value;
-            const url = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, callURL);
-            history.pushState({ search: ''}, '', createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, redirectUrl));
-            await searchProduct(url);
-        }
-        else {
-            window.location.href = '/';
-        }
-    });
+    // const form = document.getElementById('search-bar-form');
+    // const newForm = form.cloneNode(true);
+    // form.replaceWith(newForm); // to remove default listener
+    // newForm.addEventListener('submit', async (e) => {
+    //     e.preventDefault();
+    //     const searchInput = document.getElementById('search-input');
+    //     if (searchInput.value) {
+    //         currentSearchString = searchInput.value;
+    //         const url = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, callURL);
+    //         await searchProduct(url);
+    //     }
+    //     else {
+    //         window.location.href = '/';
+    //     }
+    // });
 });
 
 let currentSearchString = document.getElementById('current-search-string').innerText;
-const currentPage = document.getElementById('current-page').innerText;
+let currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
 const categoryId = document.getElementById('category-id').innerText;
 const redirectUrl = document.getElementById('redirect-url').innerText;
@@ -32,10 +32,7 @@ const cardURL = document.getElementById('card-url').innerText;
 const selectedSpecialFilters = {};
 const selectedSpecFilters = {};
 // called at the beginning once only otherwise overwrite
-async function initiate() {
-    const currentSpecialFilter = document.getElementById('current-s-filter').innerText;
-    const currentFilter = document.getElementById('current-filter').innerText;
-
+async function initiate(state = null) {
     // document.getElementById('current-page').remove();
     // document.getElementById('current-sort').remove();
     // document.getElementById('current-s-filter').remove();
@@ -45,28 +42,28 @@ async function initiate() {
     // document.getElementById('redirect-url').remove();
     // document.getElementById('card-url').remove();
 
-    const searchInput = document.getElementById('search-input').value = currentSearchString;
+    document.getElementById('search-input').value = currentSearchString;
 
-    const sortSelection = document.getElementById('sort-by-selection');
-    if (currentSort) {
-        sortSelection.value = currentSort;
-        if (!sortSelection.value)
-            sortSelection.selectedIndex = 0;
+    let currentSpecialFilter;
+    let currentFilter;
+
+    if (state) {
+        currentPage = state.page;
+        currentSort = state.sortBy;
+        currentSpecialFilter = state.sFilter;
+        currentFilter = state.filter;
+        Object.keys(selectedSpecialFilters).forEach(key => delete selectedSpecialFilters[key]);
+        Object.keys(selectedSpecFilters).forEach(key => delete selectedSpecFilters[key]);
+    } else {
+        currentSpecialFilter = document.getElementById('current-s-filter').innerText;
+        currentFilter =  document.getElementById('current-filter').innerText;
     }
 
-    currentSpecialFilter.split(',').forEach(pair => {
-        const [key, valueString] = pair.split(':');
-        if (key && valueString) {
-            selectedSpecialFilters[key] = valueString.split('|');
-        }
-    });
-
-    currentFilter.split(',').forEach(pair => {
-        const [key, valueString] = pair.split(':');
-        if (key && valueString) {
-            selectedSpecFilters[key] = valueString.split('|');
-        }
-    });
+    const sortSelection = document.getElementById('sort-by-selection');
+    sortSelection.value = currentSort;
+    if (!sortSelection.value) {
+        sortSelection.selectedIndex = 0;
+    }
 
     const queryParams = new URLSearchParams({
         feature: true,
@@ -79,10 +76,24 @@ async function initiate() {
         queryParams.append('cateId', categoryId);
     if (currentSort)
         queryParams.append('sort', currentSort);
-    if (currentSpecialFilter)
+    if (currentSpecialFilter) {
         queryParams.append('s-filters', currentSpecialFilter);
-    if (currentFilter)
+        currentSpecialFilter.split(',').forEach(pair => {
+            const [key, valueString] = pair.split(':');
+            if (key && valueString) {
+                selectedSpecialFilters[key] = valueString.split('|');
+            }
+        });
+    }
+    if (currentFilter) {
         queryParams.append('filters', currentFilter);
+        currentFilter.split(',').forEach(pair => {
+            const [key, valueString] = pair.split(':');
+            if (key && valueString) {
+                selectedSpecFilters[key] = valueString.split('|');
+            }
+        });
+    }
 
     const url = `${callURL}?${queryParams.toString()}`;
     await searchProduct(url);
@@ -118,10 +129,24 @@ function showProduct(searchResult) {
     }
 }
 
-document.getElementById('sort-by-selection').addEventListener('change', function (event) {
+function pushHistory(pushURL) {
+    const urlParams = new URLSearchParams(new URL(pushURL).search);
+    history.pushState(
+        {
+            page: urlParams.get('page'),
+            sortBy: urlParams.get('sort'),
+            sFilter: urlParams.get('s-filters'),
+            filter: urlParams.get('filters'),
+        },
+        '', pushURL);
+}
+
+document.getElementById('sort-by-selection').addEventListener('change', async function (event) {
     currentSort = event.target.value;
     currentSort = currentSort === this.options[0].value ? null : currentSort;
-    window.location.href = createUrl(null, null, null, null);
+    const pushURL = createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, redirectUrl);
+    pushHistory(pushURL);
+    await searchProduct(createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, callURL));
 });
 
 function displayFilterOptions(filters, selectedFilters) {
@@ -149,9 +174,9 @@ function displayFilterOptions(filters, selectedFilters) {
             } else {
                 filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option, selectedFilters);
                 optionInput.addEventListener('change', async function(event) {
-                    const url =  createUrl(key, value.option, event.target.checked, selectedFilters, callURL);
-                    history.pushState({ filter_search: ''}, '', createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, redirectUrl));
-                    await searchProduct(url);
+                    await searchProduct(createUrl(key, value.option, event.target.checked, selectedFilters, callURL));
+                    const pushURL = createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, redirectUrl);
+                    pushHistory(pushURL);
                 });
             }
             filterOptionContainer.appendChild(filterOption);
@@ -343,16 +368,22 @@ function displayPageInfo(page) {
             const pageLinkItem = pageLinkItemTem.cloneNode(true);
             pageLinkItem.classList.remove('hidden')
             pageLinkItem.innerHTML = i + 1;
-            pageLinkItem.href = createTempUrl(i, currentSort, null, null, null);
+            const url = createTempUrl(i, currentSort, null, null, null);
+            pageLinkItem.href = url;
             if (i === parseInt(currentPage) || (i === 0 && !currentPage)) {
                 pageLinkItem.classList.add('bg-blue-200');
                 pageLinkItem.addEventListener('click', (event) => {
                     event.preventDefault();
                 });
+            } else {
+                pageLinkItem.addEventListener('click', async function(event) {
+                    event.preventDefault();
+                    pushHistory(url);
+                    await searchProduct(createTempUrl(i, currentSort, null, null, null, currentSearchString, callURL));
+                });
             }
             pageLinkContainer.appendChild(pageLinkItem);
         }
-        pageLinkItemTem.remove();
     } else {
         document.getElementById('pagination-container').remove();
     }
@@ -403,8 +434,8 @@ function createTempUrl(page, sortBy, key, value, selectedFilters, searchString =
     const queryParams = new URLSearchParams({
         feature: true,
     });
-    if (currentPage)
-        queryParams.append('page', currentPage.toString());
+    if (page)
+        queryParams.append('page', page.toString());
     if (searchString)
         queryParams.append('q', getValidatedSearchString(searchString)) // max 100 chars only
     if (categoryId)
@@ -424,5 +455,3 @@ function getValidatedSearchString(searchString) {
     }
     return false;
 }
-
-// TODO - single page for the filter link too, and sort by, and next page
