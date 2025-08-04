@@ -13,11 +13,11 @@
 
     <div class="container mx-auto px-4 py-6">
 
-      <!-- Breadcrumb navigation -->
+      <!-- Breadcrumb category navigation -->
       <nav class="mb-4 text-sm">
         <ol id="category-nav-container" class="flex flex-wrap items-center">
-          <li class="link-list"><a href="#" class="text-blue-600 hover:underline">Home</a></li>
-          <li class="forward-slash mx-2 text-gray-500">/</li>
+          <li class="link-list category-item"><a href="#" class="text-blue-600 hover:underline">Home</a></li>
+          <li class="forward-slash category-item mx-2 text-gray-500">/</li>
         </ol>
       </nav>
 
@@ -28,7 +28,7 @@
           <div class="p-4 md:w-2/5 md:border-r md:border-b-0 sticky top-6 border">
             <!-- Main image with responsive container -->
             <div id="main-image-container" class="relative mb-4 aspect-square bg-gray-100">
-              <img src="/api/placeholder/500/500" alt="Canon EOS R6 Mark II"
+              <img src="" alt="product image"
                    class="main-image hidden absolute inset-0 h-full w-full object-contain"/>
             </div>
 
@@ -46,7 +46,7 @@
               <!-- Thumbnails container -->
               <div id="thumbnail-container" class="grid grid-cols-5 gap-2 px-2">
                 <div class="thumbnail-item hidden relative aspect-square border hover:border-blue-600">
-                  <img src="/api/placeholder/100/80" alt="Side view"
+                  <img src="" alt="Product Side view"
                        class="absolute inset-0 h-full w-full cursor-pointer object-cover"/>
                 </div>
               </div>
@@ -107,8 +107,8 @@
             <!-- Product IDs and rating stars on the same line -->
             <div class="mb-4 flex flex-wrap items-center gap-4">
               <p class="hidden" id="product-id" th:text="${productId}">1</p>
-              <p class="text-gray-600" th:text="'PID # : ' + ${productId}">B&H # CAER62</p>
-              <p id="manufacturer-id" class="text-gray-600">MFR # 4082C002</p>
+              <p id="product-display-id" class="text-gray-600" th:text="'PID # : ' + ${productId}"></p>
+              <p id="manufacturer-id" class="text-gray-600"></p>
 
               <!-- Rating stars changed to black -->
               <div class="flex text-black">
@@ -241,13 +241,13 @@
             <h2 class="text-xl font-semibold mb-6">Product Description</h2>
 
             <!-- Media Content (Image or Video Placeholder) -->
-            <div class="description-image-entry relative w-full overflow-hidden rounded-lg shadow-lg">
+            <div class="description-entry description-image-entry hidden relative w-full overflow-hidden rounded-lg shadow-lg">
               <img src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/d22219c5-e763-4326-bad8-528dc8a96542.__CR0,0,1464,600_PT0_SX1464_V1___.jpg"
                    alt="Product description media" class="w-full h-auto object-cover">
             </div>
 
             <!-- Description Text -->
-            <p class="description-text-entry mt-5 mb-5 text-gray-700 text-center mx-auto">
+            <p class="description-entry description-text-entry hidden mt-5 mb-5 text-gray-700 text-center mx-auto">
               The MoKo case is designed for new iPad (10th Generation) 10.9" 2022 (Model: A2696, A2757, A2777), protect
             </p>
           </div>
@@ -257,8 +257,7 @@
 
             <div id="specification-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-700">
               <!-- Spec Row 1 -->
-              <div class="spec-name font-medium text-gray-600">Brand</div>
-              <div>Mo</div>
+              <div class="spec-name hidden font-medium text-gray-600">Brand</div>
             </div>
           </div>
         </div>
