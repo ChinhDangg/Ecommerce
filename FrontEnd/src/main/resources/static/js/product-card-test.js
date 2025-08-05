@@ -5,16 +5,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     await initiate();
 });
 
+let currentProductId = null;
 async function initiate(state = null) {
     initializeProductInfoTabs();
-    let productId;
     if (state) {
-        productId = state.id;
+        currentProductId = state.id;
     } else {
-        productId = document.getElementById('product-id').innerText;
+        currentProductId = document.getElementById('product-id').innerText;
         document.getElementById('product-id').remove();
     }
-    const productInfo = await fetchProductInfo(productId);
+    const productInfo = await fetchProductInfo(currentProductId);
     showProductDetails(productInfo);
 }
 
@@ -22,6 +22,7 @@ async function fetchProductInfo(productId) {
     if (!productId) {
         throw new Error('No product id found.');
     }
+    currentProductId = productId;
     const response = await fetch(`http://localhost:8080/api/productWrapper/card/${productId}`);
     if (!response.ok) {
         throw new Error('Failed to fetch product');
@@ -51,8 +52,8 @@ function showProductDetails(productInfo) {
     showProductPrice(productInfo);
 
     clearConfigOption();
-    showProductConfig(productInfo.options);
     addDifferentProductConfig(productInfo.productGroupedOptions);
+    showProductConfig(productInfo.options);
 
     clearProductFeatureSection();
     showProductFeature(productInfo.features);
@@ -220,6 +221,8 @@ function addProductConfig(name, optionValue, productId = null, selected = false)
     if (configEntry) {
         const existingConfigOption = configEntry.querySelector(`.config-option-btn[data-config-value="${optionValue}"]`);
         if (existingConfigOption) {
+            existingConfigOption.classList.remove('border', 'border-gray-500', 'hover:bg-gray-50');
+            existingConfigOption.classList.add('border-2', 'border-blue-600', 'bg-blue-50', 'text-blue-600');
             return;
         }
     } else {
@@ -238,7 +241,7 @@ function addProductConfig(name, optionValue, productId = null, selected = false)
         configOption.classList.add('border-2', 'border-blue-600', 'bg-blue-50', 'text-blue-600');
     }
     configEntry.querySelector('.config-option-container').appendChild(configOption);
-    if (productId) {
+    if (productId && productId != currentProductId) {
         configOption.addEventListener('click', async function() {
             history.pushState({ id: productId },'', 'http://localhost:8081/product/card/' + productId);
             const productInfo = await fetchProductInfo(productId);
