@@ -12,6 +12,8 @@ export function initializeAdd() {
     initializeProductSpecificationSection();
 }
 
+const categoryTopURL = document.getElementById('categoryTop-url').innerText;
+const categorySubURL = document.getElementById('categorySubcategory-url').innerText;
 
 /* Product line section */
 const productLineImageInput = document.getElementById('add-line-image-input');
@@ -205,9 +207,9 @@ export function expandCategorySection(categoryToggleButton) {
 
 async function fetchTopCategories() {
     try {
-        const response = await fetch('http://localhost:8080/api/category/top');
+        const response = await fetch(categoryTopURL);
         const topCategories = await response.json(); // [{id, name}]
-        addTopCategories(topCategories);
+        await addTopCategories(topCategories);
     } catch (error) {
         console.error('Error fetching top categories:', error);
         const categoryContainer = document.getElementById('category-list');
@@ -267,7 +269,7 @@ function removeAllSubcategoryDisplay() {
 
 async function fetchSubCategories(parentId) {
     try {
-        const response = await fetch('http://localhost:8080/api/category/subcategory/' + parentId);
+        const response = await fetch(`${categorySubURL}/${parentId}`);
         return await response.json(); // [{id, name}]
     } catch (error) {
         console.error('Error fetching top categories:', error);
