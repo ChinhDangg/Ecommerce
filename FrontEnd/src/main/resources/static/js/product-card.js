@@ -5,6 +5,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     await initiate();
 });
 
+const mediaURL = document.getElementById('media-url').innerText;
+const cardURL = document.getElementById('card-url').innerText;
+const cardPageURL = document.getElementById('cardPage-url').innerText;
+const searchURL = document.getElementById('search-url').innerText;
+
 let currentProductId = null;
 async function initiate(state = null) {
     initializeProductInfoTabs();
@@ -23,7 +28,7 @@ async function fetchProductInfo(productId) {
         throw new Error('No product id found.');
     }
     currentProductId = productId;
-    const response = await fetch(`http://localhost:8080/api/productWrapper/card/${productId}`);
+    const response = await fetch(`${cardURL}/${productId}`);
     if (!response.ok) {
         throw new Error('Failed to fetch product');
     }
@@ -68,6 +73,7 @@ function showProductDetails(productInfo) {
     populateProductSpecification(productInfo.specifications);
 
     showContentTab(document.getElementById('description-tab'));
+    selectThisTabButton(document.getElementById('overview-btn'));
 }
 
 function clearCategoryChainLinkSection() {
@@ -87,7 +93,7 @@ function showCategoryChainLinks(productCategoryChain) {
         if (index !== productCategoryChain.length - 1) {
             categoryNavContainer.appendChild(fSlashTem.cloneNode(true));
         }
-        link.querySelector('a').href = `http://localhost:8081/product/search?q=Category - ${category.name}&cateId=${category.id}`;
+        link.querySelector('a').href = `${searchURL}?q=Category - ${category.name}&cateId=${category.id}`;
     });
 }
 
@@ -128,8 +134,8 @@ function showProductMedia(productMedia) {
     productMedia.forEach(media => {
         const mainImageItem = mainImageItemTem.cloneNode(true);
         const thumbnailItem = thumbnailItemTem.cloneNode(true);
-        mainImageItem.src = media.content;
-        thumbnailItem.querySelector('img').src = media.content;
+        mainImageItem.src = `${mediaURL}${media.content}`;
+        thumbnailItem.querySelector('img').src = `${mediaURL}${media.content}`;
         if (count < 5) {
             if (count === 0) {
                 mainImageItem.classList.remove('hidden');
@@ -243,7 +249,7 @@ function addProductConfig(name, optionValue, productId = null, selected = false)
     configEntry.querySelector('.config-option-container').appendChild(configOption);
     if (productId && productId != currentProductId) {
         configOption.addEventListener('click', async function() {
-            history.pushState({ id: productId },'', 'http://localhost:8081/product/card/' + productId);
+            history.pushState({ id: productId },'', `${cardPageURL}/${productId}`);
             const productInfo = await fetchProductInfo(productId);
             showProductDetails(productInfo);
         });
@@ -310,13 +316,14 @@ function populateProductDescription(productDescriptions) {
 }
 
 function clearProductSpecificationSection() {
-    const items = Array.from(document.getElementById('specification-grid')
-        .querySelectorAll('.spec-name'));
-    items.slice(1).forEach(item => item.remove());
+    const element = document.getElementById('specification-tab').querySelector('#specification-grid');
+    while (element.children.length > 1) {
+        element.removeChild(element.lastElementChild);
+    }
 }
 
 function populateProductSpecification(productSpecification) {
-    const specGrid = document.getElementById('specification-grid');
+    const specGrid = document.getElementById('specification-tab').querySelector('#specification-grid');
     const specNameTem = specGrid.querySelector('.spec-name');
     productSpecification.forEach(spec => {
         const specName = specNameTem.cloneNode(true);

@@ -8,6 +8,11 @@
   </head>
   <body class="bg-gray-100">
 
+  <span id="media_url" class="hidden" th:text="media_url"></span>
+  <span id="card_url" class="hidden" th:text="card_url"></span>
+  <span id="search_url" class="hidden" th:text="search_url"></span>
+  <span id="cardPage_url" class="hidden" th:text="cardPage_url"></span>
+
   <header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
   </header>
 
@@ -16,7 +21,7 @@
       <!-- Breadcrumb category navigation -->
       <nav class="mb-4 text-sm">
         <ol id="category-nav-container" class="flex flex-wrap items-center">
-          <li class="link-list category-item"><a href="#" class="text-blue-600 hover:underline">Home</a></li>
+          <li class="link-list category-item"><a href="/" class="text-blue-600 hover:underline">Home</a></li>
           <li class="forward-slash category-item mx-2 text-gray-500">/</li>
         </ol>
       </nav>
@@ -25,7 +30,7 @@
       <div class="rounded bg-white shadow-md">
         <div class="md:flex md:items-start md:gap-4 md:h-full">
           <!-- Left side: Images -->
-          <div class="p-4 md:w-2/5 md:border-r md:border-b-0 sticky top-6 border">
+          <div class="p-4 md:w-2/5 md:border-r md:border-b-0 md:sticky top-6 border">
             <!-- Main image with responsive container -->
             <div id="main-image-container" class="relative mb-4 aspect-square bg-gray-100">
               <img src="" alt="product image"
@@ -265,7 +270,7 @@
 
     </div>
 
-    <script type="module" src="/js/product-card-test.js"></script>
+    <script type="module" src="/js/product-card.js"></script>
 
   <footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
   </footer>
