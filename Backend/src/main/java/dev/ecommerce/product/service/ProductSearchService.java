@@ -86,7 +86,7 @@ public class ProductSearchService {
         String[] words = refined == null ? null : refined.toLowerCase().split("\\s+");
 
         // if searching with name but no words found (bad string)
-        if ((searchString != null && !searchString.isEmpty() && words.length > 0)) {
+        if ((searchString != null && !searchString.isEmpty() && words.length == 0)) {
             return new ProductSearchResultDTO(new HashMap<>(), new HashMap<>(), new PageImpl<>(Collections.emptyList()));
         }
 
