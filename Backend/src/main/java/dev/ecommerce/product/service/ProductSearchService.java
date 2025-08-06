@@ -81,12 +81,17 @@ public class ProductSearchService {
     @Transactional(readOnly = true)
     public ProductSearchResultDTO searchProductByName(String searchString, int page, int size, boolean getFeatures, SortOption sortBy,
                                                       Map<String, List<String>> selectedFilters, Map<String, List<String>> selectedSpecs) {
-        String refined = searchString == null ? null : searchString.replaceAll("[^a-zA-Z0-9 ]", "");
+        String[] words;
 
-        String[] words = refined == null ? null : refined.toLowerCase().split("\\s+");
+        if (searchString == null) {
+            words = new String[0];
+        } else {
+            String cleaned = searchString.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase().trim();
+            words = cleaned.isEmpty() ? new String[0] : cleaned.split("\\s+");
+        }
 
         // if searching with name but no words found (bad string)
-        if ((searchString != null && !searchString.isEmpty() && words.length == 0)) {
+        if ((searchString != null && !searchString.isEmpty()) && words.length == 0) {
             return new ProductSearchResultDTO(new HashMap<>(), new HashMap<>(), new PageImpl<>(Collections.emptyList()));
         }
 
