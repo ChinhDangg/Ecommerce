@@ -16,7 +16,11 @@ public class ProductController {
     @GetMapping("/card/{id}")
     public String getProductCard(@PathVariable Long id, Model model) {
         model.addAttribute("productId", id);
-        return "/product-page/product-card-draft";
+        model.addAttribute("media-url", "http://localhost:8080");
+        model.addAttribute("card-url", "http://localhost:8080/api/productWrapper/card");
+        model.addAttribute("cardPage-url", "http://localhost:8080/api/product/card");
+        model.addAttribute("search-url", "http://localhost:8080/api/product/search");
+        return "/product-page/product-card";
     }
 
     @GetMapping("/search")
@@ -42,10 +46,10 @@ public class ProductController {
         model.addAttribute("sort", sortStr);
         model.addAttribute("special_filter", specialFilterParam);
         model.addAttribute("filter", filterParam);
-        model.addAttribute("call_url", "http://localhost:8080/api/product/search");
-        model.addAttribute("redirect_url", "http://localhost:8081/product/search");
-        model.addAttribute("card_url", "http://localhost:8081/product/card/");
-        return "/product-page/product-search-draft";
+        model.addAttribute("search_url", "http://localhost:8080/api/product/search");
+        model.addAttribute("searchPage_url", "http://localhost:8081/product/search");
+        model.addAttribute("cardPage_url", "http://localhost:8081/product/card/");
+        return "/product-page/product-search";
     }
 
 }
