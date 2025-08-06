@@ -128,9 +128,9 @@ public class ProductController {
             List<String> fileNames = Arrays.stream(images)
                     .map(file -> {
                         try {
-                            // Save file to a directory (e.g., uploads/)
+                            // Save file to a directory
                             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                            Path path = Paths.get("C:\\Users\\minhc\\IdeaProjects\\Ecommerce\\FrontEnd\\src\\main\\resources\\static\\images\\" + fileName);
+                            Path path = Paths.get("Backend/uploads/images" + fileName);
                             Files.createDirectories(path.getParent()); // Ensure directory exists
                             Files.write(path, file.getBytes());
                             return "/images/" + path.getFileName().toString();
