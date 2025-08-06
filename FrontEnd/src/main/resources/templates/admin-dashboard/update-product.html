@@ -10,6 +10,14 @@
 </head>
 <body>
     <div th:fragment="update-product-template">
+        <span id="media-url" class="hidden" th:text="${media_url}"></span>
+        <span id="productLine-url" class="hidden" th:text="${productLine_url}"></span>
+        <span id="productWrapper-url" class="hidden" th:text="${productWrapper_url}"></span>
+        <span id="product-url" class="hidden" th:text="${product_url}"></span>
+        <span id="productSearch-url" class="hidden" th:text="${productSearch_url}"></span>
+        <span id="category-url" class="hidden" th:text="${category_url}"></span>
+        <span id="categoryParent-url" class="hidden" th:text="${categoryParent_url}"></span>
+
         <!-- Sticky top bar -->
         <div class="bg-white shadow sticky top-0 z-10">
             <div class="px-6 py-4 flex items-center justify-between">
@@ -73,7 +81,7 @@
 
         </div>
 
-        <script type="module" src="/js/admin-dashboard/retrieve-product.js"></script>
+        <script type="module" src="/js/admin-dashboard/update-product.js"></script>
     </div>
 
 </body>

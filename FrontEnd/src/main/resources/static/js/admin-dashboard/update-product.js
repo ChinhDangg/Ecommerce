@@ -30,8 +30,17 @@ import {
     getProductLineInfo
 } from "./post-new-product.js";
 
+const mediaURL = document.getElementById('media-url').innerText;
+const productLineURL = document.getElementById('productLine-url').innerText;
+const productWrapperURL = document.getElementById('productWrapper-url').innerText;
+const productURL = document.getElementById('product-url').innerText;
+const productSearchURL = document.getElementById('productSearch-url').innerText;
+const categoryURL = document.getElementById('category-url').innerText;
+const categoryParentURL = document.getElementById('categoryParent-url').innerText;
 
 export function initializeUpdate() {
+
+    // document.getElementById('call-url').remove();
 
     data_productLineImages.length = 0;
     data_productLineDescriptionImages.length = 0;
@@ -124,7 +133,7 @@ function displaySearchResult(content) {
         productSearchContainer.appendChild(searchEntry);
         searchEntry.classList.remove('hidden');
         searchEntry.querySelector('.product-name').innerHTML = result.name;
-        searchEntry.querySelector('.product-image').src = result.imageName;
+        searchEntry.querySelector('.product-image').src = `${mediaURL}${result.imageName}`;
         searchEntry.querySelector('.product-id').innerHTML = result.id;
         searchEntry.querySelector('.manufacturer-id').innerHTML = result.manufacturerId;
         searchEntry.querySelector('.product-quantity').innerHTML = result.quantity;
@@ -213,7 +222,9 @@ function displayProductLineInfo(productLineInfo) {
     document.getElementById('product-line-name-input').value = productLineInfo.name;
     const productLineImageContainer = document.getElementById('product-line-images');
     productLineInfo.media.forEach(media => {
-        const imageEntry = addImageEntry(data_productLineImages, productLineImageContainer, null, media.content);
+        const imageEntry = addImageEntry(
+            data_productLineImages, productLineImageContainer, null, `${mediaURL}${media.content}`
+        );
         imageEntry.dataset.mediaId = media.id;
     });
     productLineInfo.descriptions.forEach(description => {
@@ -284,7 +295,8 @@ function displayProductInfo(productItem, content) {
             const imageEntry = addImageEntry(
                 data_allProductImages.get(content.id),
                 productItem.querySelector('.product-images'),
-                null, media.content
+                null,
+                `${mediaURL}${media.content}`
             );
             imageEntry.dataset.mediaId = media.id;
         }
@@ -306,7 +318,7 @@ function displayProductInfo(productItem, content) {
 // CRUD operations
 
 async function updateProductLineInfo(productLineInfoData) {
-    const response = await fetch('http://localhost:8080/api/productLine', {
+    const response = await fetch(productLineURL, {
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
@@ -320,7 +332,7 @@ async function updateProductLineInfo(productLineInfoData) {
 }
 
 async function updateProductInfo(productInfoData) {
-    const response = await fetch('http://localhost:8080/api/product',{
+    const response = await fetch(productURL,{
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
@@ -338,7 +350,7 @@ async function updateAllProductInfo(productLineInfoData, productInfoDataList) {
         productLineDTO: productLineInfoData,
         productDTOList: productInfoDataList
     }
-    const response = await fetch('http://localhost:8080/api/productWrapper/', {
+    const response = await fetch(productWrapperURL, {
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
@@ -356,7 +368,7 @@ async function updateProductCategory(productIdList, categoryId) {
         productIds: productIdList,
         categoryId: categoryId,
     }
-    const response = await fetch('http://localhost:8080/api/category', {
+    const response = await fetch(categoryURL, {
         method: 'PUT',
         headers: {
             'Content-Type':'application/json',
@@ -372,20 +384,19 @@ async function updateProductCategory(productIdList, categoryId) {
 async function searchProduct(productNameSearch) {
     try {
         const page = 0;
-        const baseUrl = 'http://localhost:8080/api/product/by-name';
         const queryParams = new URLSearchParams({
-            name: productNameSearch,
+            q: productNameSearch,
             page: page.toString()
         });
-        const url = `${baseUrl}?${queryParams.toString()}`;
+        const url = `${productSearchURL}?${queryParams.toString()}`;
         const response = await fetch(url);
         if (!response.ok) {
             displayNoSearchResult('Failed searching product');
             return;
         }
         const searchResult = await response.json();
-        if (searchResult.page.totalElements) {
-            displaySearchResult(searchResult.content);
+        if (searchResult.productResults.page.totalElements) {
+            displaySearchResult(searchResult.productResults.content);
         } else {
             displayNoSearchResult('No result found with search');
         }
@@ -396,7 +407,7 @@ async function searchProduct(productNameSearch) {
 }
 
 async function fetchProductLineInfo(productLineId) {
-    const response = await fetch('http://localhost:8080/api/productLine/' + productLineId);
+    const response = await fetch(`${productLineURL}/${productLineId}`);
     if (!response.ok) {
         throw new Error('Failed to get product line with id: ' + productLineId);
     }
@@ -404,7 +415,7 @@ async function fetchProductLineInfo(productLineId) {
 }
 
 async function fetchProductCategory(productId) {
-    const response = await fetch('http://localhost:8080/api/category/parent/' + productId);
+    const response = await fetch(`${categoryParentURL}/${productId}`);
     if (!response.ok) {
         throw new Error(`Failed to get product category with product id: ${productId}`);
     }
@@ -412,7 +423,7 @@ async function fetchProductCategory(productId) {
 }
 
 async function fetchProductInfo(productId) {
-    const response = await fetch(`http://localhost:8080/api/product/${productId}`);
+    const response = await fetch(`${productURL}/${productId}`);
     if (!response.ok) {
         throw new Error(`Failed to get product with id: ${productId}`);
     }
@@ -424,7 +435,7 @@ async function deleteAllProductInfo(productLineId, productIdList) {
         productLineId: productLineId,
         productIdList: productIdList
     }
-    const response = await fetch('http://localhost:8080/api/productWrapper', {
+    const response = await fetch(productWrapperURL, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -437,7 +448,7 @@ async function deleteAllProductInfo(productLineId, productIdList) {
 }
 
 async function deleteProductLine(productLineId) {
-    const response = await fetch(`http://localhost:8080/api/productLine/${productLineId}`, {
+    const response = await fetch(`${productLineURL}/${productLineId}`, {
         method: 'DELETE'
     });
     if (response.status !== 204) { // no content
@@ -446,7 +457,7 @@ async function deleteProductLine(productLineId) {
 }
 
 async function deleteProduct(productId) {
-    const response = await fetch(`http://localhost:8080/api/product/${productId}`, {
+    const response = await fetch(`${productURL}/${productId}`, {
         method: 'DELETE'
     });
     if (response.status !== 204) { // no content
