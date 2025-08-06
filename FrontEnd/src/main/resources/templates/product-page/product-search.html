@@ -21,9 +21,9 @@
         <span id="current-s-filter" class="hidden" th:text="${special_filter}"></span>
         <span id="current-filter" class="hidden" th:text="${filter}"></span>
         <span id="category-id" class="hidden" th:text="${category_id}"></span>
-        <span id="call-url" class="hidden" th:text="${call_url}"></span>
-        <span id="redirect-url" class="hidden" th:text="${redirect_url}"></span>
-        <span id="card-url" class="hidden" th:text="${card_url}"></span>
+        <span id="search-url" class="hidden" th:text="${search_url}"></span>
+        <span id="searchPage-url" class="hidden" th:text="${searchPage_url}"></span>
+        <span id="cardPage-url" class="hidden" th:text="${cardPage_url}"></span>
     </h1>
 
     <!-- Filters -->
@@ -187,7 +187,7 @@
 <footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
 </footer>
 
-<script type="module" src="/js/product-search-test.js"></script>
+<script type="module" src="/js/product-search.js"></script>
 
 </body>
 </html>

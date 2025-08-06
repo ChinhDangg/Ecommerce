@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     //     const searchInput = document.getElementById('search-input');
     //     if (searchInput.value) {
     //         currentSearchString = searchInput.value;
-    //         const url = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, callURL);
+    //         const url = createTempUrl(currentPage, currentSort, null, null, null, searchInput.value, searchURL);
     //         await searchProduct(url);
     //     }
     //     else {
@@ -25,9 +25,9 @@ let currentSearchString = document.getElementById('current-search-string').inner
 let currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
 const categoryId = document.getElementById('category-id').innerText;
-const redirectUrl = document.getElementById('redirect-url').innerText;
-const callURL = document.getElementById('call-url').innerText;
-const cardURL = document.getElementById('card-url').innerText;
+const searchPageURL = document.getElementById('searchPage-url').innerText;
+const searchURL = document.getElementById('search-url').innerText;
+const cardPageURL = document.getElementById('cardPage-url').innerText;
 
 const selectedSpecialFilters = {};
 const selectedSpecFilters = {};
@@ -95,7 +95,7 @@ async function initiate(state = null) {
         });
     }
 
-    const url = `${callURL}?${queryParams.toString()}`;
+    const url = `${searchURL}?${queryParams.toString()}`;
     await searchProduct(url);
 }
 
@@ -144,9 +144,9 @@ function pushHistory(pushURL) {
 document.getElementById('sort-by-selection').addEventListener('change', async function (event) {
     currentSort = event.target.value;
     currentSort = currentSort === this.options[0].value ? null : currentSort;
-    const pushURL = createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, redirectUrl);
+    const pushURL = createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, searchPageURL);
     pushHistory(pushURL);
-    await searchProduct(createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, callURL));
+    await searchProduct(createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, searchURL));
 });
 
 function displayFilterOptions(filters, selectedFilters) {
@@ -174,8 +174,8 @@ function displayFilterOptions(filters, selectedFilters) {
             } else {
                 filterOption.querySelector('a').href = createTempUrl(currentPage, currentSort, key, value.option, selectedFilters);
                 optionInput.addEventListener('change', async function(event) {
-                    await searchProduct(createUrl(key, value.option, event.target.checked, selectedFilters, callURL));
-                    const pushURL = createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, redirectUrl);
+                    await searchProduct(createUrl(key, value.option, event.target.checked, selectedFilters, searchURL));
+                    const pushURL = createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, searchPageURL);
                     pushHistory(pushURL);
                 });
             }
@@ -205,7 +205,7 @@ function displayProductSearchResult(content) {
         productItem.classList.remove('hidden');
         productItem.dataset.productId = item.id;
         productItem.querySelectorAll('.product-link').forEach(link => {
-            link.href = `${cardURL}${item.id}`;
+            link.href = `${cardPageURL}${item.id}`;
         });
         productItem.querySelector('.product-img').src = item.imageName;
         productItem.querySelector('.product-name').innerHTML = item.name;
@@ -379,7 +379,7 @@ function displayPageInfo(page) {
                 pageLinkItem.addEventListener('click', async function(event) {
                     event.preventDefault();
                     pushHistory(url);
-                    await searchProduct(createTempUrl(i, currentSort, null, null, null, currentSearchString, callURL));
+                    await searchProduct(createTempUrl(i, currentSort, null, null, null, currentSearchString, searchURL));
                 });
             }
             pageLinkContainer.appendChild(pageLinkItem);
@@ -395,7 +395,7 @@ function displayNoSearchResult(content) {
     document.getElementById('search-string-container').innerText = content;
 }
 
-function createUrl(key, value, included, selectedFilters, url = redirectUrl) {
+function createUrl(key, value, included, selectedFilters, url = searchPageURL) {
     if (included) {
         if (!selectedFilters[key]) {
             selectedFilters[key] = [];
@@ -415,7 +415,7 @@ function createUrl(key, value, included, selectedFilters, url = redirectUrl) {
     return createTempUrl(currentPage, currentSort, null, null, null, currentSearchString, url);
 }
 
-function createTempUrl(page, sortBy, key, value, selectedFilters, searchString = currentSearchString, url = redirectUrl) {
+function createTempUrl(page, sortBy, key, value, selectedFilters, searchString = currentSearchString, url = searchPageURL) {
     let specialFilterString = Object.entries(selectedSpecialFilters)
         .map(([key, values]) => `${key}:${values.join('|')}`)
         .join(',');
