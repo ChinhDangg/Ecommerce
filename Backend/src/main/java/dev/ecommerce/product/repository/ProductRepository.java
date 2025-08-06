@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query(value = "select id from products where product_line_id = :id", nativeQuery = true)
+    @Query(value = "select id from product where product_line_id = :id", nativeQuery = true)
     Optional<Long[]> findAllIdByProductLineId(Integer id);
 
     Page<Product> findByCategoryId(Integer id, Pageable pageable);
