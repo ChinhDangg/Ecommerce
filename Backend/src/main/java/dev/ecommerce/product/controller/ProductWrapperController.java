@@ -2,7 +2,7 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductCardDTO;
 import dev.ecommerce.product.DTO.ProductDeleteDTO;
-import dev.ecommerce.product.DTO.ProductUpdateWrapperDTO;
+import dev.ecommerce.product.DTO.ProductWrapperDTO;
 import dev.ecommerce.product.service.ProductWrapperService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,12 +21,22 @@ public class ProductWrapperController {
         this.productWrapperService = productWrapperService;
     }
 
+    @PostMapping
+    public ResponseEntity<List<Long>> addAllProductInfo(@Valid @RequestBody ProductWrapperDTO productWrapperDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                productWrapperService.saveAllProductInfo(
+                        productWrapperDTO.productLineDTO(),
+                        productWrapperDTO.productDTOList()
+                )
+        );
+    }
+
     @PutMapping
-    public ResponseEntity<List<Long>> updateAllProductInfo(@Valid @RequestBody ProductUpdateWrapperDTO productUpdateWrapperDTO) {
+    public ResponseEntity<List<Long>> updateAllProductInfo(@Valid @RequestBody ProductWrapperDTO productWrapperDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 productWrapperService.updateAllProductInfo(
-                        productUpdateWrapperDTO.productLineDTO(),
-                        productUpdateWrapperDTO.productDTOList()
+                        productWrapperDTO.productLineDTO(),
+                        productWrapperDTO.productDTOList()
                 )
         );
     }

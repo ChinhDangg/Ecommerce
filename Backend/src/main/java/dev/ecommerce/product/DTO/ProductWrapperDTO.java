@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record ProductUpdateWrapperDTO(
+public record ProductWrapperDTO(
         ProductLineDTO productLineDTO,
-        @NotNull(message = "Product List info cannot be null to update")
+        @NotNull(message = "Product List info cannot be null")
         List<ProductDTO> productDTOList) {
 }
 
