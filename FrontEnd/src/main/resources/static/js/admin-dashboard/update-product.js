@@ -6,6 +6,7 @@ import {
     addProductDescription,
     addProductFeature,
     addProductLineDescription,
+    clearProductLineSection,
     addSpecificationKey,
     addSpecificationValue,
     addTopCategories,
@@ -24,7 +25,6 @@ import {
 import {updatePageUrl, updateProductQuery,} from './admin-navigation.js';
 
 import {
-    clearProductLineSection,
     clearAllProductInfo,
     getProductInfo,
     getProductLineInfo
@@ -49,6 +49,16 @@ export function initializeUpdate() {
     products.splice(1);
     retrieved_product.length = 0;
 
+    initializeAdd(); // initialize add new product
+    initializeSearchSubmitBtn()
+    initializeTopBarDiscardBtn();
+    initializeTopUpdateBtn();
+    initializeProductLineSection();
+
+    expandCategorySection(document.getElementById('product-category-section').querySelector('.toggle-collapse'));
+}
+
+function initializeSearchSubmitBtn() {
     document.getElementById('search-bar-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const searchInput = document.getElementById('search-input');
@@ -60,7 +70,9 @@ export function initializeUpdate() {
             clearSearchEntry();
         }
     });
+}
 
+function initializeTopBarDiscardBtn() {
     document.getElementById('discard-button').addEventListener('click',async function () {
         const confirmDelete = confirm('Are you sure you want to delete the entire product line');
         if (confirmDelete) {
@@ -74,7 +86,9 @@ export function initializeUpdate() {
             }
         }
     });
+}
 
+function initializeTopUpdateBtn() {
     document.getElementById('update-btn').addEventListener('click', async () => {
         const productLineId = new URLSearchParams(window.location.search).get('line');
         const productLineInfo = await getProductLineInfo(productLineId);
@@ -118,12 +132,7 @@ export function initializeUpdate() {
             }
         }
     });
-
-    expandCategorySection(document.getElementById('product-category-section').querySelector('.toggle-collapse'));
-
-    initializeAdd(); // initialize add new product
 }
-
 
 function displaySearchResult(content) {
     clearSearchEntry();
@@ -218,6 +227,23 @@ export async function handleProductResult(productId, productLineId) {
     }
 }
 
+function initializeProductLineSection() {
+    const btn = document.getElementById('product-line-section').querySelector('.delete-product-btn');
+    btn.innerText = 'Delete';
+    btn.onclick = async function () {
+        const confirmClear = confirm('Are you sure you want to delete the product line? All associate products will no longer be grouped');
+        if (confirmClear) {
+            try {
+                const productLineId = new URLSearchParams(window.location.search).get('line');
+                await deleteProductLine(productLineId);
+            } catch (error) {
+                alert('Failed to delete product line - update fail');
+            }
+            clearProductLineSection();
+        }
+    };
+}
+
 function displayProductLineInfo(productLineInfo) {
     document.getElementById('product-line-name-input').value = productLineInfo.name;
     const productLineImageContainer = document.getElementById('product-line-images');
@@ -235,7 +261,7 @@ function displayProductLineInfo(productLineInfo) {
         if (description.contentType === "TEXT") {
             descriptionTextArea.innerHTML = description.content;
         } else if (description.contentType === "IMAGE") {
-            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, description.content);
+            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, `${mediaURL}${description.content}`);
         }
     });
 }
@@ -309,7 +335,7 @@ function displayProductInfo(productItem, content) {
         if (description.contentType === "TEXT") {
             descriptionTextArea.innerHTML = description.content;
         } else if (description.contentType === "IMAGE") {
-            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), description.content);
+            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), `${mediaURL}${description.content}`);
         }
     });
 }
