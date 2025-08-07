@@ -9,8 +9,6 @@
 </head>
 <body>
     <div th:fragment="add-new-product-template">
-        <span id="categoryTop-url" class="hidden" th:text="${categoryTop_url}"></span>
-        <span id="categorySubcategory-url" class="hidden" th:text="${categorySubcategory_url}"></span>
 
         <div class="bg-white shadow sticky top-0 z-10">
             <div class="px-6 py-4 flex items-center justify-between">
@@ -29,10 +27,16 @@
 
 
         <div class="p-6" id="add-new-product-content" th:fragment="add-new-product-content">
+            <span id="categoryTop-url" class="hidden" th:text="${categoryTop_url}"></span>
+            <span id="categorySubcategory-url" class="hidden" th:text="${categorySubcategory_url}"></span>
+
             <!-- Product Line Section -->
             <div class="bg-white rounded-lg shadow mb-6" id="product-line-section">
-                <div class="border-b border-gray-200 px-4 py-4">
+                <div class="border-b border-gray-200 px-4 py-4 flex items-center justify-between">
                     <h3 class="text-lg font-medium text-gray-800">Product Line</h3>
+                    <button class="delete-product-btn px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">
+                        Delete
+                    </button>
                 </div>
                 <div class="p-4">
                     <!-- Product Line Name -->
