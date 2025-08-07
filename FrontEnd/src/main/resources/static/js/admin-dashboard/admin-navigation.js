@@ -48,9 +48,8 @@ async function getUpdateProductTemplate() {
     resetClickedLinks();
     updateProductLink.classList.add('bg-blue-300');
     await getAdminProductTemplate('/admin/dashboard/updateProduct', mainContentArea);
-    import('./retrieve-product.js')
+    import('./update-product.js')
         .then((module) => {
-            // You can use `module` here
             module.initializeUpdate();
             const productId = new URLSearchParams(window.location.search).get('product');
             const productLineId = new URLSearchParams(window.location.search).get('line');

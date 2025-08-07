@@ -4,7 +4,9 @@ import {
     data_productLineDescriptionImages,
     data_allProductImages,
     data_allProductDescriptionImages,
-    products, removeProductInfo,
+    products,
+    clearProductLineSection,
+    removeProductInfo,
 } from "./add-new-product.js";
 
 
@@ -212,16 +214,6 @@ async function uploadProducts(productLineId) {
         console.error('Fail to upload all products');
         throw error;
     }
-}
-
-export function clearProductLineSection() {
-    data_productLineImages.length = 0;
-    data_productLineDescriptionImages.length = 0;
-    document.getElementById('product-line-name-input').value = '';
-    document.getElementById('product-line-images').innerHTML = '';
-    // Remove all description entries except the first one
-    Array.from(document.getElementById('product-line-descriptions')
-        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
 }
 
 export function clearAllProductInfo() {

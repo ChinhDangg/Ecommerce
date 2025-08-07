@@ -20,12 +20,33 @@ const productLineImageInput = document.getElementById('add-line-image-input');
 export const data_productLineImages = []
 
 function initializeProductLineSection() {
+    initializeProductDeleteButton();
     document.getElementById('add-line-image-btn').addEventListener('click', function () {
         productLineImageInput.click();
     });
     document.getElementById('add-line-description-btn').addEventListener('click', function () {
         addProductLineDescription();
     });
+}
+
+function initializeProductDeleteButton() {
+    const btn = document.getElementById('product-line-section').querySelector('.delete-product-btn');
+    btn.innerText = 'Clear';
+    btn.onclick = function () {
+        const confirmClear = confirm('Are you sure you want to clear the product line?');
+        if (confirmClear)
+            clearProductLineSection();
+    };
+}
+
+export function clearProductLineSection() {
+    data_productLineImages.length = 0;
+    data_productLineDescriptionImages.length = 0;
+    document.getElementById('product-line-name-input').value = '';
+    document.getElementById('product-line-images').innerHTML = '';
+    // Remove all description entries except the first one
+    Array.from(document.getElementById('product-line-descriptions')
+        .querySelectorAll('.description-entry')).slice(1).forEach(item => item.remove());
 }
 
 productLineImageInput.addEventListener('change', function () {
@@ -132,7 +153,7 @@ function initializeDescriptionButtons(descriptionContainer, dataImageArray) {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function () {
                 updateDescriptionImage(descriptionContainer, dataImageArray, file);
             }
             reader.readAsDataURL(file);
@@ -621,7 +642,9 @@ function addNewProductGroupTemplate(productId, collapsed) {
     data_allProductDescriptionImages.set(productId, []);
 
     productGroupItem.querySelector('.delete-product-btn').onclick = function() {
-        removeProductInfo(productId);
+        const confirmDelete = confirm('Are you sure you want to delete this product?');
+        if (confirmDelete)
+            removeProductInfo(productId);
     };
     productGroupItem.querySelector('.toggle-collapse').addEventListener('click', function() {
         productGroupItem.querySelector('.product-details').classList.toggle('hidden');
