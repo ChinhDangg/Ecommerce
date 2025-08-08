@@ -122,7 +122,7 @@ public class ProductSearchService {
         futureMap.put("special", specialFiltersAndCountFuture);
         futureMap.put("spec", specFuture);
 
-        boolean hasKeywords = words != null && words.length > 0;
+        boolean hasKeywords = words.length > 0;
         boolean hasSpecialFilters = selectedFilters != null && !selectedFilters.isEmpty();
         boolean hasSelectedSpecs = selectedSpecs != null && !selectedSpecs.isEmpty();
         Map<String, List<String>> allSelectedFilters = new HashMap<>();
@@ -226,8 +226,8 @@ public class ProductSearchService {
         // --------- Main Query ---------
         CriteriaQuery<Product> query = cb.createQuery(Product.class);
         Root<Product> root = query.from(Product.class);
-        Join<Product, ProductSpecification> specJoin = root.join("specifications", JoinType.INNER);
-        Join<ProductSpecification, ProductCoreSpecification> coreSpecJoin = specJoin.join("productCoreSpecification", JoinType.INNER);
+        Join<Product, ProductSpecification> specJoin = root.join("specifications", JoinType.LEFT);
+        Join<ProductSpecification, ProductCoreSpecification> coreSpecJoin = specJoin.join("productCoreSpecification", JoinType.LEFT);
 
         // create the predicates
         List<Predicate> predicates = new ArrayList<>();
