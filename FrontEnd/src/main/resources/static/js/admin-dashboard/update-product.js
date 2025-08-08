@@ -89,7 +89,8 @@ function initializeTopBarDiscardBtn() {
 }
 
 function initializeTopUpdateBtn() {
-    document.getElementById('update-btn').addEventListener('click', async () => {
+    document.getElementById('update-btn').addEventListener('click', async function () {
+        console.log('clicked update btn');
         const productLineId = new URLSearchParams(window.location.search).get('line');
         const productLineInfo = await getProductLineInfo(productLineId);
         const productInfos = await Promise.all(retrieved_product.map(id => getProductInfo(productLineId, id)));
@@ -104,6 +105,7 @@ function initializeTopUpdateBtn() {
                 alert('Failed to delete product line - update fail');
             }
         }
+
         if (productInfos.length) {
             try {
                 const retrievedIds = await updateAllProductInfo(productLineInfo, productInfos);
@@ -113,15 +115,19 @@ function initializeTopUpdateBtn() {
             }
         } else if (productLineId && productLineInfo) { // updating only product line as no product info retrieved - nothing to update
             try {
-                console.log(productLineInfo);
                 const retrievedProductLineId = await updateProductLineInfo(productLineInfo);
                 console.log('Updated product line');
             } catch (error) {
                 alert('Failed to update product line info');
             }
-            // check if new category is picked
+        }
+
+        if (!productInfos.length) {
+            // check if a new category is picked
             const initialCategory = categoryTree[0].id;
             const newCategory = document.querySelector('input[name="category"]:checked')?.id.replace("category-", "");
+
+            console.log(initialCategory, newCategory);
             if (initialCategory !== newCategory) {
                 try {
                     const retrievedProductIds = await updateProductCategory(products.slice(1), parseInt(newCategory));
@@ -173,6 +179,10 @@ function displayNoSearchResult(content) {
 }
 
 function hideMainContent() {
+    document.getElementById('main-content').classList.add('hidden');
+}
+
+function showMainContent() {
     document.getElementById('main-content').classList.remove('hidden');
 }
 
@@ -193,7 +203,7 @@ function clearSearchEntry() {
 }
 
 function getProductLink(productId, productLineId) {
-    return `/admin/dashboard?query=${updateProductQuery}&product=${productId}&line=${productLineId}`;
+    return `/admin/dashboard?query=${updateProductQuery}&product=${productId}` + (productLineId ? `&line=${productLineId}` : '');
 }
 
 async function clickOnProductResult(e, productId, productLineId) {
@@ -210,8 +220,8 @@ export async function handleProductResult(productId, productLineId) {
     clearAllProductInfo();
     const currentCategory = await fetchProductCategory(productId);
     console.log(currentCategory);
-    await addTopCategories(currentCategory, false, true);
-    hideMainContent();
+    await addTopCategories(currentCategory, null, currentCategory[0], true);
+    showMainContent();
     showTopToolbar(true);
     if (productLineId) {
         const productLineInfo = await fetchProductLineInfo(productLineId);
@@ -231,11 +241,14 @@ function initializeProductLineSection() {
     const btn = document.getElementById('product-line-section').querySelector('.delete-product-btn');
     btn.innerText = 'Delete';
     btn.onclick = async function () {
-        const confirmClear = confirm('Are you sure you want to delete the product line? All associate products will no longer be grouped');
+        const confirmClear = confirm('Are you sure you want to delete the product line? All associated products will no longer be grouped');
         if (confirmClear) {
             try {
                 const productLineId = new URLSearchParams(window.location.search).get('line');
-                await deleteProductLine(productLineId);
+                if (productLineId)
+                    await deleteProductLine(productLineId);
+                else
+                    alert('No product line found to delete');
             } catch (error) {
                 alert('Failed to delete product line - update fail');
             }
@@ -303,7 +316,6 @@ function addProductEntry(productId) {
 }
 
 function displayProductInfo(productItem, content) {
-    console.log(content);
     productItem.querySelector('.product-name-input').value = content.name;
     productItem.querySelector('.product-brand-input').value = content.brand;
     productItem.querySelector('.product-manufacturer-part-number-input').value = content.manufacturerId;
@@ -353,20 +365,6 @@ async function updateProductLineInfo(productLineInfoData) {
     });
     if (!response.ok) {
         throw new Error('Fail update product line info');
-    }
-    return await response.text();
-}
-
-async function updateProductInfo(productInfoData) {
-    const response = await fetch(productURL,{
-        method: 'PUT',
-        headers: {
-            'Content-Type':'application/json',
-        },
-        body: JSON.stringify(productInfoData)
-    });
-    if (!response.ok) {
-        throw new Error('Fail update product info');
     }
     return await response.text();
 }
