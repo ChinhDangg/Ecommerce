@@ -5,7 +5,6 @@ import {
     data_allProductImages,
     data_allProductDescriptionImages,
     products,
-    clearProductLineSection,
     removeProductInfo,
 } from "./add-new-product.js";
 
@@ -14,18 +13,46 @@ export function initializePost() {
     document.getElementById('publish-btn').addEventListener('click', async function () {
         try {
             if (products.length < 2) {
+                console.log(products);
                 alert('No product found to add');
                 return;
             }
+
             const productLineInfo = await getProductLineInfo();
-            if (productLineInfo) {
-                const productLineId = await postProductLineInfo(productLineInfo);
-                await uploadProducts(productLineId);
-            } else {
-                await uploadProducts(null);
+            const productInfos = [];
+
+            let allProductFilled = true;
+            const productIds = products.slice(1);
+            for (const productId of productIds) {
+                const productInfo = await getProductInfo(null, productId);
+                if (productInfo) {
+                    productInfos.push(productInfo);
+                } else {
+                    allProductFilled = false;
+                    break;
+                }
             }
-            clearProductLineSection();
-            clearAllProductInfo();
+
+            if (!(productInfos && allProductFilled))
+                return;
+
+            const ids = await postAllProductInfo(productLineInfo, productInfos);
+            if (ids) {
+                const maxTotalLengthExpected = productInfos.length + 1;
+                let gotProductLineId = null;
+                let gotFirstProductId = null;
+                if (ids.length === maxTotalLengthExpected) {
+                    gotProductLineId = ids[0];
+                    gotFirstProductId = ids[1];
+                    window.location.href = `http://localhost:8081/admin/dashboard?query=updateProduct&line=${gotProductLineId}&product=${gotFirstProductId}`;
+                } else if (ids.length === maxTotalLengthExpected - 1) {
+                    gotFirstProductId = ids[0];
+                    window.location.href = `http://localhost:8081/admin/dashboard?query=updateProduct&product=${gotFirstProductId}`;
+                } else {
+                    alert('Failed to publish all info');
+                    console.error('Fail to publish all info');
+                }
+            }
         } catch (error) {
             console.error(error);
             console.error('Fail to publish all info');
@@ -99,7 +126,6 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
     });
     return descriptionTexts;
 }
-
 
 export async function getProductInfo(productLineId, productId) {
     const productGroupContainer = document.getElementById('product-group-container');
@@ -198,24 +224,6 @@ function getProductSpecificationContent(productId) {
     return specContent.length === 0 ? [] : specContent;
 }
 
-async function uploadProducts(productLineId) {
-    try {
-        for (let i = 1; i < products.length; i++) {
-            const productId = products[i];
-            const productInfo = await getProductInfo(productLineId, productId);
-            console.log(`Product info for ${productId}: `, productInfo);
-            if (productInfo) {
-                await postProductInfo(productInfo);
-            } else {
-                break;
-            }
-        }
-    } catch (error) {
-        console.error('Fail to upload all products');
-        throw error;
-    }
-}
-
 export function clearAllProductInfo() {
     products.forEach(productId => {
         if (productId !== 0)
@@ -224,34 +232,22 @@ export function clearAllProductInfo() {
 }
 
 // CRUD operations
-// product line POST
-export async function postProductLineInfo(productLineInfoData) {
-    const response = await fetch('http://localhost:8080/api/productLine', {
+export async function postAllProductInfo(productLineInfoData, productInfoDataList) {
+    const productInfoWrapper = {
+        productLineDTO: productLineInfoData,
+        productDTOList: productInfoDataList
+    }
+    const response = await fetch('http://localhost:8080/api/productWrapper', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productLineInfoData)
+        body: JSON.stringify(productInfoWrapper)
     });
     if (!response.ok) {
-        throw new Error('Failed uploading product line info');
+        throw new Error('Failed uploading all products info');
     }
-    return await response.text();
-}
-
-// product group POST
-export async function postProductInfo(productInfoData) {
-    const response = await fetch('http://localhost:8080/api/product', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productInfoData)
-    });
-    if (!response.ok) {
-        throw new Error('Failed uploading product info');
-    }
-    return await response.text();
+    return await response.json();
 }
 
 async function uploadImages(dataImageArray) {
