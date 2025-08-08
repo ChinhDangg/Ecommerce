@@ -238,7 +238,7 @@ async function fetchTopCategories() {
     }
 }
 
-export async function addTopCategories(topCategories, categoryToToggle = null, isChecked = false) {
+export async function addTopCategories(topCategories, categoryToToggle = null, categoryToCheck = null, isChecked = false) {
     removeAllTopCategoryDisplay();
     categoryNavStack.push(topCategories);
     console.log(categoryNavStack);
@@ -247,7 +247,7 @@ export async function addTopCategories(topCategories, categoryToToggle = null, i
         const categoryItem = categoryContainer.querySelector('.category-item').cloneNode(true);
         categoryItem.classList.remove('hidden');
         categoryContainer.appendChild(categoryItem);
-        updateCategoryInfo(categoryItem, topCategory, isChecked);
+        updateCategoryInfo(categoryItem, topCategory, categoryToCheck, isChecked);
         const toggleButton = categoryItem.querySelector('.toggle-subcategories');
         if (topCategory === categoryToToggle) {
             toggleButton.querySelector('svg').classList.toggle('rotate-[-90deg]');
@@ -336,11 +336,12 @@ function checkSameCategoryToggle(topCategory) {
     return false;
 }
 
-function updateCategoryInfo(container, category, isChecked = false) {
+function updateCategoryInfo(container, category, categoryToCheck = null, isChecked = false) {
     const topCategoryInput = container.querySelector('.category-input');
     topCategoryInput.id = `category-${category.id}`;
     topCategoryInput.value = category.name;
-    topCategoryInput.checked = isChecked;
+    if (category === categoryToCheck)
+        topCategoryInput.checked = isChecked;
     const topCategoryLabel = container.querySelector('.category-input-label');
     topCategoryLabel.htmlFor = `category-${category.id}`;
     topCategoryLabel.name = category.name;
@@ -455,6 +456,7 @@ function updateProductOptionSelectionValue(optionKey) {
 export function addNewProductEntry(productId = null, collapsed = false) {
     const newProductId = productId == null ? products[products.length - 1] + 1 : productId;
     products.push(newProductId);
+    console.log(products);
     return [
         addProductForOption(newProductId),
         addProductForSpec(newProductId),
