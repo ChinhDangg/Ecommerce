@@ -104,7 +104,7 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<Long> addProduct(@Valid @RequestBody ProductDTO productDTO) {
-        Long savedProductId = productService.saveProduct(productDTO);
+        Long savedProductId = productService.saveProduct(productDTO, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
 
@@ -130,7 +130,7 @@ public class ProductController {
                         try {
                             // Save file to a directory
                             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                            Path path = Paths.get("Backend/uploads/images" + fileName);
+                            Path path = Paths.get("uploads/images" + fileName);
                             Files.createDirectories(path.getParent()); // Ensure directory exists
                             Files.write(path, file.getBytes());
                             return "/images/" + path.getFileName().toString();

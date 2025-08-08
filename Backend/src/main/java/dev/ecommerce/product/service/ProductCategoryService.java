@@ -46,7 +46,7 @@ public class ProductCategoryService {
     public List<ProductCategoryDTO> getProductParentCategoryChain(Long productId) {
         Product product = productService.findProductById(productId);
         List<ProductCategoryDTO> productCategoryChain = new ArrayList<>();
-        ProductCategory parentCategory = product.getCategory();
+        ProductCategory parentCategory = product.getCategory(); // the first category is the current selected one
         while (parentCategory != null) {
             productCategoryChain.add(productMapper.toProductCategoryDTO(parentCategory));
             parentCategory = parentCategory.getParentProductCategory();

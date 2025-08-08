@@ -32,9 +32,13 @@ public class ProductWrapperService {
     @Transactional
     public List<Long> saveAllProductInfo(ProductLineDTO productLineDTO, List<ProductDTO> productDTOList) {
         List<Long> savedIds = new ArrayList<>();
-        savedIds.add(productLineService.saveProductLine(productLineDTO).longValue());
+        Integer productLineId = null;
+        if (productLineDTO != null) {
+            productLineId = productLineService.saveProductLine(productLineDTO);
+            savedIds.add(productLineId.longValue());
+        }
         for (ProductDTO productDTO : productDTOList) {
-            savedIds.add(productService.saveProduct(productDTO));
+            savedIds.add(productService.saveProduct(productDTO, productLineId));
         }
         return savedIds;
     }

@@ -27,6 +27,7 @@ public class ProductService {
     private final ProductSpecificationRepository productSpecificationRepository;
     private final ProductCoreSpecificationRepository productCoreSpecificationRepository;
     private final ProductMapper productMapper;
+    private final ProductLineService productLineService;
 
     public ProductService(
             ProductCategoryRepository productCategoryRepository,
@@ -38,8 +39,8 @@ public class ProductService {
             ProductOptionRepository productOptionRepository,
             ProductSpecificationRepository productSpecificationRepository,
             ProductCoreSpecificationRepository productCoreSpecificationRepository,
-            ProductMapper productMapper
-    ) {
+            ProductMapper productMapper,
+            ProductLineService productLineService) {
         this.productCategoryRepository = productCategoryRepository;
         this.productLineRepository = productLineRepository;
         this.productRepository = productRepository;
@@ -50,6 +51,7 @@ public class ProductService {
         this.productSpecificationRepository = productSpecificationRepository;
         this.productCoreSpecificationRepository = productCoreSpecificationRepository;
         this.productMapper = productMapper;
+        this.productLineService = productLineService;
     }
 
     public Product findProductById(Long id) {
@@ -73,15 +75,14 @@ public class ProductService {
     }
 
     @Transactional
-    public Long saveProduct(ProductDTO productDTO) {
+    public Long saveProduct(ProductDTO productDTO, Integer productLineId) {
         if (productDTO.getName() == null)
             throw new DataIntegrityViolationException("Product name is null");
 
         ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
-        ProductLine productLine = productDTO.getProductLineId() == null
-                ? null : productLineRepository.findById(productDTO.getProductLineId())
-                .orElseThrow(() -> new IllegalArgumentException("Product line not found"));
+        ProductLine productLine = productLineId != null ? productLineService.findProductLineById(productLineId)
+                : productDTO.getProductLineId() == null ? null : productLineService.findProductLineById(productDTO.getProductLineId());
         Product savedProduct = productRepository.save(new Product(
                 productDTO.getManufacturerId(),
                 productDTO.getName(),

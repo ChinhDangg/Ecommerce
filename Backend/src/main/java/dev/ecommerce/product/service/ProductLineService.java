@@ -41,7 +41,7 @@ public class ProductLineService {
         this.productMapper = productMapper;
     }
 
-    private ProductLine findProductLineById(Integer id) {
+    public ProductLine findProductLineById(Integer id) {
         if (id == null)
             throw new IllegalArgumentException("Product line id is null");
         return productLineRepository.findById(id)
