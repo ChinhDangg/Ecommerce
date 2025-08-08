@@ -2,6 +2,7 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductCardDTO;
 import dev.ecommerce.product.DTO.ProductDeleteDTO;
+import dev.ecommerce.product.DTO.ProductUpdateDTO;
 import dev.ecommerce.product.DTO.ProductWrapperDTO;
 import dev.ecommerce.product.service.ProductWrapperService;
 import jakarta.validation.Valid;
@@ -32,11 +33,12 @@ public class ProductWrapperController {
     }
 
     @PutMapping
-    public ResponseEntity<List<Long>> updateAllProductInfo(@Valid @RequestBody ProductWrapperDTO productWrapperDTO) {
+    public ResponseEntity<List<Long>> updateAllProductInfo(@RequestBody ProductUpdateDTO productUpdateDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 productWrapperService.updateAllProductInfo(
-                        productWrapperDTO.productLineDTO(),
-                        productWrapperDTO.productDTOList()
+                        productUpdateDTO.productLineDTO(),
+                        productUpdateDTO.updatingProductDTOList(),
+                        productUpdateDTO.newProductDTOList()
                 )
         );
     }

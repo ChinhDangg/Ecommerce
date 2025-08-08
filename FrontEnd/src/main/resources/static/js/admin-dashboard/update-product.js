@@ -25,7 +25,7 @@ import {
 import {updatePageUrl, updateProductQuery,} from './admin-navigation.js';
 
 import {
-    clearAllProductInfo,
+    clearAllProductInfo, getAllProductInfoFromList,
     getProductInfo,
     getProductLineInfo
 } from "./post-new-product.js";
@@ -93,7 +93,8 @@ function initializeTopUpdateBtn() {
         console.log('clicked update btn');
         const productLineId = new URLSearchParams(window.location.search).get('line');
         const productLineInfo = await getProductLineInfo(productLineId);
-        const productInfos = await Promise.all(retrieved_product.map(id => getProductInfo(productLineId, id)));
+        const updatingProductInfos = getAllProductInfoFromList(retrieved_product, productLineId);
+        const newProductInfos = getAllProductInfoFromList(products.slice(1), productLineId);
 
         if (productLineId && !productLineInfo) {
             const confirmDeleteProductLine = confirm('Product line name is empty - marking as deletion - continue?');
@@ -106,28 +107,17 @@ function initializeTopUpdateBtn() {
             }
         }
 
-        if (productInfos.length) {
+        if (updatingProductInfos || newProductInfos) {
             try {
-                const retrievedIds = await updateAllProductInfo(productLineInfo, productInfos);
+                const retrievedIds = await updateAllProductInfo(productLineInfo, updatingProductInfos, newProductInfos);
                 console.log('Updated all product info');
             } catch (error) {
                 alert('Failed to update all product info');
             }
-        } else if (productLineId && productLineInfo) { // updating only product line as no product info retrieved - nothing to update
-            try {
-                const retrievedProductLineId = await updateProductLineInfo(productLineInfo);
-                console.log('Updated product line');
-            } catch (error) {
-                alert('Failed to update product line info');
-            }
-        }
-
-        if (!productInfos.length) {
+        } else {
             // check if a new category is picked
             const initialCategory = categoryTree[0].id;
             const newCategory = document.querySelector('input[name="category"]:checked')?.id.replace("category-", "");
-
-            console.log(initialCategory, newCategory);
             if (initialCategory !== newCategory) {
                 try {
                     const retrievedProductIds = await updateProductCategory(products.slice(1), parseInt(newCategory));
@@ -369,10 +359,11 @@ async function updateProductLineInfo(productLineInfoData) {
     return await response.text();
 }
 
-async function updateAllProductInfo(productLineInfoData, productInfoDataList) {
+async function updateAllProductInfo(productLineInfoData, updatingProductInfoDataList, newProductInfoDataList) {
     const productInfoWrapper = {
         productLineDTO: productLineInfoData,
-        productDTOList: productInfoDataList
+        updatingProductDTOList: updatingProductInfoDataList,
+        newProductDTOList: newProductInfoDataList
     }
     const response = await fetch(productWrapperURL, {
         method: 'PUT',

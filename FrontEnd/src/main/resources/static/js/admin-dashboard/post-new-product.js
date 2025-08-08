@@ -19,21 +19,9 @@ export function initializePost() {
             }
 
             const productLineInfo = await getProductLineInfo();
-            const productInfos = [];
+            const productInfos = getAllProductInfoFromList(products.slice(1), null);
 
-            let allProductFilled = true;
-            const productIds = products.slice(1);
-            for (const productId of productIds) {
-                const productInfo = await getProductInfo(null, productId);
-                if (productInfo) {
-                    productInfos.push(productInfo);
-                } else {
-                    allProductFilled = false;
-                    break;
-                }
-            }
-
-            if (!(productInfos && allProductFilled))
+            if (!productInfos)
                 return;
 
             const ids = await postAllProductInfo(productLineInfo, productInfos);
@@ -125,6 +113,19 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
         }
     });
     return descriptionTexts;
+}
+
+export async function getAllProductInfoFromList(productIdList, productLineId) {
+    const productInfos = [];
+    for (const productId of productIdList) {
+        const productInfo = await getProductInfo(productLineId, productId);
+        if (productInfo) {
+            productInfos.push(productInfo);
+        } else {
+            return null; // one product fail so all fail
+        }
+    }
+    return productInfos;
 }
 
 export async function getProductInfo(productLineId, productId) {

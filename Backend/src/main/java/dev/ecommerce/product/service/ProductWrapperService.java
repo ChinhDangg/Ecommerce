@@ -44,12 +44,18 @@ public class ProductWrapperService {
     }
 
     @Transactional
-    public List<Long> updateAllProductInfo(ProductLineDTO productLineDTO, List<ProductDTO> productDTOList) {
+    public List<Long> updateAllProductInfo(ProductLineDTO productLineDTO, List<ProductDTO> updatingProductDTOList, List<ProductDTO> newProductDTOList) {
         List<Long> updatedIds = new ArrayList<>();
-        updatedIds.add(productLineService.updateProductLineInfo(productLineDTO).longValue());
-        for (ProductDTO productDTO : productDTOList) {
-            updatedIds.add(productService.updateProductInfo(productDTO));
-        }
+        if (productLineDTO != null && productLineDTO.getId() != null)
+            updatedIds.add(productLineService.updateProductLineInfo(productLineDTO).longValue());
+        if (updatingProductDTOList != null && !updatingProductDTOList.isEmpty())
+            for (ProductDTO productDTO : updatingProductDTOList) {
+                updatedIds.add(productService.updateProductInfo(productDTO));
+            }
+        if (newProductDTOList != null && !newProductDTOList.isEmpty())
+            for (ProductDTO productDTO : newProductDTOList) {
+                updatedIds.add(productService.saveProduct(productDTO, productLineDTO == null ? null : productLineDTO.getId()));
+            }
         return updatedIds;
     }
 
