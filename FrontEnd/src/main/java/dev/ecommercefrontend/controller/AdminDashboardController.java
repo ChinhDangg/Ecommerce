@@ -29,6 +29,8 @@ public class AdminDashboardController {
         model.addAttribute("product_url", "http://localhost:8080/api/product");
         model.addAttribute("productSearch_url", "http://localhost:8080/api/product/search");
         model.addAttribute("category_url", "http://localhost:8080/api/category");
+        model.addAttribute("categoryTop_url", "http://localhost:8080/api/category/top");
+        model.addAttribute("categorySubcategory_url", "http://localhost:8080/api/category/subcategory");
         model.addAttribute("categoryParent_url", "http://localhost:8080/api/category/parent");
         return "/admin-dashboard/update-product :: update-product-template";
     }
