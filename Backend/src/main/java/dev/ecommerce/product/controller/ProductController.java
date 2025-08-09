@@ -103,8 +103,9 @@ public class ProductController {
     }
 
     @PostMapping()
-    public ResponseEntity<Long> addProduct(@Valid @RequestBody ProductDTO productDTO) {
-        Long savedProductId = productService.saveProduct(productDTO, null);
+    public ResponseEntity<Long> addProduct(@Valid @RequestPart ProductDTO productDTO,
+                                           @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+        Long savedProductId = productService.saveProduct(productDTO, null, fileMap);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
 
@@ -118,32 +119,5 @@ public class ProductController {
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         productService.deleteProductById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @PostMapping("/uploadImages")
-    public ResponseEntity<List<String>> handleFileUpload(@RequestParam("images") MultipartFile[] images) {
-        try {
-            System.out.println("Received " + images.length + " images");
-            // Process each file
-            List<String> fileNames = Arrays.stream(images)
-                    .map(file -> {
-                        try {
-                            // Save file to a directory
-                            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                            Path path = Paths.get("uploads/images" + fileName);
-                            Files.createDirectories(path.getParent()); // Ensure directory exists
-                            Files.write(path, file.getBytes());
-                            return "/images/" + path.getFileName().toString();
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to store file: " + file.getOriginalFilename(), e);
-                        }
-                    })
-                    .toList();
-            System.out.println(fileNames);
-            return ResponseEntity.status(HttpStatus.CREATED).body(fileNames);
-        } catch (Exception e) {
-            System.out.println("File upload failed: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
-        }
     }
 }
