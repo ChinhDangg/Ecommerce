@@ -7,9 +7,11 @@ import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.entity.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProductWrapperService {
@@ -30,21 +32,24 @@ public class ProductWrapperService {
     }
 
     @Transactional
-    public List<Long> saveAllProductInfo(ProductLineDTO productLineDTO, List<ProductDTO> productDTOList) {
+    public List<Long> saveAllProductInfo(ProductLineDTO productLineDTO, List<ProductDTO> productDTOList, Map<String, MultipartFile> fileMap) {
         List<Long> savedIds = new ArrayList<>();
         Integer productLineId = null;
         if (productLineDTO != null) {
-            productLineId = productLineService.saveProductLine(productLineDTO);
+            productLineId = productLineService.saveProductLine(productLineDTO, fileMap);
             savedIds.add(productLineId.longValue());
         }
         for (ProductDTO productDTO : productDTOList) {
-            savedIds.add(productService.saveProduct(productDTO, productLineId));
+            savedIds.add(productService.saveProduct(productDTO, productLineId, fileMap));
         }
         return savedIds;
     }
 
     @Transactional
-    public List<Long> updateAllProductInfo(ProductLineDTO productLineDTO, List<ProductDTO> updatingProductDTOList, List<ProductDTO> newProductDTOList) {
+    public List<Long> updateAllProductInfo(ProductLineDTO productLineDTO,
+                                           List<ProductDTO> updatingProductDTOList,
+                                           List<ProductDTO> newProductDTOList,
+                                           Map<String, MultipartFile> fileMap) {
         List<Long> updatedIds = new ArrayList<>();
         if (productLineDTO != null && productLineDTO.getId() != null)
             updatedIds.add(productLineService.updateProductLineInfo(productLineDTO).longValue());
@@ -54,7 +59,7 @@ public class ProductWrapperService {
             }
         if (newProductDTOList != null && !newProductDTOList.isEmpty())
             for (ProductDTO productDTO : newProductDTOList) {
-                updatedIds.add(productService.saveProduct(productDTO, productLineDTO == null ? null : productLineDTO.getId()));
+                updatedIds.add(productService.saveProduct(productDTO, productLineDTO == null ? null : productLineDTO.getId(), fileMap));
             }
         return updatedIds;
     }

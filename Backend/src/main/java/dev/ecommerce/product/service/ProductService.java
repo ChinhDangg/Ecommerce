@@ -2,11 +2,14 @@ package dev.ecommerce.product.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
+import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -28,6 +31,7 @@ public class ProductService {
     private final ProductCoreSpecificationRepository productCoreSpecificationRepository;
     private final ProductMapper productMapper;
     private final ProductLineService productLineService;
+    private final MediaService mediaService;
 
     public ProductService(
             ProductCategoryRepository productCategoryRepository,
@@ -40,7 +44,8 @@ public class ProductService {
             ProductSpecificationRepository productSpecificationRepository,
             ProductCoreSpecificationRepository productCoreSpecificationRepository,
             ProductMapper productMapper,
-            ProductLineService productLineService) {
+            ProductLineService productLineService,
+            MediaService mediaService) {
         this.productCategoryRepository = productCategoryRepository;
         this.productLineRepository = productLineRepository;
         this.productRepository = productRepository;
@@ -52,6 +57,7 @@ public class ProductService {
         this.productCoreSpecificationRepository = productCoreSpecificationRepository;
         this.productMapper = productMapper;
         this.productLineService = productLineService;
+        this.mediaService = mediaService;
     }
 
     public Product findProductById(Long id) {
@@ -75,9 +81,14 @@ public class ProductService {
     }
 
     @Transactional
-    public Long saveProduct(ProductDTO productDTO, Integer productLineId) {
+    public Long saveProduct(ProductDTO productDTO, Integer productLineId, Map<String, MultipartFile> fileMap) {
         if (productDTO.getName() == null)
             throw new DataIntegrityViolationException("Product name is null");
+
+        List<String> filenameList = new ArrayList<>();
+
+        // unsaved media if transaction failed
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSyn(filenameList));
 
         ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
@@ -101,39 +112,37 @@ public class ProductService {
         for(String featureName : productDTO.getFeatures()) {
             featureList.add(new ProductFeature(savedProduct, featureName));
         }
-        if (!featureList.isEmpty())
-            productFeatureRepository.saveAll(featureList);
+        productFeatureRepository.saveAll(featureList);
 
         List<ProductMedia> mediaList = new ArrayList<>();
         for (int j = 0; j < productDTO.getMedia().size(); j++) {
-            mediaList.add(new ProductMedia(
-                    savedProduct,
-                    productDTO.getMedia().get(j).contentType(),
-                    productDTO.getMedia().get(j).content(),
-                    j
-            ));
+            ContentDTO mediaDTO = productDTO.getMedia().get(j);
+
+            String mediaName = mediaService.checkAndSaveMediaFile(mediaDTO, fileMap.get(mediaDTO.content()));
+            filenameList.add(mediaName);
+
+            mediaList.add(new ProductMedia(savedProduct, mediaDTO.contentType(), mediaDTO.content(), j));
         }
-        if (!mediaList.isEmpty())
-            productMediaRepository.saveAll(mediaList);
+        productMediaRepository.saveAll(mediaList);
 
         List<ProductDescription> descriptionList = new ArrayList<>();
         for (int j = 0; j < productDTO.getDescriptions().size(); j++) {
-            descriptionList.add(new ProductDescription(
-                    savedProduct,
-                    productDTO.getDescriptions().get(j).contentType(),
-                    productDTO.getDescriptions().get(j).content(),
-                    j
-            ));
+            ContentDTO descriptionDTO = productDTO.getDescriptions().get(j);
+
+            String contentName = mediaService.checkAndSaveMediaFile(descriptionDTO, fileMap.get(descriptionDTO.content()));
+            if (descriptionDTO.contentType().isMedia()) {
+                filenameList.add(contentName);
+            }
+
+            descriptionList.add(new ProductDescription(savedProduct, descriptionDTO.contentType(), contentName, j));
         }
-        if (!descriptionList.isEmpty())
-            productDescriptionRepository.saveAll(descriptionList);
+        productDescriptionRepository.saveAll(descriptionList);
 
         List<ProductOption> optionList = new ArrayList<>();
         for (OptionDTO option : productDTO.getOptions()) {
             optionList.add(new ProductOption(savedProduct, productLine, option.name(), option.valueOption()));
         }
-        if (!optionList.isEmpty())
-            productOptionRepository.saveAll(optionList);
+        productOptionRepository.saveAll(optionList);
 
         List<ProductSpecification> specificationList = new ArrayList<>();
         for (OptionDTO specification : productDTO.getSpecifications()) {
@@ -145,8 +154,7 @@ public class ProductService {
                     specification.valueOption()
             ));
         }
-        if (!specificationList.isEmpty())
-            productSpecificationRepository.saveAll(specificationList);
+        productSpecificationRepository.saveAll(specificationList);
 
         return savedProduct.getId();
     }

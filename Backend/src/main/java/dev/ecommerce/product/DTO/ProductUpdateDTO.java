@@ -6,4 +6,4 @@ public record ProductUpdateDTO(
     ProductLineDTO productLineDTO,
     List<ProductDTO> updatingProductDTOList,
     List<ProductDTO> newProductDTOList
-    ) {}
+) {}

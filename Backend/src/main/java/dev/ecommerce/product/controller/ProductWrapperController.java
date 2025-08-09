@@ -9,8 +9,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/productWrapper")
@@ -23,22 +25,27 @@ public class ProductWrapperController {
     }
 
     @PostMapping
-    public ResponseEntity<List<Long>> addAllProductInfo(@Valid @RequestBody ProductWrapperDTO productWrapperDTO) {
+    public ResponseEntity<List<Long>> addAllProductInfo(
+            @Valid @RequestPart ProductWrapperDTO productWrapperDTO,
+            Map<String, MultipartFile> fileMap) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 productWrapperService.saveAllProductInfo(
                         productWrapperDTO.productLineDTO(),
-                        productWrapperDTO.productDTOList()
+                        productWrapperDTO.productDTOList(),
+                        fileMap
                 )
         );
     }
 
     @PutMapping
-    public ResponseEntity<List<Long>> updateAllProductInfo(@RequestBody ProductUpdateDTO productUpdateDTO) {
+    public ResponseEntity<List<Long>> updateAllProductInfo(@RequestPart ProductUpdateDTO productUpdateDTO,
+                                                           @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 productWrapperService.updateAllProductInfo(
                         productUpdateDTO.productLineDTO(),
                         productUpdateDTO.updatingProductDTOList(),
-                        productUpdateDTO.newProductDTOList()
+                        productUpdateDTO.newProductDTOList(),
+                        fileMap
                 )
         );
     }

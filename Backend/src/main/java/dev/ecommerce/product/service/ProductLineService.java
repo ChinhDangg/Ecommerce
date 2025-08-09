@@ -1,6 +1,7 @@
 package dev.ecommerce.product.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
+import dev.ecommerce.product.DTO.ContentDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ProductOptionDTO;
@@ -12,6 +13,8 @@ import dev.ecommerce.product.repository.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +29,21 @@ public class ProductLineService {
     private final ProductLineDescriptionRepository productLineDescriptionRepository;
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final MediaService mediaService;
 
     public ProductLineService(
             ProductLineRepository productLineRepository,
             ProductLineMediaRepository productLineMediaRepository,
             ProductLineDescriptionRepository productLineDescriptionRepository,
             ProductRepository productRepository,
-            ProductMapper productMapper
-    ) {
+            ProductMapper productMapper,
+            MediaService mediaService) {
         this.productLineRepository = productLineRepository;
         this.productLineMediaRepository = productLineMediaRepository;
         this.productLineDescriptionRepository = productLineDescriptionRepository;
         this.productRepository = productRepository;
         this.productMapper = productMapper;
+        this.mediaService = mediaService;
     }
 
     public ProductLine findProductLineById(Integer id) {
@@ -69,30 +74,38 @@ public class ProductLineService {
     }
 
     @Transactional
-    public Integer saveProductLine(ProductLineDTO productLineDTO) {
+    public Integer saveProductLine(ProductLineDTO productLineDTO, Map<String, MultipartFile> fileMap) {
         if (productLineDTO.getName() == null)
             throw new DataIntegrityViolationException("Product line name is null");
+
+        List<String> filenameList = new ArrayList<>();
+
+        // unsaved media if transaction failed
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSyn(filenameList));
+
         ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getName()));
 
         List<ProductLineMedia> mediaList = new ArrayList<>();
         for (int j = 0; j < productLineDTO.getMedia().size(); j++) {
-            mediaList.add(new ProductLineMedia(
-                    savedProductLine,
-                    productLineDTO.getMedia().get(j).contentType(),
-                    productLineDTO.getMedia().get(j).content(),
-                    j
-            ));
+            ContentDTO mediaDTO = productLineDTO.getMedia().get(j);
+
+            String mediaName = mediaService.checkAndSaveMediaFile(mediaDTO, fileMap.get(mediaDTO.content()));
+            filenameList.add(mediaName);
+
+            mediaList.add(new ProductLineMedia(savedProductLine, mediaDTO.contentType(), mediaName, j));
         }
         productLineMediaRepository.saveAll(mediaList);
 
         List<ProductLineDescription> descriptionList = new ArrayList<>();
         for (int j = 0; j < productLineDTO.getDescriptions().size(); j++) {
-            descriptionList.add(new ProductLineDescription(
-                    savedProductLine,
-                    productLineDTO.getDescriptions().get(j).contentType(),
-                    productLineDTO.getDescriptions().get(j).content(),
-                    j
-            ));
+            ContentDTO descriptionDTO = productLineDTO.getDescriptions().get(j);
+
+            String contentName = mediaService.checkAndSaveMediaFile(descriptionDTO, fileMap.get(descriptionDTO.content()));
+            if (descriptionDTO.contentType().isMedia()) {
+                filenameList.add(contentName);
+            }
+
+            descriptionList.add(new ProductLineDescription(savedProductLine, descriptionDTO.contentType(), contentName, j));
         }
         productLineDescriptionRepository.saveAll(descriptionList);
         return savedProductLine.getId();
