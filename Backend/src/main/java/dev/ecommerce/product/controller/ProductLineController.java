@@ -6,6 +6,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/productLine")
@@ -23,8 +26,9 @@ public class ProductLineController {
     }
 
     @PostMapping()
-    public ResponseEntity<Integer> addProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer savedProductLineId = productLineService.saveProductLine(productLineDTO);
+    public ResponseEntity<Integer> addProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
+                                                  @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+        Integer savedProductLineId = productLineService.saveProductLine(productLineDTO, fileMap);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
     }
 
