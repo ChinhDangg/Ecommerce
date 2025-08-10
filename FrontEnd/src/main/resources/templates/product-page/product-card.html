@@ -8,10 +8,10 @@
   </head>
   <body class="bg-gray-100">
 
-  <span id="media_url" class="hidden" th:text="media_url"></span>
-  <span id="card_url" class="hidden" th:text="card_url"></span>
-  <span id="search_url" class="hidden" th:text="search_url"></span>
-  <span id="cardPage_url" class="hidden" th:text="cardPage_url"></span>
+  <span id="media-url" class="hidden" th:text="${media_url}"></span>
+  <span id="card-url" class="hidden" th:text="${card_url}"></span>
+  <span id="search-url" class="hidden" th:text="${search_url}"></span>
+  <span id="cardPage-url" class="hidden" th:text="${cardPage_url}"></span>
 
   <header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
   </header>
