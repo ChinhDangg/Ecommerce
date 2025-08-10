@@ -25,12 +25,21 @@ public class MediaService {
     private final String IMAGE_DIR = "uploads/images";
     private final String TEMP_IMAGE_DIR = "tmp/images";
 
+    public Resource getImageResource(String filename) throws MalformedURLException {
+        Path filePath = Paths.get(IMAGE_DIR).resolve(filename).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (!resource.exists())
+            return null;
+        return resource;
+    }
+
     public String saveImage(MultipartFile file, boolean isTemp) {
         try {
             // Save file to a directory
             String dir = isTemp ? TEMP_IMAGE_DIR : IMAGE_DIR;
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path path = Paths.get(dir + fileName);
+            Path path = Paths.get(dir, fileName);
             Files.createDirectories(path.getParent());
             Files.write(path, file.getBytes());
             return path.getFileName().toString();
@@ -115,15 +124,6 @@ public class MediaService {
                 }
             }
         };
-    }
-
-    public Resource getImageResource(String filename) throws MalformedURLException {
-        Path filePath = Paths.get(IMAGE_DIR).resolve(filename).normalize();
-        Resource resource = new UrlResource(filePath.toUri());
-
-        if (!resource.exists())
-            return null;
-        return resource;
     }
 
     /**

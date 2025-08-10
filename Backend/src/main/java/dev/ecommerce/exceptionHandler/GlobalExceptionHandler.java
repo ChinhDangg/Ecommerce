@@ -30,6 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        e.printStackTrace();
         return ResponseEntity.badRequest().body("Required request body is missing or mismatched type");
     }
 
