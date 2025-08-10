@@ -33,8 +33,9 @@ public class ProductLineController {
     }
 
     @PutMapping()
-    public ResponseEntity<Integer> updateProductLine(@Valid @RequestBody ProductLineDTO productLineDTO) {
-        Integer updatedProductLineId = productLineService.updateProductLineInfo(productLineDTO);
+    public ResponseEntity<Integer> updateProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
+                                                     @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+        Integer updatedProductLineId = productLineService.updateProductLineInfo(productLineDTO, fileMap);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
     }
 

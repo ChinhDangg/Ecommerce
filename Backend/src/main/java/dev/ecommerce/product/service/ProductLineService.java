@@ -5,10 +5,7 @@ import dev.ecommerce.product.DTO.ContentDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ProductOptionDTO;
-import dev.ecommerce.product.entity.ProductLine;
-import dev.ecommerce.product.entity.ProductLineDescription;
-import dev.ecommerce.product.entity.ProductLineMedia;
-import dev.ecommerce.product.entity.ProductOption;
+import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -16,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +79,7 @@ public class ProductLineService {
         List<String> filenameList = new ArrayList<>();
 
         // unsaved media if transaction failed
-        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSyn(filenameList));
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(filenameList));
 
         ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getName()));
 
@@ -112,8 +110,15 @@ public class ProductLineService {
     }
 
     @Transactional // will leverage entity manager to update by retrieving the entity itself
-    public Integer updateProductLineInfo(ProductLineDTO productLineDTO) {
+    public Integer updateProductLineInfo(ProductLineDTO productLineDTO, Map<String, MultipartFile> fileMap) {
         ProductLine productLine = findProductLineById(productLineDTO.getId());
+
+        List<String> oldFilenames = new ArrayList<>();
+        List<String> updatedFilenames = new ArrayList<>();
+
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(
+            oldFilenames, updatedFilenames, fileMap
+        ));
 
         if (productLineDTO.getName().isEmpty())
             throw new IllegalArgumentException("Product line name is empty");
@@ -122,26 +127,48 @@ public class ProductLineService {
             productLine.setName(productLineDTO.getName());
 
         // update media
-        Map<Long, ProductLineMedia> currentMediaMap = productLine.getMedia().stream() // to get existing media entity by id quickly
-                .collect(Collectors.toMap(ProductLineMedia::getId, m -> m));
-        List<ProductLineMedia> updatedMediaList = ProductService.buildUpdatedMediaList(
+        List<ProductLineMedia> oldMedia = productLine.getMedia();
+        oldFilenames.addAll(oldMedia.stream().map(ProductLineMedia::getContent).toList());
+        Map<Long, ProductLineMedia> currentMediaMap = oldMedia
+                .stream()
+                .collect(Collectors.toMap(ProductLineMedia::getId, m -> m)); // to get existing media entity by id quickly
+        List<ProductLineMedia> updatedMediaList = mediaService.buildUpdatedMediaList(
                 productLineDTO.getMedia(),
                 currentMediaMap,
                 (dto, sortOrder) -> new ProductLineMedia(productLine, dto.contentType(), dto.content(), sortOrder)
         );
+        updatedFilenames.addAll(updatedMediaList.stream().map(ProductLineMedia::getContent).toList());
+
         productLine.getMedia().clear();
         productLine.getMedia().addAll(updatedMediaList);
 
         // update description
-        Map<Long, ProductLineDescription> currentDescriptionMap = productLine.getDescriptions().stream()
+        List<ProductLineDescription> oldDescription = productLine.getDescriptions();
+        oldFilenames.addAll(oldDescription.stream()
+                .filter(d -> d.getContentType().isMedia())
+                .map(ProductLineDescription::getContent)
+                .toList());
+        Map<Long, ProductLineDescription> currentDescriptionMap = oldDescription
+                .stream()
                 .collect(Collectors.toMap(ProductLineDescription::getId, m -> m));
-        List<ProductLineDescription> updatedDescriptionList = ProductService.buildUpdatedMediaList(
+        List<ProductLineDescription> updatedDescriptionList = mediaService.buildUpdatedMediaList(
                 productLineDTO.getDescriptions(),
                 currentDescriptionMap,
                 (dto, sortOrder) -> new ProductLineDescription(productLine, dto.contentType(), dto.content(), sortOrder)
         );
+        updatedFilenames.addAll(updatedDescriptionList.stream()
+                        .filter(d -> d.getContentType().isMedia())
+                        .map(ProductLineDescription::getContent)
+                        .toList());
+
         productLine.getDescriptions().clear();
         productLine.getDescriptions().addAll(updatedDescriptionList);
+
+        try {
+            mediaService.updateSavedImageToTemp(oldFilenames, updatedFilenames, fileMap);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to update media");
+        }
 
         return productLineRepository.save(productLine).getId();
     }

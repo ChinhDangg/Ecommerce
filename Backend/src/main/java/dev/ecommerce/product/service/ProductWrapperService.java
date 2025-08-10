@@ -52,7 +52,7 @@ public class ProductWrapperService {
                                            Map<String, MultipartFile> fileMap) {
         List<Long> updatedIds = new ArrayList<>();
         if (productLineDTO != null && productLineDTO.getId() != null)
-            updatedIds.add(productLineService.updateProductLineInfo(productLineDTO).longValue());
+            updatedIds.add(productLineService.updateProductLineInfo(productLineDTO, fileMap).longValue());
         if (updatingProductDTOList != null && !updatingProductDTOList.isEmpty())
             for (ProductDTO productDTO : updatingProductDTOList) {
                 updatedIds.add(productService.updateProductInfo(productDTO));
