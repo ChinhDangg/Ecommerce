@@ -67,10 +67,7 @@ export async function getProductLineInfo(productLineId = null) {
 }
 
 async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
-    const mediaNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
-    if (mediaNames == null) { // null - fail uploading images
-        return null;
-    }
+    const mediaNames = wrapImages(dataImageArray);
     const mediaContent = [];
     allMediaTemplateEntries.forEach((entry, index) => {
         mediaContent.push(
@@ -85,7 +82,7 @@ async function getMediaContent(dataImageArray, allMediaTemplateEntries) {
 }
 
 async function getDescriptionContent(dataImageArray, allDescriptionEntries) {
-    let descriptionImageNames = dataImageArray.length > 0 ? await uploadImages(dataImageArray) : [];
+    let descriptionImageNames = await wrapImages(dataImageArray);
     const descriptionTexts = [];
     const filteredDescriptionImages = descriptionImageNames.filter(item => item !== undefined && item !== null);
     allDescriptionEntries.forEach(descriptionEntry => {
@@ -233,17 +230,17 @@ export function clearAllProductInfo() {
 }
 
 // CRUD operations
+const dataFormData = new FormData();
+
 export async function postAllProductInfo(productLineInfoData, productInfoDataList) {
     const productInfoWrapper = {
         productLineDTO: productLineInfoData,
         productDTOList: productInfoDataList
     }
+    dataFormData.append('productWrapperDTO', JSON.stringify(productInfoWrapper));
     const response = await fetch('http://localhost:8080/api/productWrapper', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productInfoWrapper)
+        body: dataFormData
     });
     if (!response.ok) {
         throw new Error('Failed uploading all products info');
@@ -251,38 +248,12 @@ export async function postAllProductInfo(productLineInfoData, productInfoDataLis
     return await response.json();
 }
 
-async function uploadImages(dataImageArray) {
-    if (dataImageArray.length === 0)
-        return dataImageArray;
-
-    const formData = new FormData();
-    // Store indexes of image Files to update later
-    const fileIndexes = [];
-
+async function wrapImages(dataImageArray) {
     dataImageArray.forEach((image, index) => {
         if (image instanceof File) {
-            formData.append('images', image);
-            fileIndexes.push(index);
+            dataFormData.append(image.name, image);
+            dataImageArray[index] = image.name;
         }
-    });
-
-    if (fileIndexes.length === 0) {
-        return dataImageArray;
-    }
-
-    const response = await fetch('http://localhost:8080/api/product/uploadImages', {
-        method: 'POST',
-        body: formData,
-    });
-
-    if (response.status !== 201) {
-        console.error('Failed to upload images');
-        throw new Error('Fail uploading images');
-    }
-    const uploadedNames = await response.json(); // array of image names
-    // Replace File entries in original array with returned image names
-    fileIndexes.forEach((fileIndex, i) => {
-        dataImageArray[fileIndex] = uploadedNames[i];
     });
     return dataImageArray;
 }
