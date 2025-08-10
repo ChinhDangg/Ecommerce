@@ -58,14 +58,14 @@ public class EcommerceApplication {
             ProductLineMedia productLineMedia = new ProductLineMedia(
                     savedProductLine,
                     ContentType.IMAGE,
-                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    "asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
                     0
             );
             productLineMediaRepository.save(productLineMedia);
             ProductLineDescription productLineDescription = new ProductLineDescription(
                     savedProductLine,
                     ContentType.IMAGE,
-                    "/images/水淼Aqua cosplay Tsukatsuki Rio - Blue Archive (5).jpg",
+                    "asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
                     0
             );
             ProductLineDescription productLineDescription2 = new ProductLineDescription(
@@ -132,14 +132,14 @@ public class EcommerceApplication {
             ProductMedia newProductMedia = new ProductMedia(
                     product1,
                     ContentType.IMAGE,
-                    "/images/asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
+                    "asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
                     0
             );
             productMediaRepository.save(newProductMedia);
             ProductDescription product1Description1 = new ProductDescription(
                     product1,
                     ContentType.IMAGE,
-                    "/images/asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
+                    "asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
                     0
             );
             ProductDescription product1Description2 = new ProductDescription(
@@ -207,14 +207,14 @@ public class EcommerceApplication {
             ProductMedia newProductMedia2 = new ProductMedia(
                     product2,
                     ContentType.IMAGE,
-                    "/images/asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
+                    "asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
                     0
             );
             productMediaRepository.save(newProductMedia2);
             ProductDescription product2Description1 = new ProductDescription(
                     product2,
                     ContentType.IMAGE,
-                    "/images/asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
+                    "asus_xg27aqdmg_27_glossy_qhd_oled_1718894734_1833145.jpg",
                     0
             );
             ProductDescription product2Description2 = new ProductDescription(
