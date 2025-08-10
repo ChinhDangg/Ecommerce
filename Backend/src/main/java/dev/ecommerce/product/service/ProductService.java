@@ -88,7 +88,7 @@ public class ProductService {
         List<String> filenameList = new ArrayList<>();
 
         // unsaved media if transaction failed
-        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSyn(filenameList));
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(filenameList));
 
         ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
@@ -204,7 +204,7 @@ public class ProductService {
         // update media
         Map<Long, ProductMedia> currentMediaMap = product.getMedia().stream() // to get existing media entity by id quickly
                 .collect(Collectors.toMap(ProductMedia::getId, m -> m));
-        List<ProductMedia> updatedMediaList = buildUpdatedMediaList(
+        List<ProductMedia> updatedMediaList = mediaService.buildUpdatedMediaList(
                 productDTO.getMedia(),
                 currentMediaMap,
                 (dto, sortOrder) -> new ProductMedia(product, dto.contentType(), dto.content(), sortOrder)
@@ -215,7 +215,7 @@ public class ProductService {
         // update description
         Map<Long, ProductDescription> currentDescriptionMap = product.getDescriptions().stream() // to get existing media entity by id quickly
                 .collect(Collectors.toMap(ProductDescription::getId, d -> d));
-        List<ProductDescription> updatedDescriptionList = buildUpdatedMediaList(
+        List<ProductDescription> updatedDescriptionList = mediaService.buildUpdatedMediaList(
                 productDTO.getDescriptions(),
                 currentDescriptionMap,
                 (dto, sortOrder) -> new ProductDescription(product, dto.contentType(), dto.content(), sortOrder)
@@ -226,7 +226,8 @@ public class ProductService {
         // update option
         ProductLine productLine = product.getProductLine();
 
-        Map<String, ProductOption> currentOptionMap = product.getOptions().stream()
+        Map<String, ProductOption> currentOptionMap = product.getOptions()
+                .stream()
                 .collect(Collectors.toMap(ProductOption::getName, o -> o));
         List<ProductOption> updatedOptionList = buildUpdateOptionList(
                 productDTO.getOptions(),
@@ -236,7 +237,8 @@ public class ProductService {
         product.getOptions().clear();
         product.getOptions().addAll(updatedOptionList);
 
-        Map<String, ProductSpecification> currentSpecificationMap = product.getSpecifications().stream()
+        Map<String, ProductSpecification> currentSpecificationMap = product.getSpecifications()
+                .stream()
                 .collect(Collectors.toMap(ProductSpecification::getName, s -> s));
         List<ProductSpecification> updatedSpecificationList = buildUpdateOptionList(
                 productDTO.getSpecifications(),
@@ -273,32 +275,6 @@ public class ProductService {
             }
         }
         return updatedOptionList;
-    }
-
-    public static <T extends BaseContent> List<T> buildUpdatedMediaList(
-            List<ContentDTO> incomingDTOs,
-            Map<Long, T> currentMediaMap,
-            BiFunction<ContentDTO, Integer, T> newMediaFactory
-    ) {
-        List<T> updatedList = new ArrayList<>();
-        int order = 0;
-        for (ContentDTO dto : incomingDTOs) {
-            if (dto.id() != null && currentMediaMap.containsKey(dto.id())) {
-                T media = currentMediaMap.get(dto.id());
-                if (dto.contentType() != media.getContentType())
-                    media.setContentType(dto.contentType());
-                if (!dto.content().equals(media.getContent()))
-                    media.setContent(dto.content());
-                if (media.getSortOrder() != order)
-                    media.setSortOrder(order);
-                updatedList.add(media);
-            } else {
-                T newMedia = newMediaFactory.apply(dto, order);
-                updatedList.add(newMedia);
-            }
-            order++;
-        }
-        return updatedList;
     }
 
     @Transactional
