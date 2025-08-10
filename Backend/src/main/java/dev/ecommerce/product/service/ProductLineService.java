@@ -128,16 +128,19 @@ public class ProductLineService {
 
         // update media
         List<ProductLineMedia> oldMedia = productLine.getMedia();
-        oldFilenames.addAll(oldMedia.stream().map(ProductLineMedia::getContent).toList());
-        Map<Long, ProductLineMedia> currentMediaMap = oldMedia
-                .stream()
+        oldFilenames.addAll(oldMedia.stream()
+                .map(ProductLineMedia::getContent)
+                .toList());
+        Map<Long, ProductLineMedia> currentMediaMap = oldMedia.stream()
                 .collect(Collectors.toMap(ProductLineMedia::getId, m -> m)); // to get existing media entity by id quickly
         List<ProductLineMedia> updatedMediaList = mediaService.buildUpdatedMediaList(
                 productLineDTO.getMedia(),
                 currentMediaMap,
                 (dto, sortOrder) -> new ProductLineMedia(productLine, dto.contentType(), dto.content(), sortOrder)
         );
-        updatedFilenames.addAll(updatedMediaList.stream().map(ProductLineMedia::getContent).toList());
+        updatedFilenames.addAll(updatedMediaList.stream()
+                .map(ProductLineMedia::getContent)
+                .toList());
 
         productLine.getMedia().clear();
         productLine.getMedia().addAll(updatedMediaList);
@@ -148,8 +151,7 @@ public class ProductLineService {
                 .filter(d -> d.getContentType().isMedia())
                 .map(ProductLineDescription::getContent)
                 .toList());
-        Map<Long, ProductLineDescription> currentDescriptionMap = oldDescription
-                .stream()
+        Map<Long, ProductLineDescription> currentDescriptionMap = oldDescription.stream()
                 .collect(Collectors.toMap(ProductLineDescription::getId, m -> m));
         List<ProductLineDescription> updatedDescriptionList = mediaService.buildUpdatedMediaList(
                 productLineDTO.getDescriptions(),

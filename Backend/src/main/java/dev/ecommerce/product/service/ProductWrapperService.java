@@ -55,7 +55,7 @@ public class ProductWrapperService {
             updatedIds.add(productLineService.updateProductLineInfo(productLineDTO, fileMap).longValue());
         if (updatingProductDTOList != null && !updatingProductDTOList.isEmpty())
             for (ProductDTO productDTO : updatingProductDTOList) {
-                updatedIds.add(productService.updateProductInfo(productDTO));
+                updatedIds.add(productService.updateProductInfo(productDTO, fileMap));
             }
         if (newProductDTOList != null && !newProductDTOList.isEmpty())
             for (ProductDTO productDTO : newProductDTOList) {

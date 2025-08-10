@@ -2,7 +2,6 @@ package dev.ecommerce.product.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
-import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -160,8 +159,15 @@ public class ProductService {
     }
 
     @Transactional
-    public Long updateProductInfo(ProductDTO productDTO) {
+    public Long updateProductInfo(ProductDTO productDTO, Map<String, MultipartFile> fileMap) {
         Product product = findProductById(productDTO.getId());
+
+        List<String> oldFilenames = new ArrayList<>();
+        List<String> updatedFilenames = new ArrayList<>();
+
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(
+                oldFilenames, updatedFilenames, fileMap
+        ));
 
         // update basic info
         if (!productDTO.getManufacturerId().equals(product.getManufacturerId()))
@@ -202,24 +208,43 @@ public class ProductService {
         product.getFeatures().addAll(updatedFeatures); // cancels deletion of same context features if use get features
 
         // update media
-        Map<Long, ProductMedia> currentMediaMap = product.getMedia().stream() // to get existing media entity by id quickly
-                .collect(Collectors.toMap(ProductMedia::getId, m -> m));
+        List<ProductMedia> oldMedia = product.getMedia();
+        oldFilenames.addAll(oldMedia.stream()
+                .map(ProductMedia::getContent)
+                .toList());
+        Map<Long, ProductMedia> currentMediaMap = oldMedia
+                .stream()
+                .collect(Collectors.toMap(ProductMedia::getId, m -> m)); // to get existing media entity by id quickly
         List<ProductMedia> updatedMediaList = mediaService.buildUpdatedMediaList(
                 productDTO.getMedia(),
                 currentMediaMap,
                 (dto, sortOrder) -> new ProductMedia(product, dto.contentType(), dto.content(), sortOrder)
         );
+        updatedFilenames.addAll(updatedMediaList.stream()
+                .map(ProductMedia::getContent)
+                .toList());
+
         product.getMedia().clear();
         product.getMedia().addAll(updatedMediaList);
 
         // update description
-        Map<Long, ProductDescription> currentDescriptionMap = product.getDescriptions().stream() // to get existing media entity by id quickly
+        List<ProductDescription> oldDescription = product.getDescriptions();
+        oldFilenames.addAll(oldDescription.stream()
+                .filter(d -> d.getContentType().isMedia())
+                .map(ProductDescription::getContent)
+                .toList());
+        Map<Long, ProductDescription> currentDescriptionMap = oldDescription.stream() // to get existing media entity by id quickly
                 .collect(Collectors.toMap(ProductDescription::getId, d -> d));
         List<ProductDescription> updatedDescriptionList = mediaService.buildUpdatedMediaList(
                 productDTO.getDescriptions(),
                 currentDescriptionMap,
                 (dto, sortOrder) -> new ProductDescription(product, dto.contentType(), dto.content(), sortOrder)
         );
+        updatedFilenames.addAll(updatedDescriptionList.stream()
+                .filter(d -> d.getContentType().isMedia())
+                .map(ProductDescription::getContent)
+                .toList());
+
         product.getDescriptions().clear();
         product.getDescriptions().addAll(updatedDescriptionList);
 
@@ -253,6 +278,12 @@ public class ProductService {
         );
         product.getSpecifications().clear();
         product.getSpecifications().addAll(updatedSpecificationList);
+
+        try {
+            mediaService.updateSavedImageToTemp(oldFilenames, updatedFilenames, fileMap);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to update media");
+        }
 
         return productRepository.save(product).getId();
     }
