@@ -25,9 +25,8 @@ public class ProductWrapperController {
     }
 
     @PostMapping
-    public ResponseEntity<List<Long>> addAllProductInfo(
-            @Valid @RequestPart ProductWrapperDTO productWrapperDTO,
-            Map<String, MultipartFile> fileMap) {
+    public ResponseEntity<List<Long>> addAllProductInfo(@Valid @RequestPart ProductWrapperDTO productWrapperDTO,
+                                                        @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 productWrapperService.saveAllProductInfo(
                         productWrapperDTO.productLineDTO(),

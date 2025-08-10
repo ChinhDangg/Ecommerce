@@ -110,8 +110,9 @@ public class ProductController {
     }
 
     @PutMapping()
-    public ResponseEntity<Long> updateProduct(@Valid @RequestBody ProductDTO productDTO) {
-        Long updatedProductId = productService.updateProductInfo(productDTO);
+    public ResponseEntity<Long> updateProduct(@Valid @RequestPart ProductDTO productDTO,
+                                              @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+        Long updatedProductId = productService.updateProductInfo(productDTO, fileMap);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductId);
     }
 
