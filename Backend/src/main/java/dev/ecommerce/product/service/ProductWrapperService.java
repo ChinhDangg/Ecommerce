@@ -52,8 +52,13 @@ public class ProductWrapperService {
                                            List<ProductDTO> newProductDTOList,
                                            Map<String, MultipartFile> fileMap) {
         List<Long> updatedIds = new ArrayList<>();
-        if (productLineDTO != null && productLineDTO.getId() != null) {
-            updatedIds.add(productLineService.updateProductLineInfo(productLineDTO, fileMap).longValue());
+        Integer productLineId = null;
+        if (productLineDTO != null) {
+            if (productLineDTO.getId() == null)
+                productLineId = productLineService.saveProductLine(productLineDTO, fileMap);
+            else
+                productLineId = productLineService.updateProductLineInfo(productLineDTO, fileMap);
+            updatedIds.add(productLineId.longValue());
         }
         if (updatingProductDTOList != null && !updatingProductDTOList.isEmpty())
             for (ProductDTO productDTO : updatingProductDTOList) {
@@ -61,7 +66,7 @@ public class ProductWrapperService {
             }
         if (newProductDTOList != null && !newProductDTOList.isEmpty())
             for (ProductDTO productDTO : newProductDTOList) {
-                updatedIds.add(productService.saveProduct(productDTO, productLineDTO == null ? null : productLineDTO.getId(), fileMap));
+                updatedIds.add(productService.saveProduct(productDTO, productLineId, fileMap));
             }
         return updatedIds;
     }
@@ -78,7 +83,8 @@ public class ProductWrapperService {
     public ProductCardDTO getProductCardById(Long id) {
         Product product = productService.findProductById(id);
         ProductCardDTO cardDTO = productMapper.toProductCardDTO(product);
-        cardDTO.setProductGroupedOptions(productLineService.getProductGroupedOptions(product.getProductLine().getId()));
+        if (product.getProductLine() != null)
+            cardDTO.setProductGroupedOptions(productLineService.getProductGroupedOptions(product.getProductLine().getId()));
         cardDTO.setProductCategoryChain(productCategoryService.getProductParentCategoryChain(product.getId()));
         return cardDTO;
     }
