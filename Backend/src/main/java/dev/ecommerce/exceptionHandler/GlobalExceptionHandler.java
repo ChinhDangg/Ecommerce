@@ -19,6 +19,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        e.printStackTrace();
+        // TODO see why image is not found when updating
         return ResponseEntity.badRequest().body("Illegal argument passed: " + e.getMessage());
     }
 

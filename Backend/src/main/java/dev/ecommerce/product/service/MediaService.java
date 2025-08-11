@@ -34,7 +34,7 @@ public class MediaService {
         return resource;
     }
 
-    public String saveImage(MultipartFile file, boolean isTemp) {
+    public String saveMedia(MultipartFile file, boolean isTemp) {
         try {
             // Save file to a directory
             String dir = isTemp ? TEMP_IMAGE_DIR : IMAGE_DIR;
@@ -48,12 +48,14 @@ public class MediaService {
         }
     }
 
-    public void saveImages(List<String> filenames, Map<String, MultipartFile> fileMap, boolean isTemp) {
+    public List<String> saveMedia(List<String> filenames, Map<String, MultipartFile> fileMap, boolean isTemp) {
+        List<String> savedFilenames = new ArrayList<>();
         for (String filename : filenames) {
             if (!fileMap.containsKey(filename))
                 throw new IllegalArgumentException("File not found with name: " + filename);
-            saveImage(fileMap.get(filename), isTemp);
+            savedFilenames.add(saveMedia(fileMap.get(filename), isTemp));
         }
+        return savedFilenames;
     }
 
     public void moveTempToPermanent(List<String> filenames) throws IOException {
@@ -64,16 +66,17 @@ public class MediaService {
         }
     }
 
-    public void deleteFromTemp(List<String> filenames) throws IOException {
+    public void movePermanentToTemp(List<String> filenames) throws IOException {
         for (String filename : filenames) {
             Path tempPath = Paths.get(TEMP_IMAGE_DIR).resolve(filename).normalize();
-            Files.deleteIfExists(tempPath);
+            Path finalPath = Paths.get(IMAGE_DIR).resolve(filename).normalize();
+            Files.move(finalPath, tempPath);
         }
     }
 
-    public void deleteFromPermanent(List<String> filenames) throws IOException {
+    public void deleteFromTemp(List<String> filenames) throws IOException {
         for (String filename : filenames) {
-            Path tempPath = Paths.get(IMAGE_DIR).resolve(filename).normalize();
+            Path tempPath = Paths.get(TEMP_IMAGE_DIR).resolve(filename).normalize();
             Files.deleteIfExists(tempPath);
         }
     }
@@ -99,24 +102,22 @@ public class MediaService {
         };
     }
 
-    public TransactionSynchronization getMediaTransactionSynForUpdating(List<String> oldFilenames,
-                                                                        List<String> updatedFilenames,
-                                                                        Map<String, MultipartFile> fileMap) {
+    public TransactionSynchronization getMediaTransactionSynForUpdating(List<String> markForDeleteFiles,
+                                                                        List<String> markForAddFiles) {
         return new TransactionSynchronization() {
             @Override
             public void afterCompletion(int status) {
                 try {
-                    List<String> markForDeleteFiles = oldFilenames.stream().filter(f -> !updatedFilenames.contains(f)).toList();
-                    List<String> markForAddFiles = updatedFilenames.stream().filter(f -> !oldFilenames.contains(f)).toList();
                     if (status == TransactionSynchronization.STATUS_COMMITTED) {
                         // Move to the final directory
                         moveTempToPermanent(markForAddFiles);
+                        deleteFromTemp(markForDeleteFiles);
                         System.out.println("File committed: " + markForAddFiles);
                     } else {
                         // Rollback → delete temp file
                         deleteFromTemp(markForAddFiles);
                         // undo deletion
-                        saveImages(markForDeleteFiles, fileMap, false);
+                        moveTempToPermanent(markForDeleteFiles);
                         System.out.println("File deleted due to rollback: " + markForAddFiles + "\nand restored from permanent: " + markForDeleteFiles);
                     }
                 } catch (IOException e) {
@@ -136,19 +137,7 @@ public class MediaService {
         if (mediaDTO.contentType().isMedia() && file == null) // saving means completely new media, expected all media given to have an association with multipartFile list
             throw new IllegalArgumentException("File not found with name: " + mediaDTO.content());
 
-        return (mediaDTO.contentType() == ContentType.IMAGE) ? saveImage(file, true) : mediaDTO.content();
-    }
-
-    /**
-     * Compare the old list to the new list.
-     * Any missing from the new list will be removed from permanent.
-     * Any not from the old list will be saved to temp
-     */
-    public void updateSavedImageToTemp(List<String> oldFilenames, List<String> updatedFilenames, Map<String, MultipartFile> fileMap) throws IOException {
-        List<String> deletedFilenames = oldFilenames.stream().filter(f -> !updatedFilenames.contains(f)).toList();
-        List<String> addedFilenames = updatedFilenames.stream().filter(f -> !oldFilenames.contains(f)).toList();
-        deleteFromPermanent(deletedFilenames);
-        saveImages(addedFilenames, fileMap, true);
+        return (mediaDTO.contentType() == ContentType.IMAGE) ? saveMedia(file, true) : mediaDTO.content();
     }
 
     public <T extends BaseContent> List<T> buildUpdatedMediaList(
