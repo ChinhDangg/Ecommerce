@@ -57,7 +57,8 @@ function showProductDetails(productInfo) {
     showProductPrice(productInfo);
 
     clearConfigOption();
-    addDifferentProductConfig(productInfo.productGroupedOptions);
+    if (productInfo.productGroupedOptions)
+        addDifferentProductConfig(productInfo.productGroupedOptions);
     showProductConfig(productInfo.options);
 
     clearProductFeatureSection();

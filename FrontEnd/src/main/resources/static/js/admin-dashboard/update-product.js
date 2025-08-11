@@ -96,7 +96,8 @@ function initializeTopUpdateBtn() {
         const formData = new FormData();
         const productLineInfo = getProductLineInfo(productLineId, formData);
         const updatingProductInfos = getAllProductInfoFromList(retrieved_product, productLineId, formData);
-        const newProductInfos = getAllProductInfoFromList(products.slice(1), productLineId, formData);
+        const newIds = products.slice(1).filter(item => !existing_product.includes(item));
+        const newProductInfos = getAllProductInfoFromList(newIds, productLineId, formData);
 
         if (productLineId && !productLineInfo) {
             const confirmDeleteProductLine = confirm('Product line name is empty - marking as deletion - continue?');
@@ -267,8 +268,10 @@ function displayProductLineInfo(productLineInfo) {
     });
 }
 
+const existing_product = [];
 const retrieved_product = [];
 function addProductEntry(productId) {
+    existing_product.push(productId);
     const [productOptionItem, productSpecItem, productItem] = addNewProductEntry(productId,true);
     productItem.querySelector('.toggle-collapse').addEventListener('click', async () => {
         if (retrieved_product.includes(productId))
