@@ -4,6 +4,8 @@ import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +21,9 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
+
     private final ProductCategoryRepository productCategoryRepository;
-    private final ProductLineRepository productLineRepository;
     private final ProductRepository productRepository;
     private final ProductFeatureRepository productFeatureRepository;
     private final ProductMediaRepository productMediaRepository;
@@ -34,7 +37,6 @@ public class ProductService {
 
     public ProductService(
             ProductCategoryRepository productCategoryRepository,
-            ProductLineRepository productLineRepository,
             ProductRepository productRepository,
             ProductFeatureRepository productFeatureRepository,
             ProductMediaRepository productMediaRepository,
@@ -46,7 +48,6 @@ public class ProductService {
             ProductLineService productLineService,
             MediaService mediaService) {
         this.productCategoryRepository = productCategoryRepository;
-        this.productLineRepository = productLineRepository;
         this.productRepository = productRepository;
         this.productFeatureRepository = productFeatureRepository;
         this.productMediaRepository = productMediaRepository;
@@ -118,7 +119,6 @@ public class ProductService {
             ContentDTO mediaDTO = productDTO.getMedia().get(j);
 
             String mediaName = mediaService.checkAndSaveMediaFile(mediaDTO, fileMap.get(mediaDTO.content()));
-            System.out.println("from product: " + mediaName);
             filenameList.add(mediaName);
 
             mediaList.add(new ProductMedia(savedProduct, mediaDTO.contentType(), mediaName, j));
@@ -156,6 +156,8 @@ public class ProductService {
         }
         productSpecificationRepository.saveAll(specificationList);
 
+        logger.info("Saved product: {}", savedProduct.getId());
+
         return savedProduct.getId();
     }
 
@@ -165,10 +167,6 @@ public class ProductService {
 
         List<String> oldFilenames = new ArrayList<>();
         List<String> updatedFilenames = new ArrayList<>();
-
-        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(
-                oldFilenames, updatedFilenames, fileMap
-        ));
 
         // update basic info
         if (!productDTO.getManufacturerId().equals(product.getManufacturerId()))
@@ -219,7 +217,8 @@ public class ProductService {
         List<ProductMedia> updatedMediaList = mediaService.buildUpdatedMediaList(
                 productDTO.getMedia(),
                 currentMediaMap,
-                (dto, sortOrder) -> new ProductMedia(product, dto.contentType(), dto.content(), sortOrder)
+                (dto, sortOrder) -> new ProductMedia(product, dto.contentType(),
+                        mediaService.saveMedia(fileMap.get(dto.content()), true), sortOrder)
         );
         updatedFilenames.addAll(updatedMediaList.stream()
                 .map(ProductMedia::getContent)
@@ -239,7 +238,8 @@ public class ProductService {
         List<ProductDescription> updatedDescriptionList = mediaService.buildUpdatedMediaList(
                 productDTO.getDescriptions(),
                 currentDescriptionMap,
-                (dto, sortOrder) -> new ProductDescription(product, dto.contentType(), dto.content(), sortOrder)
+                (dto, sortOrder) -> new ProductDescription(product, dto.contentType(),
+                        dto.contentType().isMedia() ? mediaService.saveMedia(fileMap.get(dto.content()), true) : dto.content(), sortOrder)
         );
         updatedFilenames.addAll(updatedDescriptionList.stream()
                 .filter(d -> d.getContentType().isMedia())
@@ -280,13 +280,24 @@ public class ProductService {
         product.getSpecifications().clear();
         product.getSpecifications().addAll(updatedSpecificationList);
 
+        List<String> deletedFilenames = oldFilenames.stream().filter(f -> !updatedFilenames.contains(f)).toList();
+        List<String> addedFilenames = updatedFilenames.stream().filter(f -> !oldFilenames.contains(f)).toList();
+
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(
+                deletedFilenames, addedFilenames
+        ));
+
         try {
-            mediaService.updateSavedImageToTemp(oldFilenames, updatedFilenames, fileMap);
+            mediaService.movePermanentToTemp(deletedFilenames);
         } catch (IOException e) {
             throw new RuntimeException("Fail to update media");
         }
 
-        return productRepository.save(product).getId();
+        Product updatedProduct = productRepository.save(product);
+
+        logger.info("Updated product: {}", updatedProduct.getId());
+
+        return updatedProduct.getId();
     }
 
     private <T extends BaseOption> List<T> buildUpdateOptionList(
@@ -313,5 +324,6 @@ public class ProductService {
     public void deleteProductById(Long id) {
         Product product = findProductById(id);
         productRepository.delete(product);
+        logger.info("Deleted product: {}", id);
     }
 }

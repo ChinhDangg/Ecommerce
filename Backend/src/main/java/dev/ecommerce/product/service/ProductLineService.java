@@ -7,7 +7,8 @@ import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ProductOptionDTO;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductLineService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductLineService.class);
 
     private final ProductLineRepository productLineRepository;
     private final ProductLineMediaRepository productLineMediaRepository;
@@ -112,6 +115,9 @@ public class ProductLineService {
             descriptionList.add(new ProductLineDescription(savedProductLine, descriptionDTO.contentType(), contentName, j));
         }
         productLineDescriptionRepository.saveAll(descriptionList);
+
+        logger.info("Saved product line: {}", savedProductLine.getId());
+
         return savedProductLine.getId();
     }
 
@@ -129,10 +135,6 @@ public class ProductLineService {
         List<String> oldFilenames = new ArrayList<>();
         List<String> updatedFilenames = new ArrayList<>();
 
-        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(
-            oldFilenames, updatedFilenames, fileMap
-        ));
-
         if (!productLine.getName().equals(updateName))
             productLine.setName(productLineDTO.getName());
 
@@ -146,7 +148,8 @@ public class ProductLineService {
         List<ProductLineMedia> updatedMediaList = mediaService.buildUpdatedMediaList(
                 productLineDTO.getMedia(),
                 currentMediaMap,
-                (dto, sortOrder) -> new ProductLineMedia(productLine, dto.contentType(), dto.content(), sortOrder)
+                (dto, sortOrder) -> new ProductLineMedia(productLine, dto.contentType(),
+                        mediaService.saveMedia(fileMap.get(dto.content()), true), sortOrder)
         );
         updatedFilenames.addAll(updatedMediaList.stream()
                 .map(ProductLineMedia::getContent)
@@ -166,7 +169,8 @@ public class ProductLineService {
         List<ProductLineDescription> updatedDescriptionList = mediaService.buildUpdatedMediaList(
                 productLineDTO.getDescriptions(),
                 currentDescriptionMap,
-                (dto, sortOrder) -> new ProductLineDescription(productLine, dto.contentType(), dto.content(), sortOrder)
+                (dto, sortOrder) -> new ProductLineDescription(productLine, dto.contentType(),
+                        dto.contentType().isMedia() ? mediaService.saveMedia(fileMap.get(dto.content()), true) : dto.content(), sortOrder)
         );
         updatedFilenames.addAll(updatedDescriptionList.stream()
                         .filter(d -> d.getContentType().isMedia())
@@ -176,22 +180,33 @@ public class ProductLineService {
         productLine.getDescriptions().clear();
         productLine.getDescriptions().addAll(updatedDescriptionList);
 
+        List<String> deletedFilenames = oldFilenames.stream().filter(f -> !updatedFilenames.contains(f)).toList();
+        List<String> addedFilenames = updatedFilenames.stream().filter(f -> !oldFilenames.contains(f)).toList();
+
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(
+                deletedFilenames, addedFilenames
+        ));
+
         try {
-            mediaService.updateSavedImageToTemp(oldFilenames, updatedFilenames, fileMap);
+            mediaService.movePermanentToTemp(deletedFilenames);
         } catch (IOException e) {
             throw new RuntimeException("Fail to update media");
         }
 
-        return productLineRepository.save(productLine).getId();
+        ProductLine updatedProductLine = productLineRepository.save(productLine);
+
+        logger.info("Updated product line: {}", updatedProductLine.getId());
+
+        return updatedProductLine.getId();
     }
 
     @Transactional
-    public Integer deleteProductLineById(Integer id) {
+    public void deleteProductLineById(Integer id) {
         ProductLine productLine = findProductLineById(id);
         productLine.getProducts().forEach(product -> product.setProductLine(null));
         productLine.getProductOptions().forEach(option -> option.setProductLine(null));
         productLineRepository.delete(productLine);
-        return id;
+        logger.info("Deleted product line: {}", id);
     }
 
 }
