@@ -37,7 +37,8 @@ public class ProductWrapperService {
         Integer productLineId = null;
         if (productLineDTO != null) {
             productLineId = productLineService.saveProductLine(productLineDTO, fileMap);
-            savedIds.add(productLineId.longValue());
+            if (productLineId != null)
+                savedIds.add(productLineId.longValue());
         }
         for (ProductDTO productDTO : productDTOList) {
             savedIds.add(productService.saveProduct(productDTO, productLineId, fileMap));
@@ -51,8 +52,9 @@ public class ProductWrapperService {
                                            List<ProductDTO> newProductDTOList,
                                            Map<String, MultipartFile> fileMap) {
         List<Long> updatedIds = new ArrayList<>();
-        if (productLineDTO != null && productLineDTO.getId() != null)
+        if (productLineDTO != null && productLineDTO.getId() != null) {
             updatedIds.add(productLineService.updateProductLineInfo(productLineDTO, fileMap).longValue());
+        }
         if (updatingProductDTOList != null && !updatingProductDTOList.isEmpty())
             for (ProductDTO productDTO : updatingProductDTOList) {
                 updatedIds.add(productService.updateProductInfo(productDTO, fileMap));

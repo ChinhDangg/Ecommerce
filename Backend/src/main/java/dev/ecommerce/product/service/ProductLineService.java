@@ -71,17 +71,23 @@ public class ProductLineService {
         return productLineDTO;
     }
 
+    private String getValidateName(String name) {
+        return name == null ? null : name.trim();
+    }
+
     @Transactional
     public Integer saveProductLine(ProductLineDTO productLineDTO, Map<String, MultipartFile> fileMap) {
-        if (productLineDTO.getName() == null)
-            throw new DataIntegrityViolationException("Product line name is null");
+        String name = getValidateName(productLineDTO.getName());
+
+        if (name == null || name.isEmpty())
+            return null;
 
         List<String> filenameList = new ArrayList<>();
 
         // unsaved media if transaction failed
         TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(filenameList));
 
-        ProductLine savedProductLine = productLineRepository.save(new ProductLine(productLineDTO.getName()));
+        ProductLine savedProductLine = productLineRepository.save(new ProductLine(name));
 
         List<ProductLineMedia> mediaList = new ArrayList<>();
         for (int j = 0; j < productLineDTO.getMedia().size(); j++) {
@@ -111,6 +117,13 @@ public class ProductLineService {
 
     @Transactional // will leverage entity manager to update by retrieving the entity itself
     public Integer updateProductLineInfo(ProductLineDTO productLineDTO, Map<String, MultipartFile> fileMap) {
+        String updateName = getValidateName(productLineDTO.getName());
+
+        if (updateName.isEmpty()) {
+            deleteProductLineById(productLineDTO.getId());
+            return productLineDTO.getId();
+        }
+
         ProductLine productLine = findProductLineById(productLineDTO.getId());
 
         List<String> oldFilenames = new ArrayList<>();
@@ -120,10 +133,7 @@ public class ProductLineService {
             oldFilenames, updatedFilenames, fileMap
         ));
 
-        if (productLineDTO.getName().isEmpty())
-            throw new IllegalArgumentException("Product line name is empty");
-
-        if (!productLine.getName().equals(productLineDTO.getName()))
+        if (!productLine.getName().equals(updateName))
             productLine.setName(productLineDTO.getName());
 
         // update media
@@ -176,11 +186,12 @@ public class ProductLineService {
     }
 
     @Transactional
-    public void deleteProductLineById(Integer id) {
+    public Integer deleteProductLineById(Integer id) {
         ProductLine productLine = findProductLineById(id);
         productLine.getProducts().forEach(product -> product.setProductLine(null));
         productLine.getProductOptions().forEach(option -> option.setProductLine(null));
         productLineRepository.delete(productLine);
+        return id;
     }
 
 }

@@ -308,7 +308,7 @@ function populateProductDescription(productDescriptions) {
             descriptionEntry.innerText = description.content;
         } else if (description.contentType === 'IMAGE') {
             descriptionEntry = descriptionImageEntryTem.cloneNode(true);
-            descriptionEntry.src = description.content;
+            descriptionEntry.querySelector('img').src = `${mediaURL}${description.content}`;
         }
         descriptionEntry.classList.remove('hidden');
         descriptionTab.appendChild(descriptionEntry);

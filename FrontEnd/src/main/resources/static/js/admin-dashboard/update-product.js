@@ -25,8 +25,8 @@ import {
 import {updatePageUrl, updateProductQuery,} from './admin-navigation.js';
 
 import {
-    clearAllProductInfo, getAllProductInfoFromList,
-    getProductInfo,
+    clearAllProductInfo,
+    getAllProductInfoFromList,
     getProductLineInfo
 } from "./post-new-product.js";
 
@@ -92,22 +92,19 @@ function initializeTopUpdateBtn() {
     document.getElementById('update-btn').addEventListener('click', async function () {
         console.log('clicked update btn');
         const productLineId = new URLSearchParams(window.location.search).get('line');
-        const productLineInfo = await getProductLineInfo(productLineId);
-        const updatingProductInfos = getAllProductInfoFromList(retrieved_product, productLineId);
-        const newProductInfos = getAllProductInfoFromList(products.slice(1), productLineId);
+
+        const formData = new FormData();
+        const productLineInfo = getProductLineInfo(productLineId, formData);
+        const updatingProductInfos = getAllProductInfoFromList(retrieved_product, productLineId, formData);
+        const newProductInfos = getAllProductInfoFromList(products.slice(1), productLineId, formData);
 
         if (productLineId && !productLineInfo) {
             const confirmDeleteProductLine = confirm('Product line name is empty - marking as deletion - continue?');
             if (!confirmDeleteProductLine)
                 return;
-            try {
-                await deleteProductLine(productLineId);
-            } catch (error) {
-                alert('Failed to delete product line - update fail');
-            }
         }
 
-        if (updatingProductInfos || newProductInfos) {
+        if (productLineInfo || updatingProductInfos || newProductInfos) {
             try {
                 const retrievedIds = await updateAllProductInfo(productLineInfo, updatingProductInfos, newProductInfos);
                 console.log('Updated all product info');
@@ -252,7 +249,7 @@ function displayProductLineInfo(productLineInfo) {
     const productLineImageContainer = document.getElementById('product-line-images');
     productLineInfo.media.forEach(media => {
         const imageEntry = addImageEntry(
-            data_productLineImages, productLineImageContainer, null, `${mediaURL}${media.content}`
+            data_productLineImages, productLineImageContainer, null, media.content
         );
         imageEntry.dataset.mediaId = media.id;
     });
@@ -264,7 +261,7 @@ function displayProductLineInfo(productLineInfo) {
         if (description.contentType === "TEXT") {
             descriptionTextArea.innerHTML = description.content;
         } else if (description.contentType === "IMAGE") {
-            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, `${mediaURL}${description.content}`);
+            updateDescriptionImage(descriptionItem, data_productLineDescriptionImages, description.content);
         }
     });
 }
@@ -318,13 +315,14 @@ function displayProductInfo(productItem, content) {
         const featureEntry = addProductFeature(productItem);
         featureEntry.querySelector('.product-feature-input').value = feature;
     });
+    data_allProductImages.set(content.id, []);
     content.media.forEach(media => {
         if (media.contentType === 'IMAGE') {
             const imageEntry = addImageEntry(
                 data_allProductImages.get(content.id),
                 productItem.querySelector('.product-images'),
                 null,
-                `${mediaURL}${media.content}`
+                media.content
             );
             imageEntry.dataset.mediaId = media.id;
         }
@@ -337,40 +335,23 @@ function displayProductInfo(productItem, content) {
         if (description.contentType === "TEXT") {
             descriptionTextArea.innerHTML = description.content;
         } else if (description.contentType === "IMAGE") {
-            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), `${mediaURL}${description.content}`);
+            updateDescriptionImage(descriptionItem, data_allProductDescriptionImages.get(content.id), description.content);
         }
     });
 }
 
 
 // CRUD operations
-
-async function updateProductLineInfo(productLineInfoData) {
-    const response = await fetch(productLineURL, {
-        method: 'PUT',
-        headers: {
-            'Content-Type':'application/json',
-        },
-        body: JSON.stringify(productLineInfoData)
-    });
-    if (!response.ok) {
-        throw new Error('Fail update product line info');
-    }
-    return await response.text();
-}
-
-async function updateAllProductInfo(productLineInfoData, updatingProductInfoDataList, newProductInfoDataList) {
+async function updateAllProductInfo(productLineInfoData, updatingProductInfoDataList, newProductInfoDataList, formData) {
     const productInfoWrapper = {
         productLineDTO: productLineInfoData,
         updatingProductDTOList: updatingProductInfoDataList,
         newProductDTOList: newProductInfoDataList
     }
+    formData.append('productUpdateDTO', JSON.stringify(productInfoWrapper));
     const response = await fetch(productWrapperURL, {
         method: 'PUT',
-        headers: {
-            'Content-Type':'application/json',
-        },
-        body: JSON.stringify(productInfoWrapper)
+        body: formData
     });
     if (!response.ok) {
         throw new Error('Failed updating all product info');

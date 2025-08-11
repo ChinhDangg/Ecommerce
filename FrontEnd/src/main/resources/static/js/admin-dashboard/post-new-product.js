@@ -19,7 +19,7 @@ export function initializePost() {
             }
 
             const formData = new FormData();
-            const productLineInfo = await getProductLineInfo(null, formData);
+            const productLineInfo = getProductLineInfo(null, formData);
             const productInfos = getAllProductInfoFromList(products.slice(1), null, formData);
 
             if (!productInfos)
@@ -33,14 +33,17 @@ export function initializePost() {
                 if (ids.length === maxTotalLengthExpected) {
                     gotProductLineId = ids[0];
                     gotFirstProductId = ids[1];
-                    window.location.href = `http://localhost:8081/admin/dashboard?query=updateProduct&line=${gotProductLineId}&product=${gotFirstProductId}`;
                 } else if (ids.length === maxTotalLengthExpected - 1) {
                     gotFirstProductId = ids[0];
-                    window.location.href = `http://localhost:8081/admin/dashboard?query=updateProduct&product=${gotFirstProductId}`;
                 } else {
                     alert('Failed to publish all info');
                     console.error('Fail to publish all info');
+                    return;
                 }
+                let redirect = `http://localhost:8081/admin/dashboard?query=updateProduct&product=${gotFirstProductId}`;
+                if (gotProductLineId && gotProductLineId !== -1)
+                    redirect += redirect + `&line=${gotProductLineId}`;
+                window.location.href = redirect
             }
         } catch (error) {
             console.error(error);
@@ -49,16 +52,14 @@ export function initializePost() {
     });
 }
 
-export async function getProductLineInfo(productLineId = null, formData = null) {
+export function getProductLineInfo(productLineId = null, formData = null) {
     const productLineNameInput = document.getElementById('product-line-name-input');
     const productLineName = productLineNameInput.value.trim();
-    if (!productLineName)
-        return null;
     const allMediaEntries = document.getElementById('product-line-images').querySelectorAll('.image-entry');
-    const productLineImageContents = await getMediaContent(data_productLineImages, allMediaEntries, formData);
+    const productLineImageContents = getMediaContent(data_productLineImages, allMediaEntries, formData);
     const allDescriptionEntries =
         Array.from(document.getElementById('product-line-descriptions').querySelectorAll('.description-entry')).slice(1);
-    const descriptionContent = await getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries, formData);
+    const descriptionContent = getDescriptionContent(data_productLineDescriptionImages, allDescriptionEntries, formData);
     return {
         id: parseInt(productLineId),
         name: productLineName,
@@ -67,7 +68,7 @@ export async function getProductLineInfo(productLineId = null, formData = null) 
     };
 }
 
-async function getMediaContent(dataImageArray, allMediaTemplateEntries, formData = null) {
+function getMediaContent(dataImageArray, allMediaTemplateEntries, formData = null) {
     const mediaNames = wrapImages(dataImageArray, formData);
     const mediaContent = [];
     allMediaTemplateEntries.forEach((entry, index) => {
@@ -82,8 +83,8 @@ async function getMediaContent(dataImageArray, allMediaTemplateEntries, formData
     return mediaContent;
 }
 
-async function getDescriptionContent(dataImageArray, allDescriptionEntries, formData = null) {
-    let descriptionImageNames = await wrapImages(dataImageArray, formData);
+function getDescriptionContent(dataImageArray, allDescriptionEntries, formData = null) {
+    let descriptionImageNames = wrapImages(dataImageArray, formData);
     const descriptionTexts = [];
     const filteredDescriptionImages = descriptionImageNames.filter(item => item !== undefined && item !== null);
     allDescriptionEntries.forEach(descriptionEntry => {
@@ -113,10 +114,10 @@ async function getDescriptionContent(dataImageArray, allDescriptionEntries, form
     return descriptionTexts;
 }
 
-export async function getAllProductInfoFromList(productIdList, productLineId, formData = null) {
+export function getAllProductInfoFromList(productIdList, productLineId, formData = null) {
     const productInfos = [];
     for (const productId of productIdList) {
-        const productInfo = await getProductInfo(productLineId, productId, formData);
+        const productInfo = getProductInfo(productLineId, productId, formData);
         if (productInfo) {
             productInfos.push(productInfo);
         } else {
@@ -126,7 +127,7 @@ export async function getAllProductInfoFromList(productIdList, productLineId, fo
     return productInfos;
 }
 
-export async function getProductInfo(productLineId, productId, formData = null) {
+function getProductInfo(productLineId, productId, formData = null) {
     const productGroupContainer = document.getElementById('product-group-container');
     const productContainer = productGroupContainer.querySelector(`[data-product-id="${productId}"]`);
     if (!productContainer)
@@ -141,10 +142,10 @@ export async function getProductInfo(productLineId, productId, formData = null) 
     });
 
     const allMediaEntries = productContainer.querySelector('.product-images').querySelectorAll('.image-entry');
-    const productImageContents = await getMediaContent(data_allProductImages.get(productId), allMediaEntries, formData);
+    const productImageContents = getMediaContent(data_allProductImages.get(productId), allMediaEntries, formData);
 
     const allDescriptionEntries = Array.from(productContainer.querySelectorAll('.description-entry')).slice(1);
-    const productDescriptionContent = await getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries, formData);
+    const productDescriptionContent = getDescriptionContent(data_allProductDescriptionImages.get(productId), allDescriptionEntries, formData);
     return {
         id: parseInt(productId),
         productLineId: parseInt(productLineId),
@@ -231,12 +232,29 @@ export function clearAllProductInfo() {
 }
 
 // CRUD operations
-export async function postAllProductInfo(productLineInfoData, productInfoDataList, formData) {
+async function postAllProductInfo(productLineInfoData, productInfoDataList, formData) {
     const productInfoWrapper = {
         productLineDTO: productLineInfoData,
         productDTOList: productInfoDataList
     }
-    formData.append('productWrapperDTO', JSON.stringify(productInfoWrapper));
+    formData.append(
+        'productWrapperDTO',
+        new Blob([JSON.stringify(productInfoWrapper)], { type: 'application/json' })
+    );
+
+    for (let [key, value] of formData.entries()) {
+        if (value instanceof Blob) {
+            console.log(key, "(Blob)", value.type, value.size, value);
+            // Optionally read blob content if it's text
+            if (value.type.startsWith("application/json") || value.type.startsWith("text")) {
+                value.text().then(text => console.log(`  → ${text}`));
+            }
+        } else {
+            console.log(key, value);
+        }
+    }
+
+
     const response = await fetch('http://localhost:8080/api/productWrapper', {
         method: 'POST',
         body: formData
@@ -247,7 +265,7 @@ export async function postAllProductInfo(productLineInfoData, productInfoDataLis
     return await response.json();
 }
 
-async function wrapImages(dataImageArray, formData = null) {
+function wrapImages(dataImageArray, formData = null) {
     dataImageArray.forEach((image, index) => {
         if (image instanceof File) {
             if (formData)

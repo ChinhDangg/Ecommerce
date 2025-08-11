@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // });
 });
 
+const mediaURL = document.getElementById('media-url').innerText;
 let currentSearchString = document.getElementById('current-search-string').innerText;
 let currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
@@ -207,7 +208,7 @@ function displayProductSearchResult(content) {
         productItem.querySelectorAll('.product-link').forEach(link => {
             link.href = `${cardPageURL}${item.id}`;
         });
-        productItem.querySelector('.product-img').src = item.imageName;
+        productItem.querySelector('.product-img').src = `${mediaURL}${item.imageName}`;
         productItem.querySelector('.product-name').innerHTML = item.name;
         productItem.querySelector('.product-id').innerHTML = `CPN # ${item.id} | MFR # ${item.manufacturerId}`;
         const featureList = productItem.querySelector('.product-feature-list');

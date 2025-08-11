@@ -26,7 +26,12 @@ public class ProductWrapperController {
 
     @PostMapping
     public ResponseEntity<List<Long>> addAllProductInfo(@Valid @RequestPart ProductWrapperDTO productWrapperDTO,
-                                                        @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+                                                        @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
+
+        System.out.println(productWrapperDTO);
+        System.out.println(fileMap);
+        System.out.println(fileMap.keySet());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 productWrapperService.saveAllProductInfo(
                         productWrapperDTO.productLineDTO(),
@@ -38,7 +43,7 @@ public class ProductWrapperController {
 
     @PutMapping
     public ResponseEntity<List<Long>> updateAllProductInfo(@RequestPart ProductUpdateDTO productUpdateDTO,
-                                                           @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+                                                           @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 productWrapperService.updateAllProductInfo(
                         productUpdateDTO.productLineDTO(),

@@ -118,9 +118,10 @@ public class ProductService {
             ContentDTO mediaDTO = productDTO.getMedia().get(j);
 
             String mediaName = mediaService.checkAndSaveMediaFile(mediaDTO, fileMap.get(mediaDTO.content()));
+            System.out.println("from product: " + mediaName);
             filenameList.add(mediaName);
 
-            mediaList.add(new ProductMedia(savedProduct, mediaDTO.contentType(), mediaDTO.content(), j));
+            mediaList.add(new ProductMedia(savedProduct, mediaDTO.contentType(), mediaName, j));
         }
         productMediaRepository.saveAll(mediaList);
 
