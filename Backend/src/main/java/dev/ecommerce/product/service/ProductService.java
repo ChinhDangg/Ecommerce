@@ -183,9 +183,9 @@ public class ProductService {
             product.setConditionType(productDTO.getConditionType());
         if (!productDTO.getPrice().equals(product.getPrice()))
             product.setPrice(productDTO.getPrice());
-        if (!productDTO.getSalePrice().equals(product.getSalePrice()))
+        if (productDTO.getSalePrice() == null || !productDTO.getSalePrice().equals(product.getSalePrice()))
             product.setSalePrice(productDTO.getSalePrice());
-        if (!productDTO.getSaleEndDate().equals(product.getSaleEndDate()))
+        if (productDTO.getSaleEndDate() == null || !productDTO.getSaleEndDate().equals(product.getSaleEndDate()))
             product.setSaleEndDate(productDTO.getSaleEndDate());
         if (!product.getCategory().getId().equals(productDTO.getCategoryId())) {
             ProductCategory category = productCategoryRepository.findById(productDTO.getCategoryId())

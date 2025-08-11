@@ -54,7 +54,7 @@ async function getUpdateProductTemplate() {
             const productId = new URLSearchParams(window.location.search).get('product');
             const productLineId = new URLSearchParams(window.location.search).get('line');
             if (productId)
-                module.handleProductResult(productId, productLineId);
+                module.handleProductResult(parseInt(productId), productLineId ? parseInt(productLineId) : null);
         });
 }
 

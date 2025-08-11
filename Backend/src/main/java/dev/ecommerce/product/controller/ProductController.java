@@ -104,14 +104,14 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<Long> addProduct(@Valid @RequestPart ProductDTO productDTO,
-                                           @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+                                           @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
         Long savedProductId = productService.saveProduct(productDTO, null, fileMap);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductId);
     }
 
     @PutMapping()
     public ResponseEntity<Long> updateProduct(@Valid @RequestPart ProductDTO productDTO,
-                                              @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+                                              @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
         Long updatedProductId = productService.updateProductInfo(productDTO, fileMap);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductId);
     }

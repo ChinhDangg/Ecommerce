@@ -25,6 +25,12 @@ export function initializePost() {
             if (!productInfos)
                 return;
 
+            if (productLineInfo.name.length === 0 && productInfos.length > 1) {
+                const proceed = confirm('Product line name is empty with multiple products. This will not save them as a group. Continue?');
+                if (!proceed)
+                    return;
+            }
+
             const ids = await postAllProductInfo(productLineInfo, productInfos, formData);
             if (ids) {
                 const maxTotalLengthExpected = productInfos.length + 1;
@@ -241,19 +247,6 @@ async function postAllProductInfo(productLineInfoData, productInfoDataList, form
         'productWrapperDTO',
         new Blob([JSON.stringify(productInfoWrapper)], { type: 'application/json' })
     );
-
-    for (let [key, value] of formData.entries()) {
-        if (value instanceof Blob) {
-            console.log(key, "(Blob)", value.type, value.size, value);
-            // Optionally read blob content if it's text
-            if (value.type.startsWith("application/json") || value.type.startsWith("text")) {
-                value.text().then(text => console.log(`  → ${text}`));
-            }
-        } else {
-            console.log(key, value);
-        }
-    }
-
 
     const response = await fetch('http://localhost:8080/api/productWrapper', {
         method: 'POST',

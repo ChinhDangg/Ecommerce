@@ -634,6 +634,7 @@ export const data_allProductImages = new Map();
 export const data_allProductDescriptionImages = new Map();
 
 function addNewProductGroupTemplate(productId, collapsed) {
+    productId = parseInt(productId);
     const productGroupContainer = document.getElementById('product-group-container');
     const productGroupItem = productGroupContainer.querySelector('.product-group-template').cloneNode(true);
     productGroupItem.classList.remove('hidden');

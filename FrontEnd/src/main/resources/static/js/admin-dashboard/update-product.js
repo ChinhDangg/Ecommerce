@@ -106,9 +106,10 @@ function initializeTopUpdateBtn() {
 
         if (productLineInfo || updatingProductInfos || newProductInfos) {
             try {
-                const retrievedIds = await updateAllProductInfo(productLineInfo, updatingProductInfos, newProductInfos);
+                const retrievedIds = await updateAllProductInfo(productLineInfo, updatingProductInfos, newProductInfos, formData);
                 console.log('Updated all product info');
             } catch (error) {
+                console.error(error);
                 alert('Failed to update all product info');
             }
         } else {
@@ -315,7 +316,6 @@ function displayProductInfo(productItem, content) {
         const featureEntry = addProductFeature(productItem);
         featureEntry.querySelector('.product-feature-input').value = feature;
     });
-    data_allProductImages.set(content.id, []);
     content.media.forEach(media => {
         if (media.contentType === 'IMAGE') {
             const imageEntry = addImageEntry(
@@ -348,7 +348,11 @@ async function updateAllProductInfo(productLineInfoData, updatingProductInfoData
         updatingProductDTOList: updatingProductInfoDataList,
         newProductDTOList: newProductInfoDataList
     }
-    formData.append('productUpdateDTO', JSON.stringify(productInfoWrapper));
+    formData.append(
+        'productUpdateDTO',
+        new Blob([JSON.stringify(productInfoWrapper)], { type: 'application/json' })
+    );
+
     const response = await fetch(productWrapperURL, {
         method: 'PUT',
         body: formData

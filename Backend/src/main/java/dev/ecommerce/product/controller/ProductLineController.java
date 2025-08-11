@@ -27,14 +27,14 @@ public class ProductLineController {
 
     @PostMapping()
     public ResponseEntity<Integer> addProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
-                                                  @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+                                                  @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
         Integer savedProductLineId = productLineService.saveProductLine(productLineDTO, fileMap);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
     }
 
     @PutMapping()
     public ResponseEntity<Integer> updateProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
-                                                     @RequestPart(required = false) Map<String, MultipartFile> fileMap) {
+                                                     @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
         Integer updatedProductLineId = productLineService.updateProductLineInfo(productLineDTO, fileMap);
         return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
     }

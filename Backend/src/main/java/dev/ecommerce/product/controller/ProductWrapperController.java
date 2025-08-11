@@ -27,11 +27,6 @@ public class ProductWrapperController {
     @PostMapping
     public ResponseEntity<List<Long>> addAllProductInfo(@Valid @RequestPart ProductWrapperDTO productWrapperDTO,
                                                         @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
-
-        System.out.println(productWrapperDTO);
-        System.out.println(fileMap);
-        System.out.println(fileMap.keySet());
-
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 productWrapperService.saveAllProductInfo(
                         productWrapperDTO.productLineDTO(),
