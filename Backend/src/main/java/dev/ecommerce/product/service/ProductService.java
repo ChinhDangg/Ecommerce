@@ -333,6 +333,7 @@ public class ProductService {
     @Transactional
     public void deleteProductById(Long id) {
         Product product = findProductById(id);
+        ProductLine productLine = product.getProductLine();
 
         List<String> filenameList = new ArrayList<>();
 
@@ -354,6 +355,10 @@ public class ProductService {
             mediaService.movePermanentToTemp(filenameList);
         } catch (IOException e) {
             throw new RuntimeException("Fail to delete product line media");
+        }
+
+        if (productLine.getProducts().isEmpty()) {
+            productLineService.deleteProductLineById(productLine.getId());
         }
 
         logger.info("Deleted product: {}", id);
