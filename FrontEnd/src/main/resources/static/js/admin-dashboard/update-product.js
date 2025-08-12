@@ -38,6 +38,8 @@ const productSearchURL = document.getElementById('productSearch-url').innerText;
 const categoryURL = document.getElementById('category-url').innerText;
 const categoryParentURL = document.getElementById('categoryParent-url').innerText;
 
+let productLineId = null;
+
 export function initializeUpdate() {
 
     // document.getElementById('call-url').remove();
@@ -91,7 +93,6 @@ function initializeTopBarDiscardBtn() {
 function initializeTopUpdateBtn() {
     document.getElementById('update-btn').addEventListener('click', async function () {
         console.log('clicked update btn');
-        const productLineId = new URLSearchParams(window.location.search).get('line');
 
         const formData = new FormData();
         const productLineInfo = getProductLineInfo(productLineId, formData);
@@ -217,6 +218,7 @@ export async function handleProductResult(productId) {
     showTopToolbar(true);
     const productLineInfo = await fetchProductLineInfo(productId);
     if (productLineInfo.id) {
+        productLineId = parseInt(productLineInfo.id);
         displayProductLineInfo(productLineInfo);
     }
     productLineInfo.productIdList.forEach(productId => {
