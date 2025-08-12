@@ -205,7 +205,29 @@ public class ProductLineService {
         ProductLine productLine = findProductLineById(id);
         productLine.getProducts().forEach(product -> product.setProductLine(null));
         productLine.getProductOptions().forEach(option -> option.setProductLine(null));
+
+        List<String> filenameList = new ArrayList<>();
+
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForDeleting(filenameList));
+
+        filenameList.addAll(productLine.getMedia()
+                .stream()
+                .map(ProductLineMedia::getContent)
+                .toList());
+        filenameList.addAll(productLine.getDescriptions()
+                .stream()
+                .filter(d -> d.getContentType().isMedia())
+                .map(ProductLineDescription::getContent)
+                .toList());
+
         productLineRepository.delete(productLine);
+
+        try {
+            mediaService.movePermanentToTemp(filenameList);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to delete product line media");
+        }
+
         logger.info("Deleted product line: {}", id);
     }
 

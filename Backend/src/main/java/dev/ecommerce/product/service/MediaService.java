@@ -74,13 +74,31 @@ public class MediaService {
         }
     }
 
-    public void deleteFromTemp(List<String> filenames) throws IOException {
+    private void deleteFromTemp(List<String> filenames) throws IOException {
         for (String filename : filenames) {
             Path tempPath = Paths.get(TEMP_IMAGE_DIR).resolve(filename).normalize();
             Files.deleteIfExists(tempPath);
         }
     }
 
+    /**
+     * check given mediaDTO has IMAGE or VIDEO as ContentType,
+     * if true, then save the media and return the saved name based on the content name,
+     * else, throw error as contentDTO is a media type but no file is given.
+     * if ContentType is not a media type, then just return the contentDTO content name.
+     */
+    public String checkAndSaveMediaFile(ContentDTO mediaDTO, MultipartFile file) {
+        if (mediaDTO.contentType().isMedia() && file == null) // saving means completely new media, expected all media given to have an association with multipartFile list
+            throw new IllegalArgumentException("File not found with name: " + mediaDTO.content());
+
+        return (mediaDTO.contentType() == ContentType.IMAGE) ? saveMedia(file, true) : mediaDTO.content();
+    }
+
+    /**
+     * Requires saving files to temp first.
+     * Files in temp will be moved to permanent upon committed.
+     * Else on rollback, delete files from temp.
+     */
     public TransactionSynchronization getMediaTransactionSynForSaving(List<String> filenames) {
         return new TransactionSynchronization() {
             @Override
@@ -102,6 +120,13 @@ public class MediaService {
         };
     }
 
+    /**
+     * Requires files marked as deletion be in temp and files marked as adding in temp.
+     * Marked as deletion files will be deleted in temp upon committed.
+     * Marked as adding files will move from temp to permanent upon committed
+     * Else on rollback, marked as deletion files in temp will be moved back to permanent.
+     * Else on rollback, marked as adding files in temp will be deleted.
+     */
     public TransactionSynchronization getMediaTransactionSynForUpdating(List<String> markForDeleteFiles,
                                                                         List<String> markForAddFiles) {
         return new TransactionSynchronization() {
@@ -128,16 +153,29 @@ public class MediaService {
     }
 
     /**
-     * check given mediaDTO has IMAGE or VIDEO as ContentType,
-     * if true, then save the media and return the saved name based on the content name,
-     * else, throw error as contentDTO is a media type but no file is given.
-     * if ContentType is not a media type, then just return the contentDTO content name.
+     * Requires moving files from permanent to tmp for files to be deleted.
+     * Files in temp will be deleted upon committed.
+     * Else on rollback, move files from temp back to permanent.
      */
-    public String checkAndSaveMediaFile(ContentDTO mediaDTO, MultipartFile file) {
-        if (mediaDTO.contentType().isMedia() && file == null) // saving means completely new media, expected all media given to have an association with multipartFile list
-            throw new IllegalArgumentException("File not found with name: " + mediaDTO.content());
-
-        return (mediaDTO.contentType() == ContentType.IMAGE) ? saveMedia(file, true) : mediaDTO.content();
+    public TransactionSynchronization getMediaTransactionSynForDeleting(List<String> filenames) {
+        return new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                try {
+                    if (status == TransactionSynchronization.STATUS_COMMITTED) {
+                        // delete from tmp
+                        deleteFromTemp(filenames);
+                        System.out.println("File committed: " + filenames);
+                    } else {
+                        // Rollback → undo deletion by moving back from tmp to permanent
+                        moveTempToPermanent(filenames);
+                        System.out.println("File deleted due to rollback: " + filenames);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
     public <T extends BaseContent> List<T> buildUpdatedMediaList(
