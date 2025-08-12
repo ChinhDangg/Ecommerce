@@ -10,6 +10,12 @@
 
 <body class="bg-gray-100">
 <div class="flex min-h-screen">
+
+    <span id="admin-page-url" class="hidden" th:text="${adminPage_url}"></span>
+    <span id="admin-page-path" class="hidden" th:text="${adminPage_path}"></span>
+    <span id="admin-add-product-path" class="hidden" th:text="${addProduct_path}"></span>
+    <span id="admin-update-product-path" class="hidden" th:text="${updateProduct_path}"></span>
+
     <!-- Admin Sidebar (Fixed, Light Background, Black Text) -->
     <div class="w-64 bg-gray-100 text-black fixed h-full overflow-y-auto">
         <a id="admin-dashboard-top-header-link" href="">

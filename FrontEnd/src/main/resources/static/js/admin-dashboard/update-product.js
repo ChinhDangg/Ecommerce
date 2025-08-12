@@ -31,6 +31,7 @@ import {
 } from "./post-new-product.js";
 
 const mediaURL = document.getElementById('media-url').innerText;
+const updateProductPageURL = document.getElementById('update-product-page-url').innerText;
 const productLineURL = document.getElementById('productLine-url').innerText;
 const productWrapperURL = document.getElementById('productWrapper-url').innerText;
 const productURL = document.getElementById('product-url').innerText;
@@ -82,7 +83,7 @@ function initializeTopBarDiscardBtn() {
                 const productLineId = new URLSearchParams(window.location.search).get('line');
                 const productIdList = products.slice(1);
                 await deleteAllProductInfo(productLineId, productIdList);
-                window.location.href = 'http://localhost:8081/admin/dashboard?query=updateProduct';
+                window.location.href = updateProductPageURL;
             } catch (error) {
                 alert('Failed to delete the entire product line');
             }

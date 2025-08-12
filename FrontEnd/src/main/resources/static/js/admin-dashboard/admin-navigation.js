@@ -1,15 +1,20 @@
 const mainContentArea = document.getElementById('main-content-area');
 
+const adminPageURL = document.getElementById('admin-page-url').innerText;
+const adminPagePath = document.getElementById('admin-page-path').innerText;
+const addProductPath = document.getElementById('admin-add-product-path').innerText;
+const updateProductPath = document.getElementById('admin-update-product-path').innerText;
+
 document.getElementById('admin-dashboard-top-header-link').addEventListener('click', async function(e) {
     e.preventDefault();
-    window.location.href = 'http://localhost:8081/admin/dashboard';
+    window.location.href = adminPageURL;
 });
 
 const addNewQuery = 'addProduct'
 const addProductLink = document.getElementById('add-product-link');
 addProductLink.addEventListener('click', async function(e) {
     e.preventDefault();
-    const newUrl = `/admin/dashboard?query=${addNewQuery}`;
+    const newUrl = `${adminPagePath}?query=${addNewQuery}`;
     this.href = newUrl;
     updatePageUrl(newUrl, addNewQuery);
     await getAddNewProductTemplate();
@@ -19,8 +24,9 @@ export const updateProductQuery = 'updateProduct';
 const updateProductLink = document.getElementById('update-product-link');
 updateProductLink.addEventListener('click', async function(e) {
     e.preventDefault();
-    const newUrl = `/admin/dashboard?query=${updateProductQuery}`;
+    const newUrl = `${adminPagePath}?query=${updateProductQuery}`;
     this.href = newUrl;
+
     updatePageUrl(newUrl, updateProductQuery);
     await getUpdateProductTemplate()
 });
@@ -33,7 +39,7 @@ const resetClickedLinks = () => {
 async function getAddNewProductTemplate() {
     resetClickedLinks();
     addProductLink.classList.add('bg-blue-300');
-    await getAdminProductTemplate('/admin/dashboard/addNewProduct', mainContentArea);
+    await getAdminProductTemplate(addProductPath, mainContentArea);
     import('./add-new-product.js')
         .then((module) => {
             module.initializeAdd();
@@ -47,7 +53,7 @@ async function getAddNewProductTemplate() {
 async function getUpdateProductTemplate() {
     resetClickedLinks();
     updateProductLink.classList.add('bg-blue-300');
-    await getAdminProductTemplate('/admin/dashboard/updateProduct', mainContentArea);
+    await getAdminProductTemplate(updateProductPath, mainContentArea);
     import('./update-product.js')
         .then((module) => {
             module.initializeUpdate();
