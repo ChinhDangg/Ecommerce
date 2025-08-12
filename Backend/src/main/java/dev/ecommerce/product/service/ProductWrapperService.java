@@ -54,15 +54,19 @@ public class ProductWrapperService {
         List<Long> updatedIds = new ArrayList<>();
         Integer productLineId = null;
         if (productLineDTO != null) {
-            if (productLineDTO.getId() == null)
+            if (productLineDTO.getId() == null) {
+                // if product line info is given with no id - meaning new product line to a product
+                // only apply to the first product given, hence must get from the product id list in product line dto
                 productLineId = productLineService.saveProductLine(productLineDTO, fileMap);
+                productService.updateProductProductLine(productLineId, productLineDTO.getProductIdList()[0]);
+            }
             else
                 productLineId = productLineService.updateProductLineInfo(productLineDTO, fileMap);
             updatedIds.add(productLineId.longValue());
         }
         if (updatingProductDTOList != null && !updatingProductDTOList.isEmpty())
             for (ProductDTO productDTO : updatingProductDTOList) {
-                updatedIds.add(productService.updateProductInfo(productDTO, fileMap));
+                updatedIds.add(productService.updateProductInfo(productDTO, productLineId, fileMap));
             }
         if (newProductDTOList != null && !newProductDTOList.isEmpty())
             for (ProductDTO productDTO : newProductDTOList) {

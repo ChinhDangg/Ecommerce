@@ -67,6 +67,14 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    public void updateProductProductLine(Integer productLineId, Long productId) {
+        Product product = findProductById(productId);
+        ProductLine productLine = productLineService.findProductLineById(productLineId);
+        product.setProductLine(productLine);
+        productRepository.save(product);
+        logger.info("Updated product line for product: {}", productId);
+    }
+
     @Transactional(readOnly = true)
     public ProductDTO getProductDTOById(Long id) {
         Product foundProduct = findProductById(id);
@@ -94,6 +102,7 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         ProductLine productLine = productLineId != null ? productLineService.findProductLineById(productLineId)
                 : productDTO.getProductLineId() == null ? null : productLineService.findProductLineById(productDTO.getProductLineId());
+
         Product savedProduct = productRepository.save(new Product(
                 productDTO.getManufacturerId(),
                 productDTO.getName(),
@@ -162,7 +171,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Long updateProductInfo(ProductDTO productDTO, Map<String, MultipartFile> fileMap) {
+    public Long updateProductInfo(ProductDTO productDTO, Integer productLineId, Map<String, MultipartFile> fileMap) {
         Product product = findProductById(productDTO.getId());
 
         List<String> oldFilenames = new ArrayList<>();
@@ -250,7 +259,8 @@ public class ProductService {
         product.getDescriptions().addAll(updatedDescriptionList);
 
         // update option
-        ProductLine productLine = product.getProductLine();
+        ProductLine productLine = productLineId == null ? product.getProductLine() : productLineService.findProductLineById(productLineId);
+        product.setProductLine(productLine);
 
         Map<String, ProductOption> currentOptionMap = product.getOptions()
                 .stream()

@@ -105,6 +105,9 @@ function initializeTopUpdateBtn() {
                 return;
         }
 
+        if (productLineInfo)
+            productLineInfo.productIdList = existing_product;
+
         if (productLineInfo || updatingProductInfos || newProductInfos) {
             try {
                 const retrievedIds = await updateAllProductInfo(productLineInfo, updatingProductInfos, newProductInfos, formData);
