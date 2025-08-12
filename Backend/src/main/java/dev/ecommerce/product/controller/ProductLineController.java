@@ -20,24 +20,24 @@ public class ProductLineController {
         this.productLineService = productLineService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductLineDTO> getProductLine(@PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(productLineService.getProductLineDTOById(id));
-    }
-
-    @PostMapping()
-    public ResponseEntity<Integer> addProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
-                                                  @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
-        Integer savedProductLineId = productLineService.saveProductLine(productLineDTO, fileMap);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
-    }
-
-    @PutMapping()
-    public ResponseEntity<Integer> updateProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
-                                                     @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
-        Integer updatedProductLineId = productLineService.updateProductLineInfo(productLineDTO, fileMap);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ProductLineDTO> getProductLine(@PathVariable Integer id) {
+//        return ResponseEntity.status(HttpStatus.OK).body(productLineService.getProductLineDTOById(id));
+//    }
+//
+//    @PostMapping()
+//    public ResponseEntity<Integer> addProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
+//                                                  @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
+//        Integer savedProductLineId = productLineService.saveProductLine(productLineDTO, fileMap);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(savedProductLineId);
+//    }
+//
+//    @PutMapping()
+//    public ResponseEntity<Integer> updateProductLine(@Valid @RequestPart ProductLineDTO productLineDTO,
+//                                                     @RequestParam(required = false) Map<String, MultipartFile> fileMap) {
+//        Integer updatedProductLineId = productLineService.updateProductLineInfo(productLineDTO, fileMap);
+//        return ResponseEntity.status(HttpStatus.OK).body(updatedProductLineId);
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProductLine(@PathVariable Integer id) {
