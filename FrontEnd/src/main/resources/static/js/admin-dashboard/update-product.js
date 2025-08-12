@@ -141,7 +141,7 @@ function displaySearchResult(content) {
         productSearchContainer.appendChild(searchEntry);
         searchEntry.classList.remove('hidden');
         searchEntry.querySelector('.product-name').innerHTML = result.name;
-        searchEntry.querySelector('.product-image').src = `${mediaURL}${result.imageName}`;
+        searchEntry.querySelector('.product-image').src = `${mediaURL}/${result.imageName}`;
         searchEntry.querySelector('.product-id').innerHTML = result.id;
         searchEntry.querySelector('.manufacturer-id').innerHTML = result.manufacturerId;
         searchEntry.querySelector('.product-quantity').innerHTML = result.quantity;

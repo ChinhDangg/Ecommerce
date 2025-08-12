@@ -22,13 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const mediaURL = document.getElementById('media-url').innerText;
+const searchURL = document.getElementById('search-url').innerText;
+const searchPageURL = document.getElementById('searchPage-url').innerText;
+const cardPageURL = document.getElementById('cardPage-url').innerText;
+
 let currentSearchString = document.getElementById('current-search-string').innerText;
 let currentPage = document.getElementById('current-page').innerText;
 let currentSort = document.getElementById('current-sort').innerText;
 const categoryId = document.getElementById('category-id').innerText;
-const searchPageURL = document.getElementById('searchPage-url').innerText;
-const searchURL = document.getElementById('search-url').innerText;
-const cardPageURL = document.getElementById('cardPage-url').innerText;
 
 const selectedSpecialFilters = {};
 const selectedSpecFilters = {};
@@ -208,7 +209,7 @@ function displayProductSearchResult(content) {
         productItem.querySelectorAll('.product-link').forEach(link => {
             link.href = `${cardPageURL}${item.id}`;
         });
-        productItem.querySelector('.product-img').src = `${mediaURL}${item.imageName}`;
+        productItem.querySelector('.product-img').src = `${mediaURL}/${item.imageName}`;
         productItem.querySelector('.product-name').innerHTML = item.name;
         productItem.querySelector('.product-id').innerHTML = `CPN # ${item.id} | MFR # ${item.manufacturerId}`;
         const featureList = productItem.querySelector('.product-feature-list');

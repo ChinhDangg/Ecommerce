@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const mediaURL = document.getElementById('media-url').innerText;
-const cardURL = document.getElementById('card-url').innerText;
 const cardPageURL = document.getElementById('cardPage-url').innerText;
+const cardURL = document.getElementById('card-url').innerText;
 const searchURL = document.getElementById('search-url').innerText;
 
 let currentProductId = null;
@@ -135,8 +135,8 @@ function showProductMedia(productMedia) {
     productMedia.forEach(media => {
         const mainImageItem = mainImageItemTem.cloneNode(true);
         const thumbnailItem = thumbnailItemTem.cloneNode(true);
-        mainImageItem.src = `${mediaURL}${media.content}`;
-        thumbnailItem.querySelector('img').src = `${mediaURL}${media.content}`;
+        mainImageItem.src = `${mediaURL}/${media.content}`;
+        thumbnailItem.querySelector('img').src = `${mediaURL}/${media.content}`;
         if (count < 5) {
             if (count === 0) {
                 mainImageItem.classList.remove('hidden');
@@ -248,7 +248,7 @@ function addProductConfig(name, optionValue, productId = null, selected = false)
         configOption.classList.add('border-2', 'border-blue-600', 'bg-blue-50', 'text-blue-600');
     }
     configEntry.querySelector('.config-option-container').appendChild(configOption);
-    if (productId && productId != currentProductId) {
+    if (productId && productId !== currentProductId) {
         configOption.addEventListener('click', async function() {
             history.pushState({ id: productId },'', `${cardPageURL}/${productId}`);
             const productInfo = await fetchProductInfo(productId);
@@ -309,7 +309,7 @@ function populateProductDescription(productDescriptions) {
             descriptionEntry.innerText = description.content;
         } else if (description.contentType === 'IMAGE') {
             descriptionEntry = descriptionImageEntryTem.cloneNode(true);
-            descriptionEntry.querySelector('img').src = `${mediaURL}${description.content}`;
+            descriptionEntry.querySelector('img').src = `${mediaURL}/${description.content}`;
         }
         descriptionEntry.classList.remove('hidden');
         descriptionTab.appendChild(descriptionEntry);

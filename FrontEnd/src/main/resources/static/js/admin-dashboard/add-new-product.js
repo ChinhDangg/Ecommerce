@@ -83,7 +83,7 @@ export function addImageEntry(dataImageArray, allImageContainer, imageFile, imag
     imageEntryTemplate.classList.remove('hidden');
     dataImageArray.push(imageFile == null ? imageSrc : imageFile);
     const newImageEntry = imageEntryTemplate.querySelector('.image-entry');
-    newImageEntry.querySelector('.image-entry-img').src = imageFile ? imageSrc : `${mediaURL}${imageSrc}`;
+    newImageEntry.querySelector('.image-entry-img').src = imageFile ? imageSrc : `${mediaURL}/${imageSrc}`;
     initializeImageButtons(allImageContainer, newImageEntry, dataImageArray);
     allImageContainer.appendChild(newImageEntry);
     console.log(dataImageArray);
@@ -173,7 +173,7 @@ export function updateDescriptionImage(descriptionContainer, dataImageArray, ima
     const descriptionImageContainer = descriptionContainer.querySelector('.description-image-entry');
     descriptionImageContainer.classList.remove('hidden');
     const imgTag = descriptionImageContainer.querySelector('img');
-    imgTag.src = imageContent instanceof File ? URL.createObjectURL(imageContent) : `${mediaURL}${imageContent}`;
+    imgTag.src = imageContent instanceof File ? URL.createObjectURL(imageContent) : `${mediaURL}/${imageContent}`;
     imgTag.alt = 'Description Image';
 }
 

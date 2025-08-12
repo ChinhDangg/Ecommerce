@@ -16,7 +16,7 @@ public class AdminDashboardController {
 
     @GetMapping("/addNewProduct")
     public String getAddNewProductTemplate(Model model) {
-        model.addAttribute("media_url", "http://localhost:8080/images/");
+        model.addAttribute("media_url", "http://localhost:8080/images");
         model.addAttribute("categoryTop_url", "http://localhost:8080/api/category/top");
         model.addAttribute("categorySubcategory_url", "http://localhost:8080/api/category/subcategory");
         return "/admin-dashboard/add-new-product :: add-new-product-template";
@@ -24,7 +24,7 @@ public class AdminDashboardController {
 
     @GetMapping("/updateProduct")
     public String getUpdateProductContent(Model model) {
-        model.addAttribute("media_url", "http://localhost:8080/images/");
+        model.addAttribute("media_url", "http://localhost:8080/images");
         model.addAttribute("productLine_url", "http://localhost:8080/api/productLine");
         model.addAttribute("productWrapper_url", "http://localhost:8080/api/productWrapper");
         model.addAttribute("product_url", "http://localhost:8080/api/product");
