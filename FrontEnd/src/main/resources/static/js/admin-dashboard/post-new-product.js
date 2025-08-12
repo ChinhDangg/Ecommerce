@@ -8,6 +8,8 @@ import {
     removeProductInfo,
 } from "./add-new-product.js";
 
+const updateProductPageURL = document.getElementById('update-product-page-url').innerText;
+const productWrapperURL = document.getElementById('productWrapper-url').innerText;
 
 export function initializePost() {
     document.getElementById('publish-btn').addEventListener('click', async function () {
@@ -34,10 +36,8 @@ export function initializePost() {
             const ids = await postAllProductInfo(productLineInfo, productInfos, formData);
             if (ids) {
                 const maxTotalLengthExpected = productInfos.length + 1;
-                let gotProductLineId = null;
                 let gotFirstProductId = null;
                 if (ids.length === maxTotalLengthExpected) {
-                    gotProductLineId = ids[0];
                     gotFirstProductId = ids[1];
                 } else if (ids.length === maxTotalLengthExpected - 1) {
                     gotFirstProductId = ids[0];
@@ -46,10 +46,7 @@ export function initializePost() {
                     console.error('Fail to publish all info');
                     return;
                 }
-                let redirect = `http://localhost:8081/admin/dashboard?query=updateProduct&product=${gotFirstProductId}`;
-                if (gotProductLineId && gotProductLineId !== -1)
-                    redirect += redirect + `&line=${gotProductLineId}`;
-                window.location.href = redirect
+                window.location.href = `${updateProductPageURL}&product=${gotFirstProductId}`;
             }
         } catch (error) {
             console.error(error);
@@ -248,7 +245,7 @@ async function postAllProductInfo(productLineInfoData, productInfoDataList, form
         new Blob([JSON.stringify(productInfoWrapper)], { type: 'application/json' })
     );
 
-    const response = await fetch('http://localhost:8080/api/productWrapper', {
+    const response = await fetch(productWrapperURL, {
         method: 'POST',
         body: formData
     });

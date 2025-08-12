@@ -16,6 +16,8 @@ public class AdminDashboardController {
 
     @GetMapping("/addNewProduct")
     public String getAddNewProductTemplate(Model model) {
+        model.addAttribute("updateProductPage_url", "http://localhost:8081/admin/dashboard?query=updateProduct");
+        model.addAttribute("productWrapper_url", "http://localhost:8080/api/productWrapper");
         model.addAttribute("media_url", "http://localhost:8080/images");
         model.addAttribute("categoryTop_url", "http://localhost:8080/api/category/top");
         model.addAttribute("categorySubcategory_url", "http://localhost:8080/api/category/subcategory");
