@@ -80,7 +80,6 @@ function initializeTopBarDiscardBtn() {
         const confirmDelete = confirm('Are you sure you want to delete the entire product line');
         if (confirmDelete) {
             try {
-                const productLineId = new URLSearchParams(window.location.search).get('line');
                 const productIdList = products.slice(1);
                 await deleteAllProductInfo(productLineId, productIdList);
                 window.location.href = updateProductPageURL;
