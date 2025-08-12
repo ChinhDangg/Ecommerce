@@ -5,6 +5,8 @@ import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductLineDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.entity.Product;
+import dev.ecommerce.product.entity.ProductLine;
+import dev.ecommerce.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,15 +22,33 @@ public class ProductWrapperService {
     private final ProductService productService;
     private final ProductCategoryService productCategoryService;
     private final ProductMapper productMapper;
+    private final ProductRepository productRepository;
 
     public ProductWrapperService(ProductLineService productLineService,
                                  ProductService productService,
                                  ProductCategoryService productCategoryService,
-                                 ProductMapper productMapper) {
+                                 ProductMapper productMapper,
+                                 ProductRepository productRepository) {
         this.productLineService = productLineService;
         this.productService = productService;
         this.productCategoryService = productCategoryService;
         this.productMapper = productMapper;
+            this.productRepository = productRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public ProductLineDTO getProductLineDTObyProductId(Long productId) {
+        Product product = productService.findProductById(productId);
+        ProductLine productLine = product.getProductLine();
+        if (productLine == null) {
+            ProductLineDTO empty = new ProductLineDTO(null, null, null, null);
+            empty.setProductIdList(new Long[] { productId });
+            return empty;
+        } else {
+            ProductLineDTO dto = productMapper.toProductLineDTO(productLine);
+            dto.setProductIdList(productRepository.findAllIdByProductLineId(productLine.getId()).orElse(new Long[]{ productId }));
+            return dto;
+        }
     }
 
     @Transactional

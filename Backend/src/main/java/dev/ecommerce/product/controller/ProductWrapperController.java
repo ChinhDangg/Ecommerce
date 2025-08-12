@@ -1,9 +1,6 @@
 package dev.ecommerce.product.controller;
 
-import dev.ecommerce.product.DTO.ProductCardDTO;
-import dev.ecommerce.product.DTO.ProductDeleteDTO;
-import dev.ecommerce.product.DTO.ProductUpdateDTO;
-import dev.ecommerce.product.DTO.ProductWrapperDTO;
+import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.service.ProductWrapperService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,6 +19,11 @@ public class ProductWrapperController {
 
     ProductWrapperController(ProductWrapperService productWrapperService) {
         this.productWrapperService = productWrapperService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductLineDTO> getProductLine(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(productWrapperService.getProductLineDTObyProductId(id));
     }
 
     @PostMapping

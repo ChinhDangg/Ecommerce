@@ -148,14 +148,14 @@ function displaySearchResult(content) {
         searchEntry.querySelector('.product-discounted-price').innerHTML = result.discountedPrice;
 
         const searchImageAnchor = searchEntry.querySelector('.product-image-anchor');
-        searchImageAnchor.href = getProductLink(result.id, result.productLineId);
+        searchImageAnchor.href = getProductLink(result.id);
         searchImageAnchor.addEventListener('click', async function(e) {
-            await clickOnProductResult(e, result.id, result.productLineId);
+            await clickOnProductResult(e, result.id);
         });
         const searchNameAnchor = searchEntry.querySelector('.product-name-anchor');
-        searchNameAnchor.href = getProductLink(result.id, result.productLineId);
+        searchNameAnchor.href = getProductLink(result.id);
         searchNameAnchor.addEventListener('click', async function(e) {
-            await clickOnProductResult(e, result.id, result.productLineId);
+            await clickOnProductResult(e, result.id);
         });
     });
 }
@@ -194,17 +194,17 @@ function clearSearchEntry() {
     Array.from(allSearchEntries).slice(1).forEach(item => item.remove()); // remove all item except first one
 }
 
-function getProductLink(productId, productLineId) {
-    return `/admin/dashboard?query=${updateProductQuery}&product=${productId}` + (productLineId ? `&line=${productLineId}` : '');
+function getProductLink(productId) {
+    return `/admin/dashboard?query=${updateProductQuery}&product=${productId}`;
 }
 
-async function clickOnProductResult(e, productId, productLineId) {
+async function clickOnProductResult(e, productId) {
     e.preventDefault();
-    await handleProductResult(productId, productLineId);
+    await handleProductResult(productId);
 }
 
-export async function handleProductResult(productId, productLineId) {
-    const newUrl = getProductLink(productId, productLineId);
+export async function handleProductResult(productId) {
+    const newUrl = getProductLink(productId);
     const query = `${updateProductQuery}P${productId}`;
     updatePageUrl(newUrl, query);
     clearSearchEntry();
@@ -215,18 +215,13 @@ export async function handleProductResult(productId, productLineId) {
     await addTopCategories(currentCategory, null, currentCategory[0], true);
     showMainContent();
     showTopToolbar(true);
-    if (productLineId) {
-        const productLineInfo = await fetchProductLineInfo(productLineId);
-        if (!productLineInfo) {
-            return;
-        }
+    const productLineInfo = await fetchProductLineInfo(productId);
+    if (productLineInfo.id) {
         displayProductLineInfo(productLineInfo);
-        productLineInfo.productIdList.forEach(productId => {
-            addProductEntry(productId);
-        });
-    } else {
-        addProductEntry(productId);
     }
+    productLineInfo.productIdList.forEach(productId => {
+        addProductEntry(productId);
+    });
 }
 
 function initializeProductLineSection() {
@@ -412,10 +407,10 @@ async function searchProduct(productNameSearch) {
     }
 }
 
-async function fetchProductLineInfo(productLineId) {
-    const response = await fetch(`${productLineURL}/${productLineId}`);
+async function fetchProductLineInfo(productId) {
+    const response = await fetch(`${productWrapperURL}/${productId}`);
     if (!response.ok) {
-        throw new Error('Failed to get product line with id: ' + productLineId);
+        throw new Error('Failed to get product line with product id: ' + productId);
     }
     return await response.json();
 }

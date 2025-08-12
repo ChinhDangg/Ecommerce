@@ -34,11 +34,9 @@ public interface ProductMapper {
     @Mapping(source = "features", target = "features", qualifiedByName = "featuresToContentList")
     ProductDTO toProductDTO(Product product);
 
-    @Mapping(source = "productLine.id", target = "productLineId")
     @Mapping(source = "features", target = "features", qualifiedByName = "featuresToContentList")
     ShortProductDTO toShortProductWithFeaturesDTO(Product product);
 
-    @Mapping(source = "productLine.id", target = "productLineId")
     @Mapping(target = "features", ignore = true)
     ShortProductDTO toShortProductWithoutFeaturesDTO(Product product);
 

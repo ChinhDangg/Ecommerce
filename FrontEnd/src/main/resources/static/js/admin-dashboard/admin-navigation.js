@@ -52,9 +52,8 @@ async function getUpdateProductTemplate() {
         .then((module) => {
             module.initializeUpdate();
             const productId = new URLSearchParams(window.location.search).get('product');
-            const productLineId = new URLSearchParams(window.location.search).get('line');
             if (productId)
-                module.handleProductResult(parseInt(productId), productLineId ? parseInt(productLineId) : null);
+                module.handleProductResult(parseInt(productId));
         });
 }
 
