@@ -97,10 +97,16 @@ public class ProductWrapperService {
 
     @Transactional
     public void deleteAllProductInfo(Integer productLineId, List<Long> productIdList) {
-        if (productLineId != null)
+        if (productLineId != null) {
+            List<Product> products = productLineService.findProductLineById(productLineId).getProducts();
+            for (Product product : products) {
+                productService.deleteProductById(product.getId());
+            }
             productLineService.deleteProductLineById(productLineId);
-        for (Long productId : productIdList)
-            productService.deleteProductById(productId);
+        } else {
+            for (Long productId : productIdList)
+                productService.deleteProductById(productId);
+        }
     }
 
     @Transactional(readOnly = true)
