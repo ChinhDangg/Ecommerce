@@ -333,7 +333,29 @@ public class ProductService {
     @Transactional
     public void deleteProductById(Long id) {
         Product product = findProductById(id);
+
+        List<String> filenameList = new ArrayList<>();
+
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForDeleting(filenameList));
+
+        filenameList.addAll(product.getMedia()
+                .stream()
+                .map(ProductMedia::getContent)
+                .toList());
+        filenameList.addAll(product.getDescriptions()
+                .stream()
+                .filter(d -> d.getContentType().isMedia())
+                .map(ProductDescription::getContent)
+                .toList());
+
         productRepository.delete(product);
+
+        try {
+            mediaService.movePermanentToTemp(filenameList);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to delete product line media");
+        }
+
         logger.info("Deleted product: {}", id);
     }
 }
