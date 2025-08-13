@@ -1,11 +1,10 @@
 package dev.ecommerce.product.service;
 
-import dev.ecommerce.product.DTO.ProductCardDTO;
-import dev.ecommerce.product.DTO.ProductDTO;
-import dev.ecommerce.product.DTO.ProductLineDTO;
-import dev.ecommerce.product.DTO.ProductMapper;
+import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.entity.ProductLine;
+import dev.ecommerce.product.entity.ProductLineDescription;
+import dev.ecommerce.product.entity.ProductLineMedia;
 import dev.ecommerce.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,8 +112,22 @@ public class ProductWrapperService {
     public ProductCardDTO getProductCardById(Long id) {
         Product product = productService.findProductById(id);
         ProductCardDTO cardDTO = productMapper.toProductCardDTO(product);
-        if (product.getProductLine() != null)
+        if (product.getProductLine() != null) {
+
+            List<ContentDTO> productLineMedia = new ArrayList<>();
+            for (ProductLineMedia media : product.getProductLine().getMedia()) {
+                productLineMedia.add(productMapper.mediaToContentDTO(media));
+            }
+            cardDTO.getMedia().addAll(0, productLineMedia);
+
+            List<ContentDTO> productLineDescription = new ArrayList<>();
+            for (ProductLineDescription description : product.getProductLine().getDescriptions()) {
+                productLineDescription.add(productMapper.descriptionsToContentDTO(description));
+            }
+            cardDTO.getDescriptions().addAll(0, productLineDescription);
+
             cardDTO.setProductGroupedOptions(productLineService.getProductGroupedOptions(product.getProductLine().getId()));
+        }
         cardDTO.setProductCategoryChain(productCategoryService.getProductParentCategoryChain(product.getId()));
         return cardDTO;
     }
