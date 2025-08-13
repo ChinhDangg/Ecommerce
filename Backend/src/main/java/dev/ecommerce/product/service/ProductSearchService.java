@@ -470,8 +470,8 @@ public class ProductSearchService {
             WITH matched_ids AS (
                 SELECT DISTINCT p.id
                 FROM product p
-                JOIN product_specification ps ON ps.product_id = p.id
-                JOIN product_core_specification cps ON cps.id = ps.core_specification_id
+                LEFT JOIN product_specification ps ON ps.product_id = p.id
+                LEFT JOIN product_core_specification cps ON cps.id = ps.core_specification_id
         """);
 
         // special filters
