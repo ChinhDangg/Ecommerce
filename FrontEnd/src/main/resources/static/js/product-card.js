@@ -306,7 +306,7 @@ function populateProductDescription(productDescriptions) {
         let descriptionEntry = null;
         if (description.contentType === 'TEXT') {
             descriptionEntry = descriptionTextEntryTem.cloneNode(true);
-            descriptionEntry.innerText = description.content;
+            descriptionEntry.innerHTML = description.content;
         } else if (description.contentType === 'IMAGE') {
             descriptionEntry = descriptionImageEntryTem.cloneNode(true);
             descriptionEntry.querySelector('img').src = `${mediaURL}/${description.content}`;
