@@ -18,6 +18,7 @@ public abstract class BaseContent {
     @Enumerated(EnumType.STRING)
     protected ContentType contentType;
 
+    @Column(columnDefinition = "TEXT")
     protected String content;
 
     protected Integer sortOrder;
