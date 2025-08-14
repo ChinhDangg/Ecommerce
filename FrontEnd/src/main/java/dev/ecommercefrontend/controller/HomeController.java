@@ -15,6 +15,6 @@ public class HomeController {
 
     @GetMapping("/login")
     public String getLoginPage() {
-        return "/product-page/login";
+        return "/other-page/login";
     }
 }
