@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class JpaUserDetailService implements UserDetailsService {
 
@@ -21,5 +23,15 @@ public class JpaUserDetailService implements UserDetailsService {
                 .findByUsername(username)
                 .map(SecurityUser::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    }
+
+    public Optional<SecurityUser> findByUsername(String username) {
+        return userRepository
+                .findByUsername(username)
+                .map(SecurityUser::new);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 }

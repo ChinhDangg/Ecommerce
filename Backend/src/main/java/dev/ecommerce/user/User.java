@@ -15,13 +15,17 @@ public class User {
     @Id
     @GeneratedValue
     private long id;
+    private String firstname;
+    private String lastname;
     private String username;
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public User(String username, String password, Role role) {
+    public User(String firstname, String lastname, String username, String password, Role role) {
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.username = username;
         this.password = password;
         this.role = role;
