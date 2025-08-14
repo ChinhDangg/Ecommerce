@@ -30,6 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+        // if requesting for authentication then skip token filter
+        if (request.getServletPath().startsWith("/api/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String headerPrefix = "Bearer ";
         Cookie[] cookies = request.getCookies();
@@ -69,12 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        if (isTokenValid) {
-            // if request for authentication while still having valid token, return back to home page
-            if (request.getRequestURI().equals("/authentication"))
-                response.sendRedirect("/home");
-        }
-        else
+        if (!isTokenValid)
             throw new BadCredentialsException("Invalid token");
         filterChain.doFilter(request, response);
     }
