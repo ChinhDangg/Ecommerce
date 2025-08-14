@@ -22,7 +22,7 @@ public class AuthenticationController {
             throw new IllegalArgumentException("Missing required fields");
         }
         AuthenticationResponse authenticationResponse = authenticationService.register(registerRequest);
-        response.setHeader("Location", "http://localhost:8081/home");
+        response.setHeader("Location", "http://localhost:8081");
         response.addCookie(authenticationResponse.cookie());
         response.setStatus(HttpServletResponse.SC_CREATED);
     }
@@ -33,7 +33,7 @@ public class AuthenticationController {
             throw new IllegalArgumentException("Missing required fields");
         }
         AuthenticationResponse authenticationResponse = authenticationService.authenticate(authenticationRequest);
-        response.setHeader("Location", "http://localhost:8081/home");
+        response.setHeader("Location", "http://localhost:8081");
         response.addCookie(authenticationResponse.cookie());
         response.setStatus(HttpServletResponse.SC_OK);
     }
