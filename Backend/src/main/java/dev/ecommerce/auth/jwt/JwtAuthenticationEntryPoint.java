@@ -15,10 +15,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        String loginPage = "http://localhost:8081/login";
         response.addCookie(removeAuthCookie());
-        String redirect = (request.getRequestURI().equals(loginPage)) ? "" : ("?r=" + request.getRequestURI());
-        response.sendRedirect(loginPage + redirect);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"Unauthorized\"}");
     }
 
     private Cookie removeAuthCookie() {
