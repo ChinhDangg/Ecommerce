@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,8 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -30,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String headerPrefix = "Bearer ";
         Cookie[] cookies = request.getCookies();
@@ -66,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtService.isCookieTokenValid(jwtToken, userDetails)) {
                 isTokenValid = true;
                 setDetailInSecurityContextHolder(userDetails, request);
-                response.addCookie(makeAuthenticateCookie(userDetails));
+                response.addCookie(jwtService.makeAuthenticateCookie(userDetails));
             }
         }
 
@@ -95,17 +94,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         );
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
-
-    private Cookie makeAuthenticateCookie(UserDetails userDetails) {
-        Date cookieMaxTime = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10);
-        Map<String, Object> claims = Map.of("cookieMaxTime", cookieMaxTime);
-        String token = jwtService.generateToken(claims, userDetails);
-        Cookie cookie = new Cookie("Auth", token);
-        cookie.setMaxAge(1000 * 60 * 60 * 10);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
     }
 
 }

@@ -11,6 +11,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -82,5 +83,16 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Base64.getDecoder().decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public Cookie makeAuthenticateCookie(UserDetails userDetails) {
+        Date cookieMaxTime = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10);
+        Map<String, Object> claims = Map.of("cookieMaxTime", cookieMaxTime);
+        String token = generateToken(claims, userDetails);
+        Cookie cookie = new Cookie("Auth", token);
+        cookie.setMaxAge(1000 * 60 * 60 * 10);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
     }
 }
