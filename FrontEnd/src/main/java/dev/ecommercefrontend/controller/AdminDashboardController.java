@@ -1,6 +1,7 @@
 package dev.ecommercefrontend.controller;
 
-import org.springframework.boot.Banner;
+import dev.ecommercefrontend.service.BackendCall;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +11,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin/dashboard")
 public class AdminDashboardController {
 
+    private final BackendCall backendCall;
+
+    public AdminDashboardController(BackendCall backendCall) {
+        this.backendCall = backendCall;
+    }
+
     @GetMapping()
-    public String getAdminDashboardPage(Model model) {
+    public String getAdminDashboardPage(HttpServletRequest request, Model model) {
+        if (!backendCall.checkHasAdminRole(request)) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("adminPage_url", "http://localhost:8081/admin/dashboard");
         model.addAttribute("adminPage_path", "/admin/dashboard");
         model.addAttribute("addProduct_path", "/admin/dashboard/addNewProduct");
@@ -20,7 +31,11 @@ public class AdminDashboardController {
     }
 
     @GetMapping("/addNewProduct")
-    public String getAddNewProductTemplate(Model model) {
+    public String getAddNewProductTemplate(HttpServletRequest request, Model model) {
+        if (!backendCall.checkHasAdminRole(request)) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("updateProductPage_url", "http://localhost:8081/admin/dashboard?query=updateProduct");
         model.addAttribute("productWrapper_url", "http://localhost:8080/api/productWrapper");
         model.addAttribute("media_url", "http://localhost:8080/images");
@@ -30,7 +45,11 @@ public class AdminDashboardController {
     }
 
     @GetMapping("/updateProduct")
-    public String getUpdateProductContent(Model model) {
+    public String getUpdateProductContent(HttpServletRequest request, Model model) {
+        if (!backendCall.checkHasAdminRole(request)) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("media_url", "http://localhost:8080/images");
         model.addAttribute("updateProductPage_url", "http://localhost:8081/admin/dashboard?query=updateProduct");
         model.addAttribute("productLine_url", "http://localhost:8080/api/productLine");
