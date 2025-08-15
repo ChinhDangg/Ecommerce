@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
 
-    @Value("${url.front-end}")
-    private String feURL;
+    @Value("${url.gateway}")
+    private String gatewayURL;
     private final AuthenticationService authenticationService;
 
     public AuthenticationController(AuthenticationService authenticationService) {
@@ -26,7 +26,7 @@ public class AuthenticationController {
             throw new IllegalArgumentException("Missing required fields");
         }
         AuthenticationResponse authenticationResponse = authenticationService.register(registerRequest);
-        response.setHeader("Location", feURL);
+        response.setHeader("Location", gatewayURL);
         response.addHeader(HttpHeaders.SET_COOKIE, authenticationResponse.cookie().toString());
         //response.addCookie(authenticationResponse.cookie());
         response.setStatus(HttpServletResponse.SC_CREATED);
@@ -38,7 +38,7 @@ public class AuthenticationController {
             throw new IllegalArgumentException("Missing required fields");
         }
         AuthenticationResponse authenticationResponse = authenticationService.authenticate(authenticationRequest);
-        response.setHeader("Location", feURL);
+        response.setHeader("Location", gatewayURL);
         System.out.println("Cookie:");
         System.out.println(authenticationResponse.cookie().getName());
         System.out.println(authenticationResponse.cookie().getValue());

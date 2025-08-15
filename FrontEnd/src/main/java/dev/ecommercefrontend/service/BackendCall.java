@@ -14,8 +14,8 @@ import java.util.Enumeration;
 @Service
 public class BackendCall {
 
-    @Value("${url.back-end}")
-    private String beUrl;
+    @Value("${url.gateway}")
+    private String gatewayUrl;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public boolean checkHasAdminRole(HttpServletRequest request) {
@@ -33,7 +33,7 @@ public class BackendCall {
         // Forward to backend
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         ResponseEntity<Boolean> response = restTemplate.exchange(
-                beUrl+"/api/internal/check-admin",
+                gatewayUrl+"/api/internal/check-admin",
                 HttpMethod.GET,
                 entity,
                 Boolean.class
