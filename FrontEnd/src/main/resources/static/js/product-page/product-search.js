@@ -207,7 +207,7 @@ function displayProductSearchResult(content) {
         productItem.classList.remove('hidden');
         productItem.dataset.productId = item.id;
         productItem.querySelectorAll('.product-link').forEach(link => {
-            link.href = `${cardPageURL}${item.id}`;
+            link.href = `${cardPageURL}/${item.id}`;
         });
         productItem.querySelector('.product-img').src = `${mediaURL}/${item.imageName}`;
         productItem.querySelector('.product-name').innerHTML = item.name;
