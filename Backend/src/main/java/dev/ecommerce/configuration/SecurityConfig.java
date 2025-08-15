@@ -3,6 +3,7 @@ package dev.ecommerce.configuration;
 import dev.ecommerce.auth.jwt.JwtAuthenticationEntryPoint;
 import dev.ecommerce.auth.jwt.JwtAuthenticationFilter;
 import dev.ecommerce.user.Role;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -25,6 +26,8 @@ import java.util.List;
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class SecurityConfig {
 
+    @Value("${url.front-end}")
+    private String feUrl;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -41,7 +44,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Customize allowed origins, methods, headers
-        config.setAllowedOrigins(List.of("http://localhost:8081"));
+        config.setAllowedOrigins(List.of(feUrl));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
