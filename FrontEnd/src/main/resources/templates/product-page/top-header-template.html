@@ -98,7 +98,7 @@
       window.location.href = '/';
       return;
     }
-    const baseUrl = [[${feUrl}]] + '/product/search';
+    const baseUrl = [[${gatewayUrl}]] + '/product/search';
     const queryParams = new URLSearchParams({
       q: searchInput.value.slice(0, 100), // max 100 chars only
       feature: true

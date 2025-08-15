@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            # Forward API requests to backend
+            - id: backend-api
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/**,/images/**
+
+            # Serve frontend pages from the frontend service
+            - id: frontend-pages
+              uri: http://localhost:8082
+              predicates:
+                - Path=/**
+#              filters:
+#                - DedupeResponseHeader=Access-Control-Allow-Credentials, Access-Control-Allow-Origin

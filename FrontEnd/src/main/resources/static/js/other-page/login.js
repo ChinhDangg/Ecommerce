@@ -14,6 +14,5 @@ document.getElementById('login-form').addEventListener('submit', async function 
     });
     if (response.ok) {
         console.log('success');
-        //window.location.href = 'http://localhost:8081/admin/dashboard';
     }
 });
