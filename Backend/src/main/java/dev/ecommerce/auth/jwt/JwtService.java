@@ -95,7 +95,7 @@ public class JwtService {
         return ResponseCookie.from("Auth", token)
                 .httpOnly(true)
                 .secure(false) // change to true upon production with https enable
-                .sameSite("None")
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .build();
