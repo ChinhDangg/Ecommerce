@@ -5,10 +5,13 @@ import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.product.service.ProductService;
+import dev.ecommerce.user.Role;
+import dev.ecommerce.user.User;
+import dev.ecommerce.user.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +19,12 @@ import java.util.List;
 
 @SpringBootApplication
 public class EcommerceApplication {
+
+    private final PasswordEncoder passwordEncoder;
+
+    public EcommerceApplication(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(EcommerceApplication.class, args);
@@ -34,8 +43,15 @@ public class EcommerceApplication {
             ProductFeatureRepository productFeatureRepository,
             ProductOptionRepository productOptionRepository,
             ProductSpecificationRepository productSpecificationRepository,
-            ProductCoreSpecificationRepository productCoreSpecificationRepository) {
+            ProductCoreSpecificationRepository productCoreSpecificationRepository, UserRepository userRepository) {
         return _ -> {
+
+            User user = new User(
+                    "chinh", "dang", "e@mail.com", passwordEncoder.encode("s"), Role.ADMIN
+            );
+            userRepository.save(user);
+
+
             ProductCategory electronics = new ProductCategory("Electronics", null);
             ProductCategory computers = new ProductCategory("Computers", electronics);
             ProductCategory display = new ProductCategory("Display", electronics);

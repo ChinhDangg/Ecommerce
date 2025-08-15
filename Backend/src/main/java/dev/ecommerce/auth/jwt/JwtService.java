@@ -9,7 +9,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -85,14 +85,19 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public Cookie makeAuthenticateCookie(UserDetails userDetails) {
-        Date cookieMaxTime = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10);
+    public ResponseCookie makeAuthenticateCookie(UserDetails userDetails) {
+        long maxAgeSeconds = 60 * 60; // 1 hour
+
+        Date cookieMaxTime = new Date(System.currentTimeMillis() + (maxAgeSeconds * 1000));
         Map<String, Object> claims = Map.of("cookieMaxTime", cookieMaxTime);
         String token = generateToken(claims, userDetails);
-        Cookie cookie = new Cookie("Auth", token);
-        cookie.setMaxAge(1000 * 60 * 60 * 10);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
+
+        return ResponseCookie.from("Auth", token)
+                .httpOnly(true)
+                .secure(false) // change to true upon production with https enable
+                .sameSite("None")
+                .path("/")
+                .maxAge(maxAgeSeconds)
+                .build();
     }
 }

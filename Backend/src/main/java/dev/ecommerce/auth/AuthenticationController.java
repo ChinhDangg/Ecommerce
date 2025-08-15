@@ -1,6 +1,7 @@
 package dev.ecommerce.auth;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,8 @@ public class AuthenticationController {
         }
         AuthenticationResponse authenticationResponse = authenticationService.register(registerRequest);
         response.setHeader("Location", "http://localhost:8081");
-        response.addCookie(authenticationResponse.cookie());
+        response.addHeader(HttpHeaders.SET_COOKIE, authenticationResponse.cookie().toString());
+        //response.addCookie(authenticationResponse.cookie());
         response.setStatus(HttpServletResponse.SC_CREATED);
     }
 
@@ -34,7 +36,11 @@ public class AuthenticationController {
         }
         AuthenticationResponse authenticationResponse = authenticationService.authenticate(authenticationRequest);
         response.setHeader("Location", "http://localhost:8081");
-        response.addCookie(authenticationResponse.cookie());
+        System.out.println("Cookie:");
+        System.out.println(authenticationResponse.cookie().getName());
+        System.out.println(authenticationResponse.cookie().getValue());
+        response.addHeader(HttpHeaders.SET_COOKIE, authenticationResponse.cookie().toString());
+        //response.addCookie(authenticationResponse.cookie());
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }
