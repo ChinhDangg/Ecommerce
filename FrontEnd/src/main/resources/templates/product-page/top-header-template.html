@@ -83,7 +83,8 @@
   </nav>
 </header>
 
-<script>
+<script th:inline="javascript">
+
   // Toggle mobile menu
   document.getElementById('mobile-menu-button').addEventListener('click', () => {
     const mobileMenu = document.getElementById('mobile-menu');
@@ -97,7 +98,7 @@
       window.location.href = '/';
       return;
     }
-    const baseUrl = 'http://localhost:8081/product/search';
+    const baseUrl = [[${feUrl}]] + '/product/search';
     const queryParams = new URLSearchParams({
       q: searchInput.value.slice(0, 100), // max 100 chars only
       feature: true

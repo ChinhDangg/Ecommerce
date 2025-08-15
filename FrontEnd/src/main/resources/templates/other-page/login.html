@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -8,7 +8,7 @@
     <title>Document</title>
 </head>
 <body>
-<form>
+<form accept-charset="utf-8" method="POST" id="login-form">
     <div id="login-error" style="display: none;">Wrong email or password</div>
     <div>
         <label for="email">Email:</label>
@@ -20,11 +20,9 @@
         <input type="password" name="password" id="password" autocapitalize="off" autocomplete="off"
                placeholder="Enter your password" required>
     </div>
-    <button type="button" id="sign-in-submit" disabled>Sign In</button>
+    <button type="submit" id="sign-in-submit">Sign In</button>
 </form>
 
-<script>
-
-</script>
+<script type="text/javascript" src="/js/other-page/login.js"></script>
 </body>
 </html>
