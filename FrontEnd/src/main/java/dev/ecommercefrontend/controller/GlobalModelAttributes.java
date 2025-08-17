@@ -39,5 +39,8 @@ public class GlobalModelAttributes {
         model.addAttribute("productSearch_url", gatewayUrl+"/api/product/search");
         model.addAttribute("category_url", gatewayUrl+"/api/category");
         model.addAttribute("categoryParent_url", gatewayUrl+"/api/category/parent");
+
+        model.addAttribute("cartPage_url", gatewayUrl+"/product/cart");
+        model.addAttribute("cart_url", gatewayUrl+"/api/user/cart");
     }
 }
