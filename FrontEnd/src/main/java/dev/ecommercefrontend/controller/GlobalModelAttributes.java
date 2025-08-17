@@ -16,7 +16,7 @@ public class GlobalModelAttributes {
 
     @ModelAttribute
     public void mediaUrl(Model model) {
-        model.addAttribute("media_url", gatewayUrl+"/images");
+        model.addAttribute("media_url", gatewayUrl+"/media");
         model.addAttribute("card_url", gatewayUrl+"/api/productWrapper/card");
         model.addAttribute("search_url", gatewayUrl+"/api/product/search");
         model.addAttribute("cardPage_url", gatewayUrl+"/product/card");
