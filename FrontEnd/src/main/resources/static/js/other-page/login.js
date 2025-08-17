@@ -13,6 +13,7 @@ document.getElementById('login-form').addEventListener('submit', async function 
         }
     });
     if (response.ok) {
-        console.log('success');
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = params.get('r') || '/';
     }
 });
