@@ -15,5 +15,6 @@ document.getElementById('login-form').addEventListener('submit', async function 
     if (response.ok) {
         const params = new URLSearchParams(window.location.search);
         window.location.href = params.get('r') || '/';
+        localStorage.clear();
     }
 });
