@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String headerPrefix = "Bearer ";
         Cookie[] cookies = request.getCookies();
 
-        // if Authorization header doesn't have Bearer token, and have cookie with Auth name,
+        // if Authorization header doesn't have Bearer token, and doesn't have cookie with Auth name,
         // then fail the jwt filter
         if (authHeader == null || !authHeader.startsWith(headerPrefix)) {
             if (cookies == null || checkCookiesHaveName(cookies, "Auth") == -1) {
@@ -51,8 +51,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // get first cookie or get authorization header
-        String jwtToken = (cookies != null) ? cookies[0].getValue() : authHeader.substring(headerPrefix.length());
+        // get auth cookie value or get authorization header
+        String jwtToken;
+        if (cookies != null) {
+            int cookieAuthIndex = checkCookiesHaveName(cookies, "Auth");
+            jwtToken = cookieAuthIndex == -1 ? cookies[0].getValue() : cookies[cookieAuthIndex].getValue();
+        } else {
+            jwtToken = authHeader.substring(headerPrefix.length());
+        }
         final String username = jwtService.extractUsername(jwtToken);
         boolean isTokenValid = false;
 
@@ -68,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // cookie is still valid but the jwt inside has expired as it has shorter duration
         // still authenticate the user but update the jwt with a new one and new cookie time
-        if (!isTokenValid && cookies != null && checkCookiesHaveName(cookies, "Auth") != -1) {
+        if (username != null && !isTokenValid && cookies != null && checkCookiesHaveName(cookies, "Auth") != -1) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtService.isCookieTokenValid(jwtToken, userDetails)) {
                 isTokenValid = true;
