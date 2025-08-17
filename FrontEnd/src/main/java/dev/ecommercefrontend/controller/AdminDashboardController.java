@@ -4,9 +4,11 @@ import dev.ecommercefrontend.service.BackendCall;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 @RequestMapping("/admin/dashboard")
@@ -22,15 +24,17 @@ public class AdminDashboardController {
     }
 
     @GetMapping()
-    public String getAdminDashboardPage(HttpServletRequest request, Model model) {
+    public String getAdminDashboardPage(HttpServletRequest request) {
         if (!backendCall.checkHasAdminRole(request)) {
-            return "redirect:" +gatewayUrl+ "/login";
+            String redirectParam = URLEncoder.encode("/admin/dashboard", StandardCharsets.UTF_8);
+            String redirectUrl = gatewayUrl + "/login?r=" + redirectParam;
+            return "redirect:" + redirectUrl;
         }
         return "/admin-dashboard/admin-dashboard";
     }
 
     @GetMapping("/addNewProduct")
-    public String getAddNewProductTemplate(HttpServletRequest request, Model model) {
+    public String getAddNewProductTemplate(HttpServletRequest request) {
         if (!backendCall.checkHasAdminRole(request)) {
             return "redirect:" +gatewayUrl+ "/login";
         }
@@ -38,7 +42,7 @@ public class AdminDashboardController {
     }
 
     @GetMapping("/updateProduct")
-    public String getUpdateProductContent(HttpServletRequest request, Model model) {
+    public String getUpdateProductContent(HttpServletRequest request) {
         if (!backendCall.checkHasAdminRole(request)) {
             return "redirect:" +gatewayUrl+ "/login";
         }
