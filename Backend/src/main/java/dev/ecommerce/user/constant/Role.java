@@ -1,4 +1,4 @@
-package dev.ecommerce.user;
+package dev.ecommerce.user.constant;
 
 public enum Role {
     USER,

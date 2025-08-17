@@ -1,10 +1,10 @@
 package dev.ecommerce.auth;
 
 import dev.ecommerce.auth.jwt.JwtService;
-import dev.ecommerce.user.JpaUserDetailService;
-import dev.ecommerce.user.Role;
+import dev.ecommerce.user.service.JpaUserDetailService;
+import dev.ecommerce.user.constant.Role;
 import dev.ecommerce.user.SecurityUser;
-import dev.ecommerce.user.User;
+import dev.ecommerce.user.entity.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

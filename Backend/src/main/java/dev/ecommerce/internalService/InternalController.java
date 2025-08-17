@@ -1,6 +1,6 @@
 package dev.ecommerce.internalService;
 
-import dev.ecommerce.user.Role;
+import dev.ecommerce.user.constant.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;

@@ -5,12 +5,13 @@ import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.product.service.ProductService;
-import dev.ecommerce.user.Role;
-import dev.ecommerce.user.User;
-import dev.ecommerce.user.UserRepository;
+import dev.ecommerce.user.constant.Role;
+import dev.ecommerce.user.entity.User;
+import dev.ecommerce.user.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;

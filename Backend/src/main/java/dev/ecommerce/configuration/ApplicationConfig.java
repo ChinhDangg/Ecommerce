@@ -1,6 +1,6 @@
 package dev.ecommerce.configuration;
 
-import dev.ecommerce.user.JpaUserDetailService;
+import dev.ecommerce.user.service.JpaUserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
