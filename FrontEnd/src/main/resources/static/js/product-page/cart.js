@@ -54,4 +54,13 @@ function updateLocalCartItemQuantity(productId, newQuantity) {
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
 }
 
-showCartQuantity(getLocalTotalQuantity());
+async function showCartTotal() {
+    const response = await fetch('http://localhost:8080/api/user/cart/total');
+    if (response.ok) {
+        showCartQuantity(await response.text());
+    } else {
+        showCartQuantity(getLocalTotalQuantity());
+    }
+}
+
+showCartTotal();
