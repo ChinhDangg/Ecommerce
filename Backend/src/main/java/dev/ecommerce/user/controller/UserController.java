@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
@@ -17,10 +19,22 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/cart/total")
+    public ResponseEntity<Integer> getCartTotal(Authentication authentication) {
+        Integer cartTotal = userService.getCartTotal(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(cartTotal);
+    }
+
+    @GetMapping("/cart")
+    public ResponseEntity<List<UserCartDTO>> getCart(Authentication authentication) {
+        List<UserCartDTO> cart = userService.getCart(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(cart);
+    }
+
     @PostMapping("/cart")
-    public ResponseEntity<?> addToCart(@RequestBody UserCartDTO userCartDTO, Authentication authentication) {
-        userService.addProductToCart(authentication.getName(), userCartDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Integer> addToCart(@RequestBody UserCartDTO userCartDTO, Authentication authentication) {
+        Integer quantity = userService.addProductToCart(authentication.getName(), userCartDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(quantity);
     }
 
     @PutMapping("/cart")

@@ -1,5 +1,6 @@
 package dev.ecommerce.user.service;
 
+import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.user.DTO.UserCartDTO;
@@ -10,6 +11,8 @@ import dev.ecommerce.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,16 +20,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserCartRepository userCartRepository;
-    public ProductService productService;
+    private final ProductService productService;
 
-    public UserService(UserRepository userRepository, UserCartRepository userCartRepository) {
+    public UserService(UserRepository userRepository, UserCartRepository userCartRepository, ProductService productService) {
         this.userRepository = userRepository;
         this.userCartRepository = userCartRepository;
+        this.productService = productService;
     }
 
     private User findUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new RuntimeException("User not found")
+                () -> new ResourceNotFoundException("User not found")
         );
     }
 
@@ -38,11 +42,35 @@ public class UserService {
         if (nullable) {
             return userCart.orElse(null);
         } else
-            return userCart.orElseThrow(() -> new RuntimeException("Product not found in cart"));
+            return userCart.orElseThrow(() -> new ResourceNotFoundException("Product not found in cart"));
+    }
+
+    private List<UserCart> findUserCart(String username) {
+        User findUser = findUserByUsername(username);
+        return findUser.getCarts();
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getCartTotal(String username) {
+        List<UserCart> userCart = findUserCart(username);
+        if (userCart.isEmpty())
+            return 0;
+        else
+            return userCart.stream().mapToInt(UserCart::getQuantity).sum();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserCartDTO> getCart(String username) {
+        List<UserCart> userCart = findUserCart(username);
+        if (userCart.isEmpty())
+            return new ArrayList<>();
+        return userCart.stream()
+                .map(cart -> new UserCartDTO(cart.getProduct().getId(), cart.getQuantity()))
+                .toList();
     }
 
     @Transactional
-    public void addProductToCart(String username, UserCartDTO userCartDTO) {
+    public Integer addProductToCart(String username, UserCartDTO userCartDTO) {
         Product product = productService.findProductById(userCartDTO.getProductId());
 
         User user = findUserByUsername(username);
@@ -55,16 +83,18 @@ public class UserService {
             addedSameCart = new UserCart(user, product, quantity);
         } else {
             System.out.println("Same product found in cart");
-            quantity = addedSameCart.getProduct().getQuantity() + userCartDTO.getQuantity();
+            quantity = addedSameCart.getQuantity() + userCartDTO.getQuantity();
             addedSameCart.setQuantity(quantity);
         }
 
         if (!(product.getQuantity() >= quantity)) {
-            throw new RuntimeException("Not enough quantity");
+            throw new IllegalArgumentException("Not enough quantity");
         } else if (quantity > 100)
-            throw new RuntimeException("Quantity must be less than 100");
+            throw new IllegalArgumentException("Quantity must be less than 100");
+        else if (quantity <= 0)
+            throw new IllegalArgumentException("Quantity must be greater than 0");
 
-        userCartRepository.save(addedSameCart);
+        return userCartRepository.save(addedSameCart).getQuantity();
     }
 
     @Transactional
