@@ -25,7 +25,7 @@ public class JwtService {
                 .claims(claims) // replaces setClaims()
                 .subject(userDetails.getUsername()) // replaces setSubject()
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 900))
+                .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 15))) // 15 minutes for token expiry
                 .signWith(getSignInKey()) // algorithm inferred from key
                 .compact();
     }
