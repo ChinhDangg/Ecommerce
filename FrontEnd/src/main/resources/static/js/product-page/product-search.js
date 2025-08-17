@@ -1,3 +1,5 @@
+import {updateCart} from "./cart.js";
+
 document.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("popstate", async (event) => {
         console.log('called');
@@ -25,6 +27,8 @@ const mediaURL = document.getElementById('media-url').innerText;
 const searchURL = document.getElementById('search-url').innerText;
 const searchPageURL = document.getElementById('searchPage-url').innerText;
 const cardPageURL = document.getElementById('cardPage-url').innerText;
+const cartPageURL = document.getElementById('cartPage-url').innerText;
+const cartURL = document.getElementById('cart-url').innerText;
 
 let currentSearchString = document.getElementById('current-search-string').innerText;
 let currentPage = document.getElementById('current-page').innerText;
@@ -263,6 +267,9 @@ function displayProductSearchResult(content) {
         if (item.quantity > 0) {
             productItem.querySelector('.out-stock-label').remove();
             productItem.querySelector('.out-of-stock-btn').remove();
+            productItem.querySelector('.add-to-cart-btn').addEventListener('click', async function () {
+                await updateCart(item.id, 1, this);
+            });
         } else {
             productItem.querySelector('.in-stock-label').remove();
             productItem.querySelector('.add-to-cart-btn').remove();
