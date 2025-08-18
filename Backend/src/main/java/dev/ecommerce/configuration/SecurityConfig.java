@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/media/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/product/**", "POST"),
                                 new AntPathRequestMatcher("/api/product/**", "PUT"),
@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/api/productWrapper/**", "PUT"),
                                 new AntPathRequestMatcher("/api/productWrapper/**", "DELETE"))
                         .hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
