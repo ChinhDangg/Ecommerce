@@ -30,6 +30,9 @@ public class ShortProductDTO {
     @Setter
     private boolean newRelease;
 
+    @Setter
+    private List<ProductOptionDTO> productOptions;
+
     public ShortProductDTO(Long id, String manufacturerId, String name,
                            Integer quantity, BigDecimal price, List<String> features) {
         this.id = id;
