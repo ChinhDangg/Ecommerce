@@ -1,6 +1,6 @@
 const cartKey = 'cart-items';
 
-export async function updateCart(productId, quantity, addToCartBtn = null) {
+export async function updateCart(productId, quantity, addToCartBtn = null, maxQuantity = null) {
     addToCartBtn.disabled = true;
     const cartInfo = {
         productId: productId,
@@ -18,6 +18,7 @@ export async function updateCart(productId, quantity, addToCartBtn = null) {
         const quantity = await response.text();
         showCartQuantity(quantity);
     } else if (response.status === 401) { // unauthorized then save to localstorage as guest
+        quantity = quantity > maxQuantity ? maxQuantity : quantity;
         updateLocalCartItemQuantity(productId, quantity);
         showCartQuantity(getLocalTotalQuantity());
     }

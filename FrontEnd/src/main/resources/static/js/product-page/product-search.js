@@ -268,7 +268,7 @@ function displayProductSearchResult(content) {
             productItem.querySelector('.out-stock-label').remove();
             productItem.querySelector('.out-of-stock-btn').remove();
             productItem.querySelector('.add-to-cart-btn').addEventListener('click', async function () {
-                await updateCart(item.id, 1, this);
+                await updateCart(item.id, 1, this, item.quantity);
             });
         } else {
             productItem.querySelector('.in-stock-label').remove();
