@@ -2,9 +2,11 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
+import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
+import dev.ecommerce.user.DTO.UserCartDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +96,12 @@ public class ProductController {
             }
         }
         return selectedFilters;
+    }
+
+    @GetMapping("/cart")
+    public ResponseEntity<List<ShortProductDTO>> getLocalCartInfo(@RequestBody List<UserCartDTO> userCartDTOList) {
+        List<ShortProductDTO> shortProductDTOList = productService.getLocalCartInfo(userCartDTOList);
+        return ResponseEntity.status(HttpStatus.OK).body(shortProductDTOList);
     }
 
     @GetMapping("/{id}")
