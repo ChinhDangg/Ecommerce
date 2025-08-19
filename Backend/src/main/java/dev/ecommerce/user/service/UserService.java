@@ -1,6 +1,8 @@
 package dev.ecommerce.user.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
+import dev.ecommerce.product.DTO.ProductMapper;
+import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.user.DTO.UserCartDTO;
@@ -21,11 +23,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserCartRepository userCartRepository;
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
-    public UserService(UserRepository userRepository, UserCartRepository userCartRepository, ProductService productService) {
+    public UserService(UserRepository userRepository, UserCartRepository userCartRepository, ProductService productService, ProductMapper productMapper) {
         this.userRepository = userRepository;
         this.userCartRepository = userCartRepository;
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     private User findUserByUsername(String username) {
@@ -60,13 +64,20 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserCartDTO> getCart(String username) {
+    public List<ShortProductDTO> getCart(String username) {
         List<UserCart> userCart = findUserCart(username);
         if (userCart.isEmpty())
             return new ArrayList<>();
-        return userCart.stream()
-                .map(cart -> new UserCartDTO(cart.getProduct().getId(), cart.getQuantity()))
-                .toList();
+
+        List<ShortProductDTO> shortProductDTOs = new ArrayList<>();
+        for (UserCart cart : userCart) {
+            Product product = cart.getProduct();
+            product.setQuantity(cart.getQuantity());
+            ShortProductDTO shortProductDTO = productService.getShortProductInfo(product, false);
+            shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
+            shortProductDTOs.add(shortProductDTO);
+        }
+        return shortProductDTOs;
     }
 
     @Transactional
