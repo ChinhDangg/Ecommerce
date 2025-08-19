@@ -19,8 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,14 +26,14 @@ import java.util.concurrent.CompletableFuture;
 public class ProductSearchService {
 
     private final EntityManager entityManager;
-    private final ProductMapper productMapper;
     private final ProductCategoryService productCategoryService;
+    private final ProductService productService;
 
     public ProductSearchService(EntityManager entityManager, ProductMapper productMapper,
-                                ProductCategoryService productCategoryService) {
+                                ProductCategoryService productCategoryService, ProductService productService) {
         this.entityManager = entityManager;
-        this.productMapper = productMapper;
         this.productCategoryService = productCategoryService;
+        this.productService = productService;
     }
 
     @Transactional
@@ -322,18 +320,7 @@ public class ProductSearchService {
         List<Product> resultList = typedQuery.getResultList();
         List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
         for (Product product : resultList) {
-            ShortProductDTO current = (getFeatures) ? productMapper.toShortProductWithFeaturesDTO(product)
-                    : productMapper.toShortProductWithoutFeaturesDTO(product);
-            current.setImageName(product.getMedia().stream().findFirst().map(ProductMedia::getContent).orElse(null));
-            current.setDiscountedPrice(
-                    product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
-            );
-            if (product.getSaleEndDate() != null) {
-                long daysDifference = ChronoUnit.DAYS.between(product.getSaleEndDate(), LocalDate.now());
-                current.setNewRelease(daysDifference >= 0 && daysDifference < 8);
-            } else {
-                current.setNewRelease(false);
-            }
+            ShortProductDTO current = productService.getShortProductInfo(product, getFeatures);
             shortProductDTOList.add(current);
         }
 
