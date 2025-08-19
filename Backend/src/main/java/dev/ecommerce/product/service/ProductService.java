@@ -4,6 +4,7 @@ import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
+import dev.ecommerce.user.DTO.UserCartDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -73,6 +75,37 @@ public class ProductService {
         product.setProductLine(productLine);
         productRepository.save(product);
         logger.info("Updated product line for product: {}", productId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ShortProductDTO> getLocalCartInfo(List<UserCartDTO> userCartDTOList) {
+        List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
+
+        for (UserCartDTO userCartDTO : userCartDTOList) {
+            Product product = findProductById(userCartDTO.getProductId());
+            product.setQuantity(userCartDTO.getQuantity() > product.getQuantity() ? product.getQuantity() : userCartDTO.getQuantity());
+            ShortProductDTO shortProductDTO = getShortProductInfo(product, false);
+            shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
+            shortProductDTOList.add(shortProductDTO);
+        }
+        return shortProductDTOList;
+    }
+
+    @Transactional(readOnly = true)
+    public ShortProductDTO getShortProductInfo(Product product, boolean getFeatures) {
+        ShortProductDTO shortProductDTO = (getFeatures) ? productMapper.toShortProductWithFeaturesDTO(product)
+                : productMapper.toShortProductWithoutFeaturesDTO(product);
+        shortProductDTO.setImageName(product.getMedia().stream().findFirst().map(ProductMedia::getContent).orElse(null));
+        shortProductDTO.setDiscountedPrice(
+                product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
+        );
+        if (product.getSaleEndDate() != null) {
+            long daysDifference = ChronoUnit.DAYS.between(product.getSaleEndDate(), LocalDate.now());
+            shortProductDTO.setNewRelease(daysDifference >= 0 && daysDifference < 8);
+        } else {
+            shortProductDTO.setNewRelease(false);
+        }
+        return shortProductDTO;
     }
 
     @Transactional(readOnly = true)
