@@ -1,5 +1,6 @@
 package dev.ecommerce.user.controller;
 
+import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.user.DTO.UserCartDTO;
 import dev.ecommerce.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/cart")
-    public ResponseEntity<List<UserCartDTO>> getCart(Authentication authentication) {
-        List<UserCartDTO> cart = userService.getCart(authentication.getName());
+    public ResponseEntity<List<ShortProductDTO>> getCart(Authentication authentication) {
+        List<ShortProductDTO> cart = userService.getCart(authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(cart);
     }
 
