@@ -8,6 +8,9 @@
 </head>
 <body class="bg-gray-100">
 
+<span id="media-url" class="hidden" th:text="${media_url}"></span>
+<span id="cardPage-url" class="hidden" th:text="${cardPage_url}"></span>
+
 <header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
 </header>
 
@@ -21,7 +24,7 @@
             <div id="product-item-container" class="space-y-6">
 
                 <!-- Product Item -->
-                <div class="product-item w-full min-w-[14rem] p-4 border rounded-lg shadow-md bg-white flex flex-row gap-6 items-start">
+                <div class="product-item hidden w-full min-w-[14rem] p-4 border rounded-lg shadow-md bg-white flex flex-row gap-6 items-start">
                     <div class="flex flex-col items-center space-y-2">
                         <a class="product-link" href="#">
                             <div class="img-container w-48 h-48 flex items-center justify-center overflow-hidden">
@@ -36,15 +39,20 @@
                         <p class="product-id text-sm text-gray-500">#LE83F50018US | MFR #83F50018US</p>
                         <div class="flex items-center">
                             <span class="in-stock-label rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">In Stock</span>
+                            <span class="out-stock-label rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">Out of Stock</span>
                         </div>
                         <div class="option-container text-sm">
-                            <span class="font-bold">Color: </span><span class="text-gray-600">Red</span>
+                            <div class="option-item hidden">
+                                <span class="option-item-name font-bold">Color</span><span class="font-bold">: </span><span class="option-item-value text-gray-600">Red</span>
+                            </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <label for="quantity" class="text-sm text-gray-600">Qty:</label>
-                            <select id="quantity" class="border rounded-md px-2 py-1 text-sm">
-                                <option value="1">1</option><option value="2">2</option>
-                                <option value="3">3</option><option value="4">4</option>
+                            <label for="quantity-select" class="text-sm text-gray-600">Qty:</label>
+                            <select id="quantity-select" class="border rounded-md px-2 py-1 text-sm">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
                                 <option value="5">5</option>
                             </select>
                             <button class="text-black hover:text-gray-700 text-sm">Remove</button>
@@ -126,7 +134,7 @@
                     <!-- Details -->
                     <div class="space-y-2 flex-1">
                         <a class="product-link" href="#">
-                            <h2 class="product-name hover:text-blue-600 text-lg font-bold text-gray-900">
+                            <h2 class="product-name hover:text-blue-600 text-base font-bold text-gray-900">
                                 ASUS ROG Strix GeForce RTX 4090 Graphics Card
                             </h2>
                         </a>
@@ -161,9 +169,10 @@
             </div>
         </section>
 
-
     </div>
 </div>
+
+<script type="module" src="/js/product-page/cartPage.js"></script>
 
 <footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
 </footer>

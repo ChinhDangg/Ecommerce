@@ -1,4 +1,4 @@
-const cartKey = 'cart-items';
+export const cartKey = 'cart-items';
 
 export async function updateCart(productId, quantity, addToCartBtn = null, maxQuantity = null) {
     addToCartBtn.disabled = true;
