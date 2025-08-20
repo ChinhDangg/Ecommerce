@@ -72,7 +72,9 @@ public class UserService {
         List<ShortProductDTO> shortProductDTOs = new ArrayList<>();
         for (UserCart cart : userCart) {
             Product product = cart.getProduct();
-            product.setQuantity(cart.getQuantity());
+            product.setQuantity(
+                    cart.getQuantity() > product.getQuantity() ? product.getQuantity() : cart.getQuantity()
+            );
             ShortProductDTO shortProductDTO = productService.getShortProductInfo(product, false);
             shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
             shortProductDTOs.add(shortProductDTO);
