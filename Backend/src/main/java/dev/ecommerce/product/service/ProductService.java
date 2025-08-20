@@ -83,7 +83,9 @@ public class ProductService {
 
         for (UserCartDTO userCartDTO : userCartDTOList) {
             Product product = findProductById(userCartDTO.getProductId());
-            product.setQuantity(userCartDTO.getQuantity() > product.getQuantity() ? product.getQuantity() : userCartDTO.getQuantity());
+            product.setQuantity(
+                    userCartDTO.getQuantity() > product.getQuantity() ? product.getQuantity() : userCartDTO.getQuantity()
+            );
             ShortProductDTO shortProductDTO = getShortProductInfo(product, false);
             shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
             shortProductDTOList.add(shortProductDTO);
