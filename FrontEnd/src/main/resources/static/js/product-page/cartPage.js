@@ -2,33 +2,43 @@ import {cartKey} from "./cart.js";
 
 async function loadUserCart() {
     const response = await fetch('http://localhost:8080/api/user/cart');
-    if (response.ok) {
-        const cartInfo = await response.json();
-        displayCartProduct(cartInfo);
-    } else if (response.status === 401) { // not login / unauthorized
-        console.log("Not authorized yet");
-        if (localStorage.getItem(cartKey)) {
-            const cartInfo = JSON.parse(localStorage.getItem(cartKey));
-            console.log(cartInfo);
-            const getLocal = await fetch('http://localhost:8080/api/product/cart', {
-                method: 'POST',
-                body: JSON.stringify(cartInfo),
-                headers: {
-                    'Content-Type': 'application/json'
+    try {
+        if (response.ok) {
+            const cartInfo = await response.json();
+            if (cartInfo.productList.length) {
+                displayCartProduct(cartInfo.productList);
+                displayOrderSummary(cartInfo);
+            } else
+                removeOrderSummary();
+            return;
+        } else if (response.status === 401) { // not login / unauthorized
+            if (localStorage.getItem(cartKey)) {
+                const cartInfo = JSON.parse(localStorage.getItem(cartKey));
+                console.log(cartInfo);
+                const getLocal = await fetch('http://localhost:8080/api/product/cart', {
+                    method: 'POST',
+                    body: JSON.stringify(cartInfo),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (getLocal.ok) {
+                    const localCartInfo = await getLocal.json();
+                    if (localCartInfo.productList.length) {
+                        displayCartProduct(localCartInfo.productList);
+                        displayOrderSummary(localCartInfo);
+                        return;
+                    }
+                } else {
+                    console.error('Fail to load local cart info');
                 }
-            });
-            if (getLocal.ok) {
-                const localCartInfo = await getLocal.json();
-                displayCartProduct(localCartInfo);
             } else {
-                console.error('Fail to load local cart info');
+                console.log('No local cart info');
             }
-        } else {
-            console.log("No local cart");
         }
-    } else {
-        console.error('Fail to load user cart');
+    } catch (error) {
     }
+    removeOrderSummary();
 }
 
 function displayCartProduct(content) {
@@ -85,6 +95,24 @@ function displayCartProduct(content) {
         }
         productItemContainer.appendChild(productItem);
     });
+}
+
+function displayOrderSummary(cartInfo) {
+    const item = cartInfo.totalQuantity > 1 ? 'items' : 'item';
+    document.getElementById('order-num-item').innerText = `(${cartInfo.totalQuantity} ${item})`
+    document.getElementById('price-before-tax').innerText = '$' + cartInfo.totalPrice;
+    document.getElementById('tax-amount').innerText = '$' + cartInfo.taxAmount;
+    document.getElementById('price-after-tax').innerText = '$' + cartInfo.priceAfterTax;
+}
+
+function removeOrderSummary() {
+    const orderContainer = document.getElementById('order-summary-container');
+    document.getElementById('price-before-tax').remove();
+    orderContainer.querySelector('.shipping-section').remove();
+    orderContainer.querySelector('.tax-section').remove();
+    orderContainer.querySelector('.total-section').remove();
+    orderContainer.querySelector('.check-out-btn').remove();
+
 }
 
 loadUserCart();
