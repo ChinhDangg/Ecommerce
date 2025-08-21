@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/media")
-public class ImageController {
+public class MediaController {
 
     private final MediaService mediaService;
 
-    public ImageController(MediaService mediaService) {
+    public MediaController(MediaService mediaService) {
         this.mediaService = mediaService;
     }
 
