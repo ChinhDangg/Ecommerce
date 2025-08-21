@@ -14,6 +14,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -78,7 +80,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ShortProductDTO> getLocalCartInfo(List<UserCartDTO> userCartDTOList) {
+    public ProductCartDTO getLocalCartInfo(List<UserCartDTO> userCartDTOList) {
         List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
 
         for (UserCartDTO userCartDTO : userCartDTOList) {
@@ -90,7 +92,23 @@ public class ProductService {
             shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
             shortProductDTOList.add(shortProductDTO);
         }
-        return shortProductDTOList;
+        return getProductCartInfo(shortProductDTOList);
+    }
+
+    public ProductCartDTO getProductCartInfo(List<ShortProductDTO> productList) {
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        int totalQuantity = 0;
+        for (ShortProductDTO product : productList) {
+            BigDecimal whichPrice = product.getDiscountedPrice() == null ? product.getPrice() : product.getDiscountedPrice();
+            totalPrice = totalPrice.add(whichPrice.multiply(new BigDecimal(product.getQuantity())));
+            totalQuantity += product.getQuantity();
+        }
+        BigDecimal tax = totalPrice.multiply(new BigDecimal("0.0625"));
+        BigDecimal priceAfterTax = totalPrice.add(tax);
+        return new ProductCartDTO(productList, totalQuantity,
+                tax.setScale(2, RoundingMode.HALF_UP),
+                totalPrice.setScale(2, RoundingMode.HALF_UP),
+                priceAfterTax.setScale(2, RoundingMode.HALF_UP));
     }
 
     @Transactional(readOnly = true)

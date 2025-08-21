@@ -1,8 +1,8 @@
 package dev.ecommerce.product.controller;
 
+import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.DTO.ProductDTO;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
-import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
@@ -13,10 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -99,8 +95,8 @@ public class ProductController {
     }
 
     @PostMapping("/cart")
-    public ResponseEntity<List<ShortProductDTO>> getLocalCartInfo(@RequestBody List<UserCartDTO> userCartDTOList) {
-        List<ShortProductDTO> shortProductDTOList = productService.getLocalCartInfo(userCartDTOList);
+    public ResponseEntity<ProductCartDTO> getLocalCartInfo(@RequestBody List<UserCartDTO> userCartDTOList) {
+        ProductCartDTO shortProductDTOList = productService.getLocalCartInfo(userCartDTOList);
         return ResponseEntity.status(HttpStatus.OK).body(shortProductDTOList);
     }
 

@@ -1,6 +1,7 @@
 package dev.ecommerce.user.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
+import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.entity.Product;
@@ -64,10 +65,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<ShortProductDTO> getCart(String username) {
+    public ProductCartDTO getUserCartInfo(String username) {
         List<UserCart> userCart = findUserCart(username);
         if (userCart.isEmpty())
-            return new ArrayList<>();
+            return new ProductCartDTO();
 
         List<ShortProductDTO> shortProductDTOs = new ArrayList<>();
         for (UserCart cart : userCart) {
@@ -79,7 +80,7 @@ public class UserService {
             shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
             shortProductDTOs.add(shortProductDTO);
         }
-        return shortProductDTOs;
+        return productService.getProductCartInfo(shortProductDTOs);
     }
 
     @Transactional
