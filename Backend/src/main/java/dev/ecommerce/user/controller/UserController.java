@@ -1,15 +1,12 @@
 package dev.ecommerce.user.controller;
 
 import dev.ecommerce.product.DTO.ProductCartDTO;
-import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.user.DTO.UserCartDTO;
 import dev.ecommerce.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")

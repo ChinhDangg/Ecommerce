@@ -1,5 +1,6 @@
-import {cartKey} from "./cart.js";
+import {cartKey, showCartTotal} from "./cart.js";
 
+let localLoaded = false;
 async function loadUserCart() {
     const response = await fetch('http://localhost:8080/api/user/cart');
     try {
@@ -8,9 +9,10 @@ async function loadUserCart() {
             if (cartInfo.productList.length) {
                 displayCartProduct(cartInfo.productList);
                 displayOrderSummary(cartInfo);
+                localLoaded = false;
+                return;
             } else
                 removeOrderSummary();
-            return;
         } else if (response.status === 401) { // not login / unauthorized
             if (localStorage.getItem(cartKey)) {
                 const cartInfo = JSON.parse(localStorage.getItem(cartKey));
@@ -27,6 +29,7 @@ async function loadUserCart() {
                     if (localCartInfo.productList.length) {
                         displayCartProduct(localCartInfo.productList);
                         displayOrderSummary(localCartInfo);
+                        localLoaded = true;
                         return;
                     }
                 } else {
@@ -42,6 +45,7 @@ async function loadUserCart() {
 }
 
 function displayCartProduct(content) {
+    showEmptyCart(false);
     const mediaURL = document.getElementById('media-url').innerText;
     const cardPageURL = document.getElementById('cardPage-url').innerText;
     const productItemContainer = document.getElementById('product-item-container');
@@ -93,6 +97,10 @@ function displayCartProduct(content) {
         } else {
             productItem.querySelector('.in-stock-label').remove();
         }
+        productItem.querySelector('.remove-cart-btn').addEventListener('click', async function() {
+            await removeFromCart(item.id);
+            productItem.remove();
+        });
         productItemContainer.appendChild(productItem);
     });
 }
@@ -112,7 +120,46 @@ function removeOrderSummary() {
     orderContainer.querySelector('.tax-section').remove();
     orderContainer.querySelector('.total-section').remove();
     orderContainer.querySelector('.check-out-btn').remove();
+}
 
+async function removeFromCart(productId) {
+    if (localLoaded) {
+        removeProductFromLocalCart(productId);
+    } else {
+        await removeProductFromUserCart(productId);
+    }
+    const quantity = await showCartTotal();
+    if (quantity === 0) {
+        removeOrderSummary();
+        showEmptyCart(true);
+    }
+}
+
+function showEmptyCart(show = true) {
+    if (show) {
+        document.getElementById('empty-cart-container').classList.remove('hidden');
+    } else {
+        document.getElementById('empty-cart-container').classList.add('hidden');
+    }
+}
+
+async function removeProductFromUserCart(productId) {
+    const response = await fetch('http://localhost:8080/api/user/cart', {
+        method: 'DELETE',
+        body: JSON.stringify({productId}),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Fail to remove product from user cart');
+    }
+}
+
+function removeProductFromLocalCart(productId) {
+    let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
+    cartItems = cartItems.filter(item => item.productId !== productId);
+    localStorage.setItem(cartKey, JSON.stringify(cartItems));
 }
 
 loadUserCart();

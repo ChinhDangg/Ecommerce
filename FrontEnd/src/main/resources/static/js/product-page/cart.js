@@ -28,12 +28,13 @@ function showCartQuantity(quantity) {
     quantity = parseInt(quantity);
     if (quantity <= 0) {
         document.getElementById('cart-quantity').classList.add('hidden');
-        return;
+        return 0;
     }
     else if (quantity > 99)
         quantity = '99+';
     document.getElementById('cart-quantity').innerText = quantity;
     document.getElementById('cart-quantity').classList.remove('hidden');
+    return quantity;
 }
 
 function getLocalTotalQuantity() {
@@ -55,12 +56,12 @@ function updateLocalCartItemQuantity(productId, newQuantity) {
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
 }
 
-async function showCartTotal() {
+export async function showCartTotal() {
     const response = await fetch('http://localhost:8080/api/user/cart/total');
     if (response.ok) {
-        showCartQuantity(await response.text());
+        return showCartQuantity(await response.text());
     } else {
-        showCartQuantity(getLocalTotalQuantity());
+        return showCartQuantity(getLocalTotalQuantity());
     }
 }
 
