@@ -1,4 +1,4 @@
-import {cartKey, showCartTotal} from "./cart.js";
+import {cartKey, getLocalCartItem, showCartTotal} from "./cart.js";
 
 let localLoaded = false;
 async function loadUserCart() {
@@ -15,7 +15,7 @@ async function loadUserCart() {
                 removeOrderSummary();
         } else if (response.status === 401) { // not login / unauthorized
             if (localStorage.getItem(cartKey)) {
-                const cartInfo = JSON.parse(localStorage.getItem(cartKey));
+                const cartInfo = getLocalCartItem();
                 console.log(cartInfo);
                 const getLocal = await fetch('http://localhost:8080/api/product/cart', {
                     method: 'POST',
@@ -160,6 +160,27 @@ function removeProductFromLocalCart(productId) {
     let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
     cartItems = cartItems.filter(item => item.productId !== productId);
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
+}
+
+async function moveProductToUserSaved(productId) {
+    const response = await fetch('http://localhost:8080/api/user/cart/to-save', {
+        method: 'POST',
+        body: JSON.stringify({productId}),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Fail to move product to saved');
+    }
+}
+
+function moveLocalCartToSaved(productId) {
+    let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
+    const cartItemIndex = cartItems.findIndex(item => item.productId === productId);
+    if (cartItemIndex !== -1) {
+
+    }
 }
 
 loadUserCart();

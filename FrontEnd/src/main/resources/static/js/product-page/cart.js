@@ -20,7 +20,7 @@ export async function updateCart(productId, quantity, addToCartBtn = null, maxQu
     } else if (response.status === 401) { // unauthorized then save to localstorage as guest
         quantity = quantity > maxQuantity ? maxQuantity : quantity;
         updateLocalCartItemQuantity(productId, quantity);
-        showCartQuantity(getLocalTotalQuantity());
+        showCartQuantity(getLocalCartTotalQuantity());
     }
 }
 
@@ -37,9 +37,11 @@ function showCartQuantity(quantity) {
     return quantity;
 }
 
-function getLocalTotalQuantity() {
+function getLocalCartTotalQuantity() {
     const cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
-    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    return cartItems
+        .filter(item => item.type === 'CART')
+        .reduce((sum, item) => sum + item.quantity, 0);
 }
 
 function updateLocalCartItemQuantity(productId, newQuantity) {
@@ -47,11 +49,11 @@ function updateLocalCartItemQuantity(productId, newQuantity) {
     const itemIndex = cartItems.findIndex(item => item.productId === productId);
 
     if (itemIndex !== -1) {
-        // ✅ update quantity if product exists
+        // update quantity if product exists
         cartItems[itemIndex].quantity = newQuantity;
     } else {
-        // ❌ optionally add it if it doesn't exist
-        cartItems.push({ productId, quantity: newQuantity });
+        // optionally add it if it doesn't exist
+        cartItems.push({ productId, quantity: newQuantity, type: 'CART' });
     }
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
 }
@@ -61,8 +63,17 @@ export async function showCartTotal() {
     if (response.ok) {
         return showCartQuantity(await response.text());
     } else {
-        return showCartQuantity(getLocalTotalQuantity());
+        return showCartQuantity(getLocalCartTotalQuantity());
     }
+}
+
+export function getLocalCartItem(getCart = true) {
+    const cartInfo = JSON.parse(localStorage.getItem(cartKey)) || [];
+    if (cartInfo) {
+        let getWhich = getCart ? 'CART' : 'SAVED'
+        return cartInfo.filter(item => item.type === getWhich);
+    }
+    return [];
 }
 
 showCartTotal();
