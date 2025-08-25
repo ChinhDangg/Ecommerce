@@ -47,4 +47,16 @@ public class UserController {
         userService.removeProductFromCart(authentication.getName(), productId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/cart/to-save")
+    public ResponseEntity<?> cartToSaved(@RequestParam Long productId, Authentication authentication) {
+        userService.moveProductFromCartToSaved(authentication.getName(), productId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/cart/to-cart")
+    public ResponseEntity<?> savedToCart(@RequestParam Long productId, Authentication authentication) {
+        userService.moveProductFromSavedToCart(authentication.getName(), productId);
+        return ResponseEntity.ok().build();
+    }
 }
