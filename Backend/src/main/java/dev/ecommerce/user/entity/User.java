@@ -28,7 +28,7 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<UserCart> carts = new ArrayList<>();
+    private final List<UserItem> carts = new ArrayList<>();
 
     public User(String firstname, String lastname, String username, String password, Role role) {
         this.firstname = firstname;

@@ -7,8 +7,9 @@ import dev.ecommerce.product.DTO.ShortProductDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.user.DTO.UserCartDTO;
+import dev.ecommerce.user.constant.UserItemType;
 import dev.ecommerce.user.entity.User;
-import dev.ecommerce.user.entity.UserCart;
+import dev.ecommerce.user.entity.UserItem;
 import dev.ecommerce.user.repository.UserCartRepository;
 import dev.ecommerce.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,9 @@ public class UserService {
         );
     }
 
-    private UserCart findUserCartByProductId(User user, String username, Long productId, boolean nullable) {
+    private UserItem findUserCartByProductId(User user, String username, Long productId, boolean nullable) {
         User findUser = user == null ? findUserByUsername(username) : user;
-        Optional<UserCart> userCart = findUser.getCarts().stream()
+        Optional<UserItem> userCart = findUser.getCarts().stream()
                 .filter(p -> p.getId() == productId)
                 .findFirst();
         if (nullable) {
@@ -50,28 +51,30 @@ public class UserService {
             return userCart.orElseThrow(() -> new ResourceNotFoundException("Product not found in cart"));
     }
 
-    private List<UserCart> findUserCart(String username) {
+    private List<UserItem> findUserCart(String username) {
         User findUser = findUserByUsername(username);
         return findUser.getCarts();
     }
 
     @Transactional(readOnly = true)
     public Integer getCartTotal(String username) {
-        List<UserCart> userCart = findUserCart(username);
-        if (userCart.isEmpty())
+        List<UserItem> userItem = findUserCart(username);
+        if (userItem.isEmpty())
             return 0;
         else
-            return userCart.stream().mapToInt(UserCart::getQuantity).sum();
+            return userItem.stream()
+                    .filter(ut -> ut.getType() == UserItemType.CART)
+                    .mapToInt(UserItem::getQuantity).sum();
     }
 
     @Transactional(readOnly = true)
     public ProductCartDTO getUserCartInfo(String username) {
-        List<UserCart> userCart = findUserCart(username);
-        if (userCart.isEmpty())
+        List<UserItem> userItem = findUserCart(username);
+        if (userItem.isEmpty())
             return new ProductCartDTO();
 
         List<ShortProductDTO> shortProductDTOs = new ArrayList<>();
-        for (UserCart cart : userCart) {
+        for (UserItem cart : userItem) {
             Product product = cart.getProduct();
             product.setQuantity(
                     cart.getQuantity() > product.getQuantity() ? product.getQuantity() : cart.getQuantity()
@@ -88,13 +91,13 @@ public class UserService {
         Product product = productService.findProductById(userCartDTO.getProductId());
 
         User user = findUserByUsername(username);
-        UserCart addedSameCart = findUserCartByProductId(user, username, userCartDTO.getProductId(), true);
+        UserItem addedSameCart = findUserCartByProductId(user, username, userCartDTO.getProductId(), true);
 
         Integer quantity;
 
         if (addedSameCart == null) {
             quantity = userCartDTO.getQuantity();
-            addedSameCart = new UserCart(user, product, quantity);
+            addedSameCart = new UserItem(user, product, quantity, UserItemType.CART);
         } else {
             System.out.println("Same product found in cart");
             quantity = addedSameCart.getQuantity() + userCartDTO.getQuantity();
@@ -113,14 +116,34 @@ public class UserService {
 
     @Transactional
     public void updateProductQuantityInCart(String username, UserCartDTO userCartDTO) {
-        UserCart userCart = findUserCartByProductId(null, username, userCartDTO.getProductId(), false);
-        userCart.setQuantity(userCart.getQuantity());
-        userCartRepository.save(userCart);
+        UserItem userItem = findUserCartByProductId(null, username, userCartDTO.getProductId(), false);
+        userItem.setQuantity(userItem.getQuantity());
+        userCartRepository.save(userItem);
     }
 
     @Transactional
     public void removeProductFromCart(String username, Long productId) {
-        UserCart userCart = findUserCartByProductId(null, username, productId, false);
-        userCartRepository.delete(userCart);
+        UserItem userItem = findUserCartByProductId(null, username, productId, false);
+        userCartRepository.delete(userItem);
+    }
+
+    @Transactional
+    public void moveProductFromCartToSaved(String username, Long productId) {
+        UserItem userItem = findUserCartByProductId(null, username, productId, false);
+        if (userItem.getType().equals(UserItemType.SAVED)) {
+            throw new IllegalStateException("Moving from saved to saved is not allowed");
+        }
+        userItem.setType(UserItemType.SAVED);
+        userCartRepository.save(userItem);
+    }
+
+    @Transactional
+    public void moveProductFromSavedToCart(String username, Long productId) {
+        UserItem userItem = findUserCartByProductId(null, username, productId, false);
+        if (userItem.getType().equals(UserItemType.CART)) {
+            throw new IllegalArgumentException("Moving from cart to cart is not allowed");
+        }
+        userItem.setType(UserItemType.CART);
+        userCartRepository.save(userItem);
     }
 }
