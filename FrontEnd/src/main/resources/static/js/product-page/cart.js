@@ -54,16 +54,20 @@ function updateLocalCartItemQuantity(productId, newQuantity) {
     } else {
         // optionally add it if it doesn't exist
         cartItems.push({ productId, quantity: newQuantity, type: 'CART' });
+        console.log(cartItems);
     }
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
 }
 
-export async function showCartTotal() {
-    const response = await fetch('http://localhost:8080/api/user/cart/total');
-    if (response.ok) {
-        return showCartQuantity(await response.text());
-    } else {
+export async function showCartTotal(getLocal = false) {
+    if (getLocal) {
         return showCartQuantity(getLocalCartTotalQuantity());
+    } else {
+        const response = await fetch('http://localhost:8080/api/user/cart/total');
+        if (response.ok)
+            return showCartQuantity(await response.text());
+        else
+            return showCartQuantity(getLocalCartTotalQuantity());
     }
 }
 
@@ -74,6 +78,17 @@ export function getLocalCartItem(getCart = true) {
         return cartInfo.filter(item => item.type === getWhich);
     }
     return [];
+}
+
+export function updateLocalCartItemType(productId, cart = true) {
+    let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
+    const itemIndex = cartItems.findIndex(item => item.productId === productId);
+    if (itemIndex !== -1) {
+        cartItems[itemIndex].type = cart ? 'CART' : 'SAVED';
+        localStorage.setItem(cartKey, JSON.stringify(cartItems));
+        return true;
+    }
+    return false;
 }
 
 showCartTotal();

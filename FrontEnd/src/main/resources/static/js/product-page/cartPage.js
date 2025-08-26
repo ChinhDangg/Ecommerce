@@ -1,4 +1,4 @@
-import {cartKey, getLocalCartItem, showCartTotal} from "./cart.js";
+import {cartKey, getLocalCartItem, showCartTotal, updateLocalCartItemType} from "./cart.js";
 
 let localLoaded = false;
 async function loadUserCart() {
@@ -44,10 +44,11 @@ async function loadUserCart() {
     removeOrderSummary();
 }
 
+const mediaURL = document.getElementById('media-url').innerText;
+const cardPageURL = document.getElementById('cardPage-url').innerText;
+
 function displayCartProduct(content) {
     showEmptyCart(false);
-    const mediaURL = document.getElementById('media-url').innerText;
-    const cardPageURL = document.getElementById('cardPage-url').innerText;
     const productItemContainer = document.getElementById('product-item-container');
     productItemContainer.classList.remove('hidden');
     const productItemTem = productItemContainer.querySelector('.product-item');
@@ -101,6 +102,9 @@ function displayCartProduct(content) {
             await removeFromCart(item.id);
             productItem.remove();
         });
+        productItem.querySelector('.save-later-btn').addEventListener('click', async function() {
+            await moveCartToSaved(item);
+        });
         productItemContainer.appendChild(productItem);
     });
 }
@@ -122,25 +126,14 @@ function removeOrderSummary() {
     orderContainer.querySelector('.check-out-btn').remove();
 }
 
+
 async function removeFromCart(productId) {
     if (localLoaded) {
         removeProductFromLocalCart(productId);
     } else {
         await removeProductFromUserCart(productId);
     }
-    const quantity = await showCartTotal();
-    if (quantity === 0) {
-        removeOrderSummary();
-        showEmptyCart(true);
-    }
-}
-
-function showEmptyCart(show = true) {
-    if (show) {
-        document.getElementById('empty-cart-container').classList.remove('hidden');
-    } else {
-        document.getElementById('empty-cart-container').classList.add('hidden');
-    }
+    await getTotalCartAndUpdateLayout(localLoaded);
 }
 
 async function removeProductFromUserCart(productId) {
@@ -162,7 +155,35 @@ function removeProductFromLocalCart(productId) {
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
 }
 
-async function moveProductToUserSaved(productId) {
+async function getTotalCartAndUpdateLayout(getLocal) {
+    const quantity = await showCartTotal(getLocal);
+    if (quantity === 0) {
+        removeOrderSummary();
+        showEmptyCart(true);
+    }
+}
+
+function showEmptyCart(show = true) {
+    if (show) {
+        document.getElementById('empty-cart-container').classList.remove('hidden');
+    } else {
+        document.getElementById('empty-cart-container').classList.add('hidden');
+    }
+}
+
+
+async function moveCartToSaved(item) {
+    if (localLoaded) {
+        moveLocalCartToSaved(item.id);
+    } else {
+        await moveUserCartToSaved(item.id);
+    }
+    removeItemDisplayFromCart(item.id);
+    addItemDisplayToSaved(item);
+    await getTotalCartAndUpdateLayout(localLoaded);
+}
+
+async function moveUserCartToSaved(productId) {
     const response = await fetch('http://localhost:8080/api/user/cart/to-save', {
         method: 'POST',
         body: JSON.stringify({productId}),
@@ -176,11 +197,57 @@ async function moveProductToUserSaved(productId) {
 }
 
 function moveLocalCartToSaved(productId) {
-    let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
-    const cartItemIndex = cartItems.findIndex(item => item.productId === productId);
-    if (cartItemIndex !== -1) {
+    updateLocalCartItemType(productId, false);
+}
 
+function removeItemDisplayFromCart(productId) {
+    const cartItemContainer = document.getElementById('product-item-container');
+    const item = cartItemContainer.querySelector(`.product-item[data-product-id="${productId}"]`);
+    if (item) {
+        item.remove();
+    } else {
+        console.error('Unable to remove item from cart');
     }
+}
+
+function addItemDisplayToSaved(item) {
+    const savedItemContainer = document.getElementById('saved-item-container');
+    const savedItem = savedItemContainer.querySelector('.saved-item').cloneNode(true);
+    savedItem.classList.add('hidden');
+    savedItem.dataset.productId = item.id;
+    savedItem.classList.remove('hidden');
+    savedItem.dataset.productId = item.id;
+    savedItem.querySelectorAll('.product-link').forEach(link => {
+        link.href = `${cardPageURL}/${item.id}`;
+    });
+    savedItem.querySelector('.product-img').src = `${mediaURL}/${item.imageName}`;
+    savedItem.querySelector('.product-name').innerHTML = item.name;
+    savedItem.querySelector('.product-id').innerHTML = `CPN # ${item.id} | MFR # ${item.manufacturerId}`;
+    if (item.discountedPrice) {
+        savedItem.querySelector('.sale-price').innerHTML =
+            '$' + Number(item.discountedPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        savedItem.querySelector('.price').innerHTML =
+            '$' + Number(item.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    } else {
+        savedItem.querySelector('.sale-price').innerHTML =
+            '$' + Number(item.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        savedItem.querySelector('.price').remove();
+    }
+    if (item.quantity > 0) {
+        savedItem.querySelector('.out-stock-label').remove();
+    } else {
+        savedItem.querySelector('.in-stock-label').remove();
+    }
+    savedItemContainer.appendChild(savedItem);
+}
+
+
+function removeItemDisplayFromSaved(productId) {
+
+}
+
+function addItemDisplayToCart() {
+
 }
 
 loadUserCart();
