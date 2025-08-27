@@ -25,6 +25,8 @@ public interface ProductMapper {
 
     List<ProductOptionDTO> toProductOptionDTOList(List<ProductOption> productOption);
 
+    ShortProductCartDTO toShortProductCartDTO(ShortProductDTO shortProductDTO);
+
     @Mapping(source = "productLine.id", target = "productLineId")
     @Mapping(source = "features", target = "features", qualifiedByName = "featuresToContentList")
     ProductCardDTO toProductCardDTO(Product product);

@@ -3,7 +3,7 @@ package dev.ecommerce.user.service;
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
-import dev.ecommerce.product.DTO.ShortProductDTO;
+import dev.ecommerce.product.DTO.ShortProductCartDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.user.DTO.UserCartDTO;
@@ -73,15 +73,19 @@ public class UserService {
         if (userItem.isEmpty())
             return new ProductCartDTO();
 
-        List<ShortProductDTO> shortProductDTOs = new ArrayList<>();
+        List<ShortProductCartDTO> shortProductDTOs = new ArrayList<>();
         for (UserItem cart : userItem) {
             Product product = cart.getProduct();
             product.setQuantity(
                     cart.getQuantity() > product.getQuantity() ? product.getQuantity() : cart.getQuantity()
             );
-            ShortProductDTO shortProductDTO = productService.getShortProductInfo(product, false);
-            shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
-            shortProductDTOs.add(shortProductDTO);
+            ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(
+                    productService.getShortProductInfo(product, false));
+            shortProductCartDTO.setProductOptions(
+                    productMapper.toProductOptionDTOList(product.getOptions())
+            );
+            shortProductCartDTO.setItemType(cart.getType());
+            shortProductDTOs.add(shortProductCartDTO);
         }
         return productService.getProductCartInfo(shortProductDTOs);
     }

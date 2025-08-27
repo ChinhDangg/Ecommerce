@@ -81,24 +81,27 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductCartDTO getLocalCartInfo(List<UserCartDTO> userCartDTOList) {
-        List<ShortProductDTO> shortProductDTOList = new ArrayList<>();
+        List<ShortProductCartDTO> shortProductDTOList = new ArrayList<>();
 
         for (UserCartDTO userCartDTO : userCartDTOList) {
             Product product = findProductById(userCartDTO.getProductId());
             product.setQuantity(
                     userCartDTO.getQuantity() > product.getQuantity() ? product.getQuantity() : userCartDTO.getQuantity()
             );
-            ShortProductDTO shortProductDTO = getShortProductInfo(product, false);
-            shortProductDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
-            shortProductDTOList.add(shortProductDTO);
+            ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(getShortProductInfo(product, false));
+            shortProductCartDTO.setProductOptions(
+                    productMapper.toProductOptionDTOList(product.getOptions())
+            );
+            shortProductCartDTO.setItemType(userCartDTO.getItemType());
+            shortProductDTOList.add(shortProductCartDTO);
         }
         return getProductCartInfo(shortProductDTOList);
     }
 
-    public ProductCartDTO getProductCartInfo(List<ShortProductDTO> productList) {
+    public ProductCartDTO getProductCartInfo(List<ShortProductCartDTO> productList) {
         BigDecimal totalPrice = BigDecimal.ZERO;
         int totalQuantity = 0;
-        for (ShortProductDTO product : productList) {
+        for (ShortProductCartDTO product : productList) {
             BigDecimal whichPrice = product.getDiscountedPrice() == null ? product.getPrice() : product.getDiscountedPrice();
             totalPrice = totalPrice.add(whichPrice.multiply(new BigDecimal(product.getQuantity())));
             totalQuantity += product.getQuantity();
