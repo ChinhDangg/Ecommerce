@@ -38,14 +38,14 @@ function showCartQuantity(quantity) {
 }
 
 function getLocalCartTotalQuantity() {
-    const cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
+    const cartItems = getLocalCartItem();
     return cartItems
-        .filter(item => item.type === 'CART')
+        .filter(item => item.itemType === 'CART')
         .reduce((sum, item) => sum + item.quantity, 0);
 }
 
 function updateLocalCartItemQuantity(productId, newQuantity) {
-    let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
+    let cartItems = getLocalCartItem();
     const itemIndex = cartItems.findIndex(item => item.productId === productId);
 
     if (itemIndex !== -1) {
@@ -53,7 +53,7 @@ function updateLocalCartItemQuantity(productId, newQuantity) {
         cartItems[itemIndex].quantity = newQuantity;
     } else {
         // optionally add it if it doesn't exist
-        cartItems.push({ productId, quantity: newQuantity, type: 'CART' });
+        cartItems.push({ productId, quantity: newQuantity, itemType: 'CART' });
         console.log(cartItems);
     }
     localStorage.setItem(cartKey, JSON.stringify(cartItems));
@@ -71,20 +71,15 @@ export async function showCartTotal(getLocal = false) {
     }
 }
 
-export function getLocalCartItem(getCart = true) {
-    const cartInfo = JSON.parse(localStorage.getItem(cartKey)) || [];
-    if (cartInfo) {
-        let getWhich = getCart ? 'CART' : 'SAVED'
-        return cartInfo.filter(item => item.type === getWhich);
-    }
-    return [];
+export function getLocalCartItem() {
+    return JSON.parse(localStorage.getItem(cartKey)) || [];
 }
 
 export function updateLocalCartItemType(productId, cart = true) {
-    let cartItems = JSON.parse(localStorage.getItem(cartKey)) || [];
+    let cartItems = getLocalCartItem();
     const itemIndex = cartItems.findIndex(item => item.productId === productId);
     if (itemIndex !== -1) {
-        cartItems[itemIndex].type = cart ? 'CART' : 'SAVED';
+        cartItems[itemIndex].itemType = cart ? 'CART' : 'SAVED';
         localStorage.setItem(cartKey, JSON.stringify(cartItems));
         return true;
     }
