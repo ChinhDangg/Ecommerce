@@ -95,7 +95,7 @@ public class ProductController {
     }
 
     @PostMapping("/cart")
-    public ResponseEntity<ProductCartDTO> getLocalCartInfo(@RequestBody List<UserCartDTO> userCartDTOList) {
+    public ResponseEntity<ProductCartDTO> getLocalCartInfo(@Valid @RequestBody List<UserCartDTO> userCartDTOList) {
         ProductCartDTO shortProductDTOList = productService.getLocalCartInfo(userCartDTOList);
         return ResponseEntity.status(HttpStatus.OK).body(shortProductDTOList);
     }

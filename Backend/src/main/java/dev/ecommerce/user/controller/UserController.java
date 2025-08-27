@@ -3,6 +3,7 @@ package dev.ecommerce.user.controller;
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.user.DTO.UserCartDTO;
 import dev.ecommerce.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,13 +32,13 @@ public class UserController {
     }
 
     @PostMapping("/cart")
-    public ResponseEntity<Integer> addToCart(@RequestBody UserCartDTO userCartDTO, Authentication authentication) {
+    public ResponseEntity<Integer> addToCart(@Valid @RequestBody UserCartDTO userCartDTO, Authentication authentication) {
         Integer quantity = userService.addProductToCart(authentication.getName(), userCartDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(quantity);
     }
 
     @PutMapping("/cart")
-    public ResponseEntity<?> updateCartQuantity(@RequestBody UserCartDTO userCartDTO, Authentication authentication) {
+    public ResponseEntity<?> updateCartQuantity(@Valid @RequestBody UserCartDTO userCartDTO, Authentication authentication) {
         userService.updateProductQuantityInCart(authentication.getName(), userCartDTO);
         return ResponseEntity.ok().build();
     }
