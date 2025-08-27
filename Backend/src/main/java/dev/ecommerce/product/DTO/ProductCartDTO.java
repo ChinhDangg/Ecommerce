@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductCartDTO {
-        private List<ShortProductDTO> productList;
+        private List<ShortProductCartDTO> productList;
         private int totalQuantity;
         private BigDecimal taxAmount;
         private BigDecimal totalPrice;

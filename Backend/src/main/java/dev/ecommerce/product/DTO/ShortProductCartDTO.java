@@ -1,5 +1,6 @@
 package dev.ecommerce.product.DTO;
 
+import dev.ecommerce.user.constant.UserItemType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
-public class ShortProductDTO {
+public class ShortProductCartDTO {
 
     private final Long id;
 
@@ -19,7 +20,8 @@ public class ShortProductDTO {
 
     private final BigDecimal price;
 
-    private final List<String> features;
+    @Setter
+    private List<ProductOptionDTO> productOptions;
 
     @Setter
     private String imageName;
@@ -30,13 +32,15 @@ public class ShortProductDTO {
     @Setter
     private boolean newRelease;
 
-    public ShortProductDTO(Long id, String manufacturerId, String name,
-                           Integer quantity, BigDecimal price, List<String> features) {
+    @Setter
+    private UserItemType itemType;
+
+    public ShortProductCartDTO(Long id, String manufacturerId, String name,
+                               Integer quantity, BigDecimal price) {
         this.id = id;
         this.manufacturerId = manufacturerId;
         this.name = name;
         this.quantity = quantity;
         this.price = price;
-        this.features = features;
     }
 }
