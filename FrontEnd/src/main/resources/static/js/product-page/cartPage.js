@@ -2,7 +2,7 @@ import {cartKey, getLocalCartItem, showCartTotal, updateLocalCartItemType} from 
 
 let localLoaded = false;
 async function loadUserCart() {
-    const response = await fetch('http://localhost:8080/api/user/cart');
+    const response = await fetchUserCart();
     try {
         if (response.ok) {
             const cartInfo = await response.json();
@@ -12,22 +12,15 @@ async function loadUserCart() {
         } else if (response.status === 401) { // not login / unauthorized
             if (localStorage.getItem(cartKey)) {
                 const cartInfo = getLocalCartItem();
-                const getLocal = await fetch('http://localhost:8080/api/product/cart', {
-                    method: 'POST',
-                    body: JSON.stringify(cartInfo),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const getLocal = await fetchLocalCart(cartInfo);
                 if (getLocal.ok) {
                     console.log('get local');
                     const localCartInfo = await getLocal.json();
                     displayAllItems(localCartInfo);
                     localLoaded = true;
                     return;
-                } else {
-                    console.error('Fail to load local cart info');
                 }
+                console.error('Fail to load local cart info');
             } else {
                 console.log('No local cart info');
             }
@@ -36,6 +29,20 @@ async function loadUserCart() {
         console.error(error);
     }
     removeOrderSummary();
+}
+
+async function fetchUserCart() {
+    return await fetch('http://localhost:8080/api/user/cart');
+}
+
+async function fetchLocalCart(cartInfo) {
+    return await fetch('http://localhost:8080/api/product/cart', {
+        method: 'POST',
+        body: JSON.stringify(cartInfo),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 }
 
 const mediaURL = document.getElementById('media-url').innerText;
@@ -172,6 +179,8 @@ async function getTotalCartAndUpdateLayout(getLocal) {
     if (quantity === 0) {
         removeOrderSummary();
         showEmptyCart(true);
+    } else if (quantity === 1) {
+        showEmptyCart(false);
     }
 }
 
@@ -262,6 +271,9 @@ function addItemDisplayToSaved(item) {
     } else {
         savedItem.querySelector('.in-stock-label').remove();
     }
+    savedItem.querySelector('.move-to-cart-btn').addEventListener('click', async function() {
+        await moveSavedToCart(item);
+    });
     savedItem.querySelector('.remove-btn').addEventListener('click', async function() {
         await removeFromCart(item.id, false);
         savedItem.remove();
@@ -269,8 +281,43 @@ function addItemDisplayToSaved(item) {
     savedItemContainer.appendChild(savedItem);
 }
 
-function removeItemDisplayFromSaved(productId) {
 
+async function moveSavedToCart(item) {
+    if (localLoaded) {
+        moveLocalSavedToCart(item.id);
+    } else {
+        await moveUserSavedToCart(item.id);
+    }
+    removeItemDisplayFromSaved(item.id);
+    addItemDisplayToCart(item);
+    await getTotalCartAndUpdateLayout(localLoaded);
+}
+
+async function moveUserSavedToCart(productId) {
+    const response = await fetch('http://localhost:8080/api/user/cart/to-cart', {
+        method: 'POST',
+        body: JSON.stringify({productId}),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Fail to move product to cart');
+    }
+}
+
+function moveLocalSavedToCart(productId) {
+    updateLocalCartItemType(productId, true);
+}
+
+function removeItemDisplayFromSaved(productId) {
+    const savedItemContainer = document.getElementById('saved-item-container');
+    const item = savedItemContainer.querySelector(`.saved-item[data-product-id="${productId}"]`);
+    if (item) {
+        item.remove();
+    } else {
+        console.error('Unable to remove item from cart');
+    }
 }
 
 loadUserCart();
