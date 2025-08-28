@@ -6,13 +6,9 @@ async function loadUserCart() {
     try {
         if (response.ok) {
             const cartInfo = await response.json();
-            if (cartInfo.productList.length) {
-                displayAllItems(cartInfo.productList);
-                displayOrderSummary(cartInfo);
-                localLoaded = false;
-                return;
-            } else
-                removeOrderSummary();
+            displayAllItems(cartInfo);
+            localLoaded = false;
+            return;
         } else if (response.status === 401) { // not login / unauthorized
             if (localStorage.getItem(cartKey)) {
                 const cartInfo = getLocalCartItem();
@@ -26,12 +22,9 @@ async function loadUserCart() {
                 if (getLocal.ok) {
                     console.log('get local');
                     const localCartInfo = await getLocal.json();
-                    if (localCartInfo.productList.length) {
-                        displayAllItems(localCartInfo.productList);
-                        displayOrderSummary(localCartInfo);
-                        localLoaded = true;
-                        return;
-                    }
+                    displayAllItems(localCartInfo);
+                    localLoaded = true;
+                    return;
                 } else {
                     console.error('Fail to load local cart info');
                 }
@@ -48,17 +41,24 @@ async function loadUserCart() {
 const mediaURL = document.getElementById('media-url').innerText;
 const cardPageURL = document.getElementById('cardPage-url').innerText;
 
-function displayAllItems(content) {
-    content.forEach(item => {
-        console.log(item);
-        console.log(item.itemType);
+function displayAllItems(cartInfo) {
+    if (!cartInfo.productList.length) {
+        removeOrderSummary();
+        return;
+    }
+    let addedCart = false;
+    cartInfo.productList.forEach(item => {
         if (item.itemType === 'CART') {
             showEmptyCart(false);
             addItemDisplayToCart(item);
+            displayOrderSummary(cartInfo);
+            addedCart = true;
         }
         else if (item.itemType === 'SAVED')
             addItemDisplayToSaved(item);
     });
+    if (!addedCart)
+        removeOrderSummary();
 }
 
 function addItemDisplayToCart(item) {
@@ -130,6 +130,7 @@ function displayOrderSummary(cartInfo) {
 function removeOrderSummary() {
     const orderContainer = document.getElementById('order-summary-container');
     document.getElementById('price-before-tax').remove();
+    document.getElementById('order-num-item').innerText = '(0 item)';
     orderContainer.querySelector('.shipping-section').remove();
     orderContainer.querySelector('.tax-section').remove();
     orderContainer.querySelector('.total-section').remove();
@@ -137,13 +138,14 @@ function removeOrderSummary() {
 }
 
 
-async function removeFromCart(productId) {
+async function removeFromCart(productId, updateCount = true) {
     if (localLoaded) {
         removeProductFromLocalCart(productId);
     } else {
         await removeProductFromUserCart(productId);
     }
-    await getTotalCartAndUpdateLayout(localLoaded);
+    if (updateCount)
+        await getTotalCartAndUpdateLayout(localLoaded);
 }
 
 async function removeProductFromUserCart(productId) {
@@ -243,14 +245,29 @@ function addItemDisplayToSaved(item) {
             '$' + Number(item.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         savedItem.querySelector('.price').remove();
     }
+    if (item.productOptions.length) {
+        const optionContainer = savedItem.querySelector('.option-container');
+        const optionItemTem = optionContainer.querySelector('.option-item');
+        item.productOptions.forEach(option => {
+            const optionItem = optionItemTem.cloneNode(true);
+            optionItem.classList.remove('hidden');
+            optionItem.querySelector('.option-item-name').innerHTML = option.name;
+            optionItem.querySelector('.option-item-value').innerHTML = option.valueOption;
+            optionContainer.appendChild(optionItem);
+        });
+        optionItemTem.remove();
+    }
     if (item.quantity > 0) {
         savedItem.querySelector('.out-stock-label').remove();
     } else {
         savedItem.querySelector('.in-stock-label').remove();
     }
+    savedItem.querySelector('.remove-btn').addEventListener('click', async function() {
+        await removeFromCart(item.id, false);
+        savedItem.remove();
+    });
     savedItemContainer.appendChild(savedItem);
 }
-
 
 function removeItemDisplayFromSaved(productId) {
 
