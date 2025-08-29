@@ -5,6 +5,7 @@ import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.user.DTO.UserCartDTO;
+import dev.ecommerce.user.constant.UserItemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -102,6 +103,8 @@ public class ProductService {
         BigDecimal totalPrice = BigDecimal.ZERO;
         int totalQuantity = 0;
         for (ShortProductCartDTO product : productList) {
+            if (product.getItemType() == UserItemType.SAVED)
+                continue;
             BigDecimal whichPrice = product.getDiscountedPrice() == null ? product.getPrice() : product.getDiscountedPrice();
             totalPrice = totalPrice.add(whichPrice.multiply(new BigDecimal(product.getQuantity())));
             totalQuantity += product.getQuantity();

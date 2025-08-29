@@ -56,15 +56,17 @@ function displayAllItems(cartInfo) {
     let addedCart = false;
     cartInfo.productList.forEach(item => {
         if (item.itemType === 'CART') {
-            showEmptyCart(false);
             addItemDisplayToCart(item);
-            displayOrderSummary(cartInfo);
             addedCart = true;
         }
         else if (item.itemType === 'SAVED')
             addItemDisplayToSaved(item);
     });
-    if (!addedCart)
+    if (addedCart) {
+        showEmptyCart(false);
+        displayOrderSummary(cartInfo)
+    }
+    else
         removeOrderSummary();
 }
 
@@ -132,16 +134,22 @@ function displayOrderSummary(cartInfo) {
     document.getElementById('price-before-tax').innerText = '$' + cartInfo.totalPrice;
     document.getElementById('tax-amount').innerText = '$' + cartInfo.taxAmount;
     document.getElementById('price-after-tax').innerText = '$' + cartInfo.priceAfterTax;
+    document.getElementById('price-before-tax').classList.remove('hidden');
+    const orderContainer = document.getElementById('order-summary-container');
+    orderContainer.querySelector('.shipping-section').classList.remove('hidden');
+    orderContainer.querySelector('.tax-section').classList.remove('hidden');
+    orderContainer.querySelector('.total-section').classList.remove('hidden');
+    orderContainer.querySelector('.check-out-btn').classList.remove('hidden');
 }
 
 function removeOrderSummary() {
     const orderContainer = document.getElementById('order-summary-container');
-    document.getElementById('price-before-tax').remove();
+    document.getElementById('price-before-tax').classList.add('hidden');
     document.getElementById('order-num-item').innerText = '(0 item)';
-    orderContainer.querySelector('.shipping-section').remove();
-    orderContainer.querySelector('.tax-section').remove();
-    orderContainer.querySelector('.total-section').remove();
-    orderContainer.querySelector('.check-out-btn').remove();
+    orderContainer.querySelector('.shipping-section').classList.add('hidden');
+    orderContainer.querySelector('.tax-section').classList.add('hidden');
+    orderContainer.querySelector('.total-section').classList.add('hidden');
+    orderContainer.querySelector('.check-out-btn').classList.add('hidden');
 }
 
 
@@ -201,6 +209,7 @@ async function moveCartToSaved(item) {
     }
     removeItemDisplayFromCart(item.id);
     addItemDisplayToSaved(item);
+    await updateOrderSummary(localLoaded);
     await getTotalCartAndUpdateLayout(localLoaded);
 }
 
@@ -281,6 +290,16 @@ function addItemDisplayToSaved(item) {
     savedItemContainer.appendChild(savedItem);
 }
 
+async function updateOrderSummary(localLoaded) {
+    if (localLoaded) {
+        const cartItem = getLocalCartItem();
+        const getLocalResponse = await fetchLocalCart(cartItem);
+        displayOrderSummary(await getLocalResponse.json())
+    } else {
+        const getUserCartResponse = fetchUserCart();
+        displayOrderSummary(await getUserCartResponse.json);
+    }
+}
 
 async function moveSavedToCart(item) {
     if (localLoaded) {
@@ -290,6 +309,7 @@ async function moveSavedToCart(item) {
     }
     removeItemDisplayFromSaved(item.id);
     addItemDisplayToCart(item);
+    await updateOrderSummary(localLoaded);
     await getTotalCartAndUpdateLayout(localLoaded);
 }
 
