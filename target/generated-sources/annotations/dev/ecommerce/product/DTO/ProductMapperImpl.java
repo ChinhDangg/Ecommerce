@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-08-26T23:39:05-0400",
+    date = "2025-08-29T21:27:12-0400",
     comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.2 (Oracle Corporation)"
 )
 @Component
@@ -162,20 +162,19 @@ public class ProductMapperImpl implements ProductMapper {
         Long id = null;
         String manufacturerId = null;
         String name = null;
-        Integer quantity = null;
         BigDecimal price = null;
 
         id = shortProductDTO.getId();
         manufacturerId = shortProductDTO.getManufacturerId();
         name = shortProductDTO.getName();
-        quantity = shortProductDTO.getQuantity();
         price = shortProductDTO.getPrice();
 
-        ShortProductCartDTO shortProductCartDTO = new ShortProductCartDTO( id, manufacturerId, name, quantity, price );
+        ShortProductCartDTO shortProductCartDTO = new ShortProductCartDTO( id, manufacturerId, name, price );
 
         shortProductCartDTO.setImageName( shortProductDTO.getImageName() );
         shortProductCartDTO.setDiscountedPrice( shortProductDTO.getDiscountedPrice() );
         shortProductCartDTO.setNewRelease( shortProductDTO.isNewRelease() );
+        shortProductCartDTO.setQuantity( shortProductDTO.getQuantity() );
 
         return shortProductCartDTO;
     }

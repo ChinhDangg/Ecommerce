@@ -86,14 +86,16 @@ public class ProductService {
 
         for (UserCartDTO userCartDTO : userCartDTOList) {
             Product product = findProductById(userCartDTO.getProductId());
-            product.setQuantity(
-                    userCartDTO.getQuantity() > product.getQuantity() ? product.getQuantity() : userCartDTO.getQuantity()
-            );
             ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(getShortProductInfo(product, false));
             shortProductCartDTO.setProductOptions(
                     productMapper.toProductOptionDTOList(product.getOptions())
             );
             shortProductCartDTO.setItemType(userCartDTO.getItemType());
+            int maxQuantity = product.getQuantity() > 100 ? 100 : product.getQuantity();
+            shortProductCartDTO.setMaxQuantity(maxQuantity);
+            shortProductCartDTO.setQuantity(
+                    userCartDTO.getQuantity() > maxQuantity ? maxQuantity : userCartDTO.getQuantity()
+            );
             shortProductDTOList.add(shortProductCartDTO);
         }
         return getProductCartInfo(shortProductDTOList);

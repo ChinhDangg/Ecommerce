@@ -76,15 +76,17 @@ public class UserService {
         List<ShortProductCartDTO> shortProductDTOs = new ArrayList<>();
         for (UserItem cart : userItem) {
             Product product = cart.getProduct();
-            product.setQuantity(
-                    cart.getQuantity() > product.getQuantity() ? product.getQuantity() : cart.getQuantity()
-            );
             ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(
                     productService.getShortProductInfo(product, false));
             shortProductCartDTO.setProductOptions(
                     productMapper.toProductOptionDTOList(product.getOptions())
             );
             shortProductCartDTO.setItemType(cart.getType());
+            int maxQuantity = product.getQuantity() > 100 ? 100 : product.getQuantity();
+            shortProductCartDTO.setMaxQuantity(maxQuantity);
+            shortProductCartDTO.setQuantity(
+                    cart.getQuantity() > maxQuantity ? maxQuantity : cart.getQuantity()
+            );
             shortProductDTOs.add(shortProductCartDTO);
         }
         return productService.getProductCartInfo(shortProductDTOs);

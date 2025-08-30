@@ -16,8 +16,6 @@ public class ShortProductCartDTO {
 
     private final String name;
 
-    private final Integer quantity;
-
     private final BigDecimal price;
 
     @Setter
@@ -35,12 +33,16 @@ public class ShortProductCartDTO {
     @Setter
     private UserItemType itemType;
 
-    public ShortProductCartDTO(Long id, String manufacturerId, String name,
-                               Integer quantity, BigDecimal price) {
+    @Setter
+    private Integer quantity;
+
+    @Setter
+    private Integer maxQuantity;
+
+    public ShortProductCartDTO(Long id, String manufacturerId, String name, BigDecimal price) {
         this.id = id;
         this.manufacturerId = manufacturerId;
         this.name = name;
-        this.quantity = quantity;
         this.price = price;
     }
 }
