@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Shopping Cart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<span id="media-url" class="hidden" th:text="${media_url}"></span>
+
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-8">Check Out</h1>
+
+    <!-- GRID LAYOUT: 1 col on small, 3 cols on lg -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items (left, spans 2 cols on lg) -->
+        <section class="lg:col-span-2">
+
+            <div id="product-item-container">
+
+                <!-- Product Item -->
+                <div class="product-item w-full min-w-[14rem] p-4 border rounded-lg shadow-md bg-white flex
+                flex-row gap-6 items-start mb-2">
+                    <div class="flex flex-col items-center space-y-2">
+                        <a class="product-link" href="#">
+                            <div class="img-container w-48 h-48 flex items-center justify-center overflow-hidden">
+                                <img src="" alt="Product image" class="product-img max-w-full max-h-full object-contain" />
+                            </div>
+                        </a>
+                    </div>
+                    <div class="space-y-2 flex-1">
+                        <a class="product-link" href="#">
+                            <h2 class="product-name hover:text-blue-600 text-xl font-bold text-gray-900">Gigabyte Radeon RX 9070 XT GAMING OC Graphics Card</h2>
+                        </a>
+                        <p class="product-id text-sm text-gray-500">#LE83F50018US | MFR #83F50018US</p>
+                        <div class="flex items-center">
+                            <span class="in-stock-label rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">In Stock</span>
+                            <span class="out-stock-label rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">Out of Stock</span>
+                        </div>
+                        <div class="option-container text-sm">
+                            <div class="option-item hidden">
+                                <span class="option-item-name font-bold">Color</span><span class="font-bold">: </span><span class="option-item-value text-gray-600">Red</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="quantity-select" class="text-sm text-gray-600">Qty:</label>
+                            <select id="quantity-select" class="border rounded-md px-2 py-1 text-sm">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                            <button class="remove-cart-btn text-black hover:text-gray-700 text-sm">Remove</button>
+                            <span class="text-gray-400">|</span>
+                            <button class="save-later-btn flex items-center text-black hover:text-gray-700 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                Save for later
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="mb-6 border-b border-gray-200 pb-4">
+                            <div class="flex items-start">
+                                <div class="text-left">
+                                    <span class="sale-price text-xl font-bold text-gray-900 block">$3,599.99</span>
+                                    <span class="price text-sm text-gray-500 line-through mt-1">$3,999.99</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+
+        <!-- Order Summary (right column on lg) -->
+        <aside id="side-container" class="lg:col-span-1">
+
+            <div class="bg-white p-6 border rounded-lg shadow-md mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Delivering to User name</h2>
+                <span class="font-semibold text-gray-900">Address: </span><span>4 DENNY ST, WORCESTER, MA, 01609-3310, United States</span>
+            </div>
+
+            <div class="bg-white p-6 border rounded-lg shadow-md mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Paying with</h2>
+                <span class="font-semibold text-gray-900">Visa: </span><span>9999</span>
+            </div>
+
+            <div class="bg-white p-6 border rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal <span id="order-num-item">(0 item)</span></span>
+                        <span class="font-semibold text-gray-900" id="price-before-tax">$0</span>
+                    </div>
+                    <div class="flex justify-between shipping-section">
+                        <span class="text-gray-600">Shipping</span>
+                        <span class="font-semibold text-gray-900">Free</span>
+                    </div>
+                    <div class="flex justify-between tax-section">
+                        <span class="text-gray-600">Estimated Tax</span>
+                        <span class="font-semibold text-gray-900" id="tax-amount">$0</span>
+                    </div>
+                    <div class="border-t pt-4 total-section">
+                        <div class="flex justify-between">
+                            <span class="text-lg font-semibold text-gray-900">Total</span>
+                            <span class="text-lg font-semibold text-gray-900" id="price-after-tax">$0</span>
+                        </div>
+                    </div>
+                    <button class="check-out-btn w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                        Place Your Order
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</div>
+
+
+</body>
+</html>
