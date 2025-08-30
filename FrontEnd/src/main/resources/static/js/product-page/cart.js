@@ -41,10 +41,10 @@ function getLocalCartTotalQuantity() {
     const cartItems = getLocalCartItem();
     return cartItems
         .filter(item => item.itemType === 'CART')
-        .reduce((sum, item) => sum + item.quantity, 0);
+        .reduce((sum, item) => sum + Number.parseInt(item.quantity), 0);
 }
 
-function updateLocalCartItemQuantity(productId, newQuantity) {
+export function updateLocalCartItemQuantity(productId, newQuantity) {
     let cartItems = getLocalCartItem();
     const itemIndex = cartItems.findIndex(item => item.productId === productId);
 
