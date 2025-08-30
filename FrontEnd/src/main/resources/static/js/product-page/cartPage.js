@@ -106,7 +106,10 @@ function addItemDisplayToCart(item) {
     }
     if (item.quantity > 0) {
         productItem.querySelector('.out-stock-label').remove();
-        const quantitySelect = document.getElementById('quantity-select');
+        const quantitySelect = productItem.querySelector('#quantity-select');
+        productItem.querySelector('label[for="quantity-select"]')
+            .setAttribute('for', `quantity-select-${item.id}`);
+        quantitySelect.id = `quantity-select-${item.id}`;
         quantitySelect.innerHTML = '';
         for (let i = 0; i < item.quantity; i++) {
             const option = document.createElement('option');
@@ -116,6 +119,8 @@ function addItemDisplayToCart(item) {
             quantitySelect.appendChild(option);
         }
     } else {
+        productItem.querySelector('label[for="quantity-select"]').remove();
+        productItem.querySelector('#quantity-select').remove();
         productItem.querySelector('.in-stock-label').remove();
     }
     productItem.querySelector('.remove-cart-btn').addEventListener('click', async function() {
