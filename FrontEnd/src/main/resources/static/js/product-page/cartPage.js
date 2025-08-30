@@ -1,4 +1,10 @@
-import {cartKey, getLocalCartItem, showCartTotal, updateLocalCartItemType} from "./cart.js";
+import {
+    cartKey,
+    getLocalCartItem,
+    showCartTotal,
+    updateLocalCartItemQuantity,
+    updateLocalCartItemType
+} from "./cart.js";
 
 let localLoaded = false;
 async function loadUserCart() {
@@ -104,20 +110,24 @@ function addItemDisplayToCart(item) {
         });
         optionItemTem.remove();
     }
-    if (item.quantity > 0) {
+    if (item.maxQuantity > 0) {
         productItem.querySelector('.out-stock-label').remove();
         const quantitySelect = productItem.querySelector('#quantity-select');
         productItem.querySelector('label[for="quantity-select"]')
             .setAttribute('for', `quantity-select-${item.id}`);
         quantitySelect.id = `quantity-select-${item.id}`;
         quantitySelect.innerHTML = '';
-        for (let i = 0; i < item.quantity; i++) {
+        for (let i = 0; i < item.maxQuantity; i++) {
             const option = document.createElement('option');
             const index = (i + 1) + '';
             option.value = index;
             option.textContent = index;
             quantitySelect.appendChild(option);
         }
+        quantitySelect.value = item.quantity;
+        quantitySelect.addEventListener('change', async function(event) {
+            await updateCartQuantity(item.id, event.target.value);
+        });
     } else {
         productItem.querySelector('label[for="quantity-select"]').remove();
         productItem.querySelector('#quantity-select').remove();
@@ -132,6 +142,37 @@ function addItemDisplayToCart(item) {
     });
     productItemContainer.appendChild(productItem);
 }
+
+
+async function updateCartQuantity(productId, quantity) {
+    if (localLoaded) {
+        updateLocalCartQuantity(productId, quantity);
+    } else {
+        await updateUserCartQuantity(productId, quantity);
+    }
+    await updateOrderSummary(localLoaded);
+    await getTotalCartAndUpdateLayout(localLoaded);
+}
+
+function updateLocalCartQuantity(productId, quantity) {
+    updateLocalCartItemQuantity(productId, quantity);
+}
+
+async function updateUserCartQuantity(productId, quantity) {
+    const info = {
+        productId: productId,
+        quantity: quantity
+    }
+    const response = await fetch('http://localhost:8080/api/product/cart', {
+        method: 'PUT',
+        body: JSON.stringify(info),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    return response.ok;
+}
+
 
 function displayOrderSummary(cartInfo) {
     const item = cartInfo.totalQuantity > 1 ? 'items' : 'item';
