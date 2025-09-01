@@ -8,11 +8,21 @@ services:
     ports:
       - '5432:5432'
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@localhost.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_LISTEN_PORT: 5050
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@localhost.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#      PGADMIN_LISTEN_PORT: 5050
+#    ports:
+#      - '5050:5050'
+
+  redis:
+    image: redis:8.2-alpine
+    container_name: redis
+    restart: unless-stopped
     ports:
-      - '5050:5050'
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
