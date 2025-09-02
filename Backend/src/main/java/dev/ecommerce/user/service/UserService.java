@@ -10,7 +10,7 @@ import dev.ecommerce.user.DTO.UserCartDTO;
 import dev.ecommerce.user.constant.UserItemType;
 import dev.ecommerce.user.entity.User;
 import dev.ecommerce.user.entity.UserItem;
-import dev.ecommerce.user.repository.UserCartRepository;
+import dev.ecommerce.user.repository.UserItemRepository;
 import dev.ecommerce.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,18 +23,18 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserCartRepository userCartRepository;
+    private final UserItemRepository userItemRepository;
     private final ProductService productService;
     private final ProductMapper productMapper;
 
-    public UserService(UserRepository userRepository, UserCartRepository userCartRepository, ProductService productService, ProductMapper productMapper) {
+    public UserService(UserRepository userRepository, UserItemRepository userItemRepository, ProductService productService, ProductMapper productMapper) {
         this.userRepository = userRepository;
-        this.userCartRepository = userCartRepository;
+        this.userItemRepository = userItemRepository;
         this.productService = productService;
         this.productMapper = productMapper;
     }
 
-    private User findUserByUsername(String username) {
+    public User findUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new ResourceNotFoundException("User not found")
         );
@@ -117,20 +117,20 @@ public class UserService {
         else if (quantity <= 0)
             throw new IllegalArgumentException("Quantity must be greater than 0");
 
-        return userCartRepository.save(addedSameCart).getQuantity();
+        return userItemRepository.save(addedSameCart).getQuantity();
     }
 
     @Transactional
     public void updateProductQuantityInCart(String username, UserCartDTO userCartDTO) {
         UserItem userItem = findUserCartByProductId(null, username, userCartDTO.getProductId(), false);
         userItem.setQuantity(userItem.getQuantity());
-        userCartRepository.save(userItem);
+        userItemRepository.save(userItem);
     }
 
     @Transactional
     public void removeProductFromCart(String username, Long productId) {
         UserItem userItem = findUserCartByProductId(null, username, productId, false);
-        userCartRepository.delete(userItem);
+        userItemRepository.delete(userItem);
     }
 
     @Transactional
@@ -140,7 +140,7 @@ public class UserService {
             throw new IllegalStateException("Moving from saved to saved is not allowed");
         }
         userItem.setType(UserItemType.SAVED);
-        userCartRepository.save(userItem);
+        userItemRepository.save(userItem);
     }
 
     @Transactional
@@ -150,6 +150,6 @@ public class UserService {
             throw new IllegalArgumentException("Moving from cart to cart is not allowed");
         }
         userItem.setType(UserItemType.CART);
-        userCartRepository.save(userItem);
+        userItemRepository.save(userItem);
     }
 }

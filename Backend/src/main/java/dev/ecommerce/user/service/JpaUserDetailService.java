@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Will be used to return our customer security user that implement UserDetails to store our User entity
+ */
+
 @Service
 public class JpaUserDetailService implements UserDetailsService {
 
