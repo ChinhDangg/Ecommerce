@@ -37,5 +37,5 @@ build/
 
 
 uploads
-
+target/generated-sources
 tmp
