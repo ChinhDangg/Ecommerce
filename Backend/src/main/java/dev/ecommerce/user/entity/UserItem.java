@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_cart")
+@Table(name = "user_item")
 @Getter
 @NoArgsConstructor
 public class UserItem {
@@ -16,7 +16,7 @@ public class UserItem {
     @GeneratedValue
     private long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
@@ -27,7 +27,7 @@ public class UserItem {
     @Enumerated(EnumType.STRING)
     private UserItemType type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
