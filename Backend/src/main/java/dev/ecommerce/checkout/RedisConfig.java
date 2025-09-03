@@ -53,77 +53,99 @@ public class RedisConfig {
     }
 
     private static final String RESERVE_LUA = """
-            -- reserve_min.lua
-            -- KEYS[1] = stock:{PID}
-            -- KEYS[2] = holds:{PID}
-            -- KEYS[3] = exp:{PID}
-            -- ARGV[1] = CART
-            -- ARGV[2] = requestedQty (absolute, >= 0)
+            -- reserve_global.lua
+            -- KEYS[1] = stock:{pid}    -- the current stock of the product
+            -- KEYS[2] = holds:{pid}    -- cart that hold number of stock
+            -- KEYS[3] = exp:{pid}      -- expiry time as score for cart holding the product id
+            -- KEYS[4] = exp:all               -- global ZSET to help retrieving all expiry entry
+            -- ARGV[1] = cart
+            -- ARGV[2] = requestedQty (absolute)
             -- ARGV[3] = expiresAtMillis
+            -- ARGV[4] = pid
             -- Returns: {1,newStock} on success; {0,errCode} on failure
             -- errCode: -1 not enough, -2 no cache, -3 bad request
             
-            local stockKey, holdsKey, expKey = KEYS[1], KEYS[2], KEYS[3]
-            local cart = ARGV[1]
-            local req  = tonumber(ARGV[2])
-            local exp  = tonumber(ARGV[3])
+            local stockKey, holdsKey, expKey, expAll = KEYS[1], KEYS[2], KEYS[3], KEYS[4]
+            local cart, req, exp, pid = ARGV[1], tonumber(ARGV[2]), tonumber(ARGV[3]), ARGV[4]
             
-            if not cart or not req or req < 0 or not exp then return {0,-3} end
+            if not cart or not req or req < 0 or not exp then
+              return {0, -3}
+            end
             
+            -- current stock
             local cur = tonumber(redis.call('GET', stockKey) or '-1')
-            if cur == -1 then return {0,-2} end
+            if cur == -1 then
+              return {0, -2}
+            end
             
+            -- previous reservation for this cart
             local prev = tonumber(redis.call('HGET', holdsKey, cart) or '0')
             local delta = req - prev
             
+            -- adjust stock if needed
             if delta > 0 then
-              if cur < delta then return {0,-1} end
+              if cur < delta then return {0, -1} end
               cur = redis.call('DECRBY', stockKey, delta)
             elseif delta < 0 then
               cur = redis.call('INCRBY', stockKey, -delta)
             end
             
-            -- set/refresh reservation + expiry index
+            local globalMember = pid .. ":" .. cart
+            
+            -- update reservation
             if req == 0 then
+              -- releasing reservation
               redis.call('HDEL', holdsKey, cart)
               redis.call('ZREM', expKey, cart)
+              redis.call('ZREM', expAll, globalMember)
             else
+              -- new or updated reservation
               redis.call('HSET', holdsKey, cart, req)
               redis.call('ZADD', expKey, exp, cart)
+              redis.call('ZADD', expAll, exp, globalMember)
             end
             
             return {1, cur}
-            
             """;
 
     private static final String RELEASE_LUA = """
-            -- reaper_min.lua
-            -- KEYS[1] = stock:{PID}
-            -- KEYS[2] = holds:{PID}
-            -- KEYS[3] = exp:{PID}
+            -- reaper_global.lua
+            -- KEYS[1] = exp:all
             -- ARGV[1] = nowMillis
             -- ARGV[2] = maxCount
-            -- Returns: {processedCount, reclaimedTotal}
+            -- Returns: {processed, reclaimed}
             
-            local stockKey, holdsKey, expKey = KEYS[1], KEYS[2], KEYS[3]
+            local allKey = KEYS[1]
             local now  = tonumber(ARGV[1])
             local maxn = tonumber(ARGV[2]) or 200
             
-            local expired = redis.call('ZRANGEBYSCORE', expKey, '-inf', now, 'LIMIT', 0, maxn)
-            local reclaimed, processed = 0, 0
+            local members = redis.call('ZRANGEBYSCORE', allKey, '-inf', now, 'LIMIT', 0, maxn)
+            local processed, reclaimed = 0, 0
             
-            for _, cart in ipairs(expired) do
-              local qty = tonumber(redis.call('HGET', holdsKey, cart) or '0')
-              if qty > 0 then
-                redis.call('INCRBY', stockKey, qty)
-                reclaimed = reclaimed + qty
+            for _, m in ipairs(members) do
+              local sep = string.find(m, ":")
+              if sep then
+                local pid  = string.sub(m, 1, sep-1)
+                local cart = string.sub(m, sep+1)
+            
+                local holdsKey = "holds:{" .. pid .. "}"
+                local expKey   = "exp:{" .. pid .. "}"
+                local stockKey = "stock:{" .. pid .. "}"
+            
+                local qty = tonumber(redis.call('HGET', holdsKey, cart) or '0')
+                if qty > 0 then
+                  redis.call('INCRBY', stockKey, qty)
+                  reclaimed = reclaimed + qty
+                end
+                redis.call('HDEL', holdsKey, cart)
+                redis.call('ZREM', expKey, cart)
+                redis.call('ZREM', allKey, m)
+                processed = processed + 1
+              else
+                redis.call('ZREM', allKey, m) -- malformed member
               end
-              redis.call('HDEL', holdsKey, cart)
-              redis.call('ZREM', expKey, cart)
-              processed = processed + 1
             end
             
             return {processed, reclaimed}
-            
             """;
 }
