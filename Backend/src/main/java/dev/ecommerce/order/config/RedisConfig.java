@@ -52,6 +52,14 @@ public class RedisConfig {
         return script;
     }
 
+    @Bean
+    public RedisScript<Integer> removeReserveScript() {
+        DefaultRedisScript<Integer> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText(REMOVE_LUA);
+        redisScript.setResultType(Integer.class);
+        return redisScript;
+    }
+
     private static final String RESERVE_LUA = """
             -- reserve_global.lua
             -- KEYS[1] = stock:{pid}    -- the current stock of the product
@@ -147,5 +155,20 @@ public class RedisConfig {
             end
             
             return {processed, reclaimed}
+            """;
+
+    // remove reserved
+    private static final String REMOVE_LUA = """
+            -- KEYS[1] = holds:{pid}
+            -- KEYS[2] = exp:{pid}
+            -- KEYS[3] = exp:all
+            -- ARGV[1] = cartId
+            -- ARGV[2] = pid
+            local holdsKey, expKey, allKey = KEYS[1], KEYS[2], KEYS[3]
+            local cart, pid = ARGV[1], ARGV[2]
+            redis.call('HDEL', holdsKey, cart)
+            redis.call('ZREM', expKey, cart)
+            redis.call('ZREM', allKey, pid .. ":" .. cart)
+            return 1
             """;
 }
