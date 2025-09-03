@@ -16,7 +16,7 @@ public class UserItem {
     @GeneratedValue
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
