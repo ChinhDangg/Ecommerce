@@ -1,8 +1,13 @@
 package dev.ecommerce.order.service;
 
+import dev.ecommerce.order.constant.OrderStatus;
+import dev.ecommerce.order.entity.Order;
+import dev.ecommerce.order.entity.OrderItem;
 import dev.ecommerce.order.model.ReserveResult;
 import dev.ecommerce.order.constant.ReserveStatus;
+import dev.ecommerce.order.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
+import dev.ecommerce.product.repository.ProductRepository;
 import dev.ecommerce.user.constant.UserItemType;
 import dev.ecommerce.user.entity.UserItem;
 import dev.ecommerce.user.repository.UserItemRepository;
@@ -14,7 +19,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -23,27 +30,87 @@ import java.util.List;
 public class CheckoutService {
 
     private final UserItemRepository userItemRepository;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisScript<List> reserveScript;
     private final RedisScript<List> releaseScript;
+    private final RedisScript<Integer> removeReserveScript;
 
     private static String stockKey(long pid) { return "stock:{" + pid + "}"; }
     private static String holdsKey(long pid) { return "holds:{" + pid + "}"; }
     private static String expKey(long pid)   { return "exp:{" + pid + "}"; }
     private static String expAll() { return "exp:all"; }
 
+    @Transactional
+    public Long placeOrder(Long userId) {
+        List<UserItem> carts = userItemRepository.getUserItemsByUserId(userId);
+        if (carts.isEmpty()) {
+            throw new IllegalArgumentException("No items found for user " + userId);
+        }
+
+        Order order = new Order(OrderStatus.PROCESSING, carts.getFirst().getUser(), Instant.now());
+
+        for (UserItem cart : carts) {
+            if (cart.getType() != UserItemType.CART)
+                continue;
+
+            long pid = cart.getProduct().getId();
+            int expectedQuantity = cart.getQuantity();
+
+            String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(pid), cart.getId());
+            int held = (qtyStr == null) ? 0 : Integer.parseInt(qtyStr);
+
+            if (held <= 0 || held != expectedQuantity) {
+                throw new IllegalArgumentException("Reservation missing or quantity mismatched");
+            }
+
+            Product product = cart.getProduct();
+            BigDecimal price = product.getSalePrice() == null ? product.getPrice() : product.getSalePrice();
+            OrderItem orderItem = new OrderItem(order, cart.getProduct(), cart.getQuantity(), price);
+            order.getOrderItems().add(orderItem);
+        }
+
+        if (order.getOrderItems().isEmpty()) {
+            throw new IllegalArgumentException("No items found for user " + userId);
+        }
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+            int res = productRepository.decreaseStockIfEnough(orderItem.getProduct().getId(), orderItem.getQuantity());
+            if (res <= 0) {
+                throw new IllegalArgumentException("Cannot decrease stock as not enough");
+            }
+        }
+
+        Order savedOrder = orderRepository.save(order);
+
+        for (UserItem cart : carts) {
+            cleanReservation(cart.getProduct().getId(), cart.getId());
+        }
+
+        return savedOrder.getId();
+    }
+
+    private void cleanReservation(long pid, long cartId) {
+        stringRedisTemplate.execute(
+                removeReserveScript,
+                List.of(holdsKey(pid), expKey(pid), expAll()),
+                String.valueOf(cartId), String.valueOf(pid)
+        );
+    }
+
     @Transactional(readOnly = true)
     public ReserveStatus reserve(Long userId) {
         List<UserItem> carts = userItemRepository.getUserItemsByUserId(userId);
 
         for (UserItem cart : carts) {
-            if (cart.getType() == UserItemType.SAVED)
+            if (cart.getType() != UserItemType.CART)
                 continue;
             ReserveResult result = reserveWithCache(cart.getProduct().getId(), cart.getId(), cart.getQuantity());
             if (result.status() == ReserveStatus.NO_CACHE) {
                 Product product = cart.getProduct();
                 addProductQuantityCache(product.getId(), product.getQuantity());
-                ReserveResult retry =  reserveWithCache(product.getId(), cart.getId(), cart.getQuantity());
+                ReserveResult retry = reserveWithCache(product.getId(), cart.getId(), cart.getQuantity());
                 return retry.status();
             }
             return result.status();
