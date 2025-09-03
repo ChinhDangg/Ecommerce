@@ -1,5 +1,7 @@
-package dev.ecommerce.checkout;
+package dev.ecommerce.order.controller;
 
+import dev.ecommerce.order.service.CheckoutService;
+import dev.ecommerce.order.constant.ReserveStatus;
 import dev.ecommerce.user.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/check-out")
 @RequiredArgsConstructor
-public class CheckOutController {
+public class OrderController {
 
     private final CheckoutService checkoutService;
 

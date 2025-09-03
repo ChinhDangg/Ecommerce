@@ -1,4 +1,4 @@
-package dev.ecommerce.checkout;
+package dev.ecommerce.order.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

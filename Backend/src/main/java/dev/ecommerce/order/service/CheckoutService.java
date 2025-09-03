@@ -1,5 +1,7 @@
-package dev.ecommerce.checkout;
+package dev.ecommerce.order.service;
 
+import dev.ecommerce.order.model.ReserveResult;
+import dev.ecommerce.order.constant.ReserveStatus;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.user.constant.UserItemType;
 import dev.ecommerce.user.entity.UserItem;
@@ -96,7 +98,6 @@ public class CheckoutService {
             );
             count++;
             long processed = result.isEmpty() ? 0 : ((Number) result.getFirst()).longValue();
-            System.out.println("processed: " + processed);
             if (processed == 0)
                 break;
         }
