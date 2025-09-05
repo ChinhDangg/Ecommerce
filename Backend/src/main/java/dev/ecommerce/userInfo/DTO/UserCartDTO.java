@@ -1,6 +1,6 @@
-package dev.ecommerce.user.DTO;
+package dev.ecommerce.userInfo.DTO;
 
-import dev.ecommerce.user.constant.UserItemType;
+import dev.ecommerce.userInfo.constant.UserItemType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

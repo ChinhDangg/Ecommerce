@@ -1,63 +1,68 @@
-package dev.ecommerce.user.controller;
+package dev.ecommerce.userInfo.controller;
 
 import dev.ecommerce.product.DTO.ProductCartDTO;
-import dev.ecommerce.user.DTO.UserCartDTO;
-import dev.ecommerce.user.service.UserService;
+import dev.ecommerce.user.SecurityUser;
+import dev.ecommerce.userInfo.DTO.UserCartDTO;
+import dev.ecommerce.userInfo.service.UserInfoService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final UserService userService;
+    private final UserInfoService userInfoService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    private Long getUserId(Authentication authentication) {
+        if (authentication == null)
+            return null;
+        return ((SecurityUser) authentication.getPrincipal()).user().getId();
     }
 
     @GetMapping("/cart/total")
     public ResponseEntity<Integer> getCartTotal(Authentication authentication) {
-        Integer cartTotal = userService.getCartTotal(authentication.getName());
+        Integer cartTotal = userInfoService.getCartTotal(getUserId(authentication));
         return ResponseEntity.status(HttpStatus.OK).body(cartTotal);
     }
 
     @GetMapping("/cart")
     public ResponseEntity<ProductCartDTO> getCart(Authentication authentication) {
-        ProductCartDTO cart = userService.getUserCartInfo(authentication.getName());
+        ProductCartDTO cart = userInfoService.getUserCartInfo(getUserId(authentication));
         return ResponseEntity.status(HttpStatus.OK).body(cart);
     }
 
     @PostMapping("/cart")
     public ResponseEntity<Integer> addToCart(@Valid @RequestBody UserCartDTO userCartDTO, Authentication authentication) {
-        Integer quantity = userService.addProductToCart(authentication.getName(), userCartDTO);
+        Integer quantity = userInfoService.addProductToCart(getUserId(authentication), userCartDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(quantity);
     }
 
     @PutMapping("/cart")
     public ResponseEntity<?> updateCartQuantity(@Valid @RequestBody UserCartDTO userCartDTO, Authentication authentication) {
-        userService.updateProductQuantityInCart(authentication.getName(), userCartDTO);
+        userInfoService.updateProductQuantityInCart(getUserId(authentication), userCartDTO);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/cart")
     public ResponseEntity<?> deleteFromCart(@RequestParam Long productId, Authentication authentication) {
-        userService.removeProductFromCart(authentication.getName(), productId);
+        userInfoService.removeProductFromCart(getUserId(authentication), productId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/cart/to-save")
     public ResponseEntity<?> cartToSaved(@RequestParam Long productId, Authentication authentication) {
-        userService.moveProductFromCartToSaved(authentication.getName(), productId);
+        userInfoService.moveProductFromCartToSaved(getUserId(authentication), productId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/cart/to-cart")
     public ResponseEntity<?> savedToCart(@RequestParam Long productId, Authentication authentication) {
-        userService.moveProductFromSavedToCart(authentication.getName(), productId);
+        userInfoService.moveProductFromSavedToCart(getUserId(authentication), productId);
         return ResponseEntity.ok().build();
     }
 }

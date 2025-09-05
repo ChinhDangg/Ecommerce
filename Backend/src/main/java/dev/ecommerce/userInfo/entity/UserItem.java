@@ -1,8 +1,8 @@
-package dev.ecommerce.user.entity;
+package dev.ecommerce.userInfo.entity;
 
 import dev.ecommerce.order.entity.UserUsageInfo;
 import dev.ecommerce.product.entity.Product;
-import dev.ecommerce.user.constant.UserItemType;
+import dev.ecommerce.userInfo.constant.UserItemType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

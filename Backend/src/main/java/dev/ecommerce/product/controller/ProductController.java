@@ -6,7 +6,7 @@ import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
-import dev.ecommerce.user.DTO.UserCartDTO;
+import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

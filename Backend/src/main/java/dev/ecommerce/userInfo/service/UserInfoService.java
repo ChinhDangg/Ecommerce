@@ -1,17 +1,18 @@
-package dev.ecommerce.user.service;
+package dev.ecommerce.userInfo.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
+import dev.ecommerce.order.entity.UserUsageInfo;
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ShortProductCartDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
-import dev.ecommerce.user.DTO.UserCartDTO;
-import dev.ecommerce.user.constant.UserItemType;
+import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import dev.ecommerce.user.entity.User;
-import dev.ecommerce.user.entity.UserItem;
-import dev.ecommerce.user.repository.UserItemRepository;
 import dev.ecommerce.user.repository.UserRepository;
+import dev.ecommerce.userInfo.constant.UserItemType;
+import dev.ecommerce.userInfo.entity.UserItem;
+import dev.ecommerce.userInfo.repository.UserItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,28 +21,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserInfoService {
 
     private final UserRepository userRepository;
     private final UserItemRepository userItemRepository;
     private final ProductService productService;
     private final ProductMapper productMapper;
 
-    public UserService(UserRepository userRepository, UserItemRepository userItemRepository, ProductService productService, ProductMapper productMapper) {
+    public UserInfoService(UserRepository userRepository, UserItemRepository userItemRepository, ProductService productService, ProductMapper productMapper) {
         this.userRepository = userRepository;
         this.userItemRepository = userItemRepository;
         this.productService = productService;
         this.productMapper = productMapper;
     }
 
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
+    public UserUsageInfo findUserInfoByUserId(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found")
         );
+        return user.getUserUsageInfo();
     }
 
-    private UserItem findUserCartByProductId(User user, String username, Long productId, boolean nullable) {
-        User findUser = user == null ? findUserByUsername(username) : user;
+    private UserItem findUserCartByProductId(UserUsageInfo userInfo, Long userId, Long productId, boolean nullable) {
+        UserUsageInfo findUser = userInfo == null ? findUserInfoByUserId(userId) : userInfo;
         Optional<UserItem> userCart = findUser.getCarts().stream()
                 .filter(p -> p.getId() == productId)
                 .findFirst();
@@ -51,14 +53,14 @@ public class UserService {
             return userCart.orElseThrow(() -> new ResourceNotFoundException("Product not found in cart"));
     }
 
-    private List<UserItem> findUserCart(String username) {
-        User findUser = findUserByUsername(username);
+    private List<UserItem> findUserCart(Long userId) {
+        UserUsageInfo findUser = findUserInfoByUserId(userId);
         return findUser.getCarts();
     }
 
     @Transactional(readOnly = true)
-    public Integer getCartTotal(String username) {
-        List<UserItem> userItem = findUserCart(username);
+    public Integer getCartTotal(Long userId) {
+        List<UserItem> userItem = findUserCart(userId);
         if (userItem.isEmpty())
             return 0;
         else
@@ -68,8 +70,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ProductCartDTO getUserCartInfo(String username) {
-        List<UserItem> userItem = findUserCart(username);
+    public ProductCartDTO getUserCartInfo(Long userId) {
+        List<UserItem> userItem = findUserCart(userId);
         if (userItem.isEmpty())
             return new ProductCartDTO();
 
@@ -93,17 +95,17 @@ public class UserService {
     }
 
     @Transactional
-    public Integer addProductToCart(String username, UserCartDTO userCartDTO) {
+    public Integer addProductToCart(Long userId, UserCartDTO userCartDTO) {
         Product product = productService.findProductById(userCartDTO.getProductId());
 
-        User user = findUserByUsername(username);
-        UserItem addedSameCart = findUserCartByProductId(user, username, userCartDTO.getProductId(), true);
+        UserUsageInfo userInfo = findUserInfoByUserId(userId);
+        UserItem addedSameCart = findUserCartByProductId(userInfo, userId, userCartDTO.getProductId(), true);
 
         Integer quantity;
 
         if (addedSameCart == null) {
             quantity = userCartDTO.getQuantity();
-            addedSameCart = new UserItem(user, product, quantity, UserItemType.CART);
+            addedSameCart = new UserItem(userInfo, product, quantity, UserItemType.CART);
         } else {
             System.out.println("Same product found in cart");
             quantity = addedSameCart.getQuantity() + userCartDTO.getQuantity();
@@ -121,21 +123,21 @@ public class UserService {
     }
 
     @Transactional
-    public void updateProductQuantityInCart(String username, UserCartDTO userCartDTO) {
-        UserItem userItem = findUserCartByProductId(null, username, userCartDTO.getProductId(), false);
+    public void updateProductQuantityInCart(Long userId, UserCartDTO userCartDTO) {
+        UserItem userItem = findUserCartByProductId(null, userId, userCartDTO.getProductId(), false);
         userItem.setQuantity(userItem.getQuantity());
         userItemRepository.save(userItem);
     }
 
     @Transactional
-    public void removeProductFromCart(String username, Long productId) {
-        UserItem userItem = findUserCartByProductId(null, username, productId, false);
+    public void removeProductFromCart(Long userId, Long productId) {
+        UserItem userItem = findUserCartByProductId(null, userId, productId, false);
         userItemRepository.delete(userItem);
     }
 
     @Transactional
-    public void moveProductFromCartToSaved(String username, Long productId) {
-        UserItem userItem = findUserCartByProductId(null, username, productId, false);
+    public void moveProductFromCartToSaved(Long userId, Long productId) {
+        UserItem userItem = findUserCartByProductId(null, userId, productId, false);
         if (userItem.getType().equals(UserItemType.SAVED)) {
             throw new IllegalStateException("Moving from saved to saved is not allowed");
         }
@@ -144,8 +146,8 @@ public class UserService {
     }
 
     @Transactional
-    public void moveProductFromSavedToCart(String username, Long productId) {
-        UserItem userItem = findUserCartByProductId(null, username, productId, false);
+    public void moveProductFromSavedToCart(Long userId, Long productId) {
+        UserItem userItem = findUserCartByProductId(null, userId, productId, false);
         if (userItem.getType().equals(UserItemType.CART)) {
             throw new IllegalArgumentException("Moving from cart to cart is not allowed");
         }

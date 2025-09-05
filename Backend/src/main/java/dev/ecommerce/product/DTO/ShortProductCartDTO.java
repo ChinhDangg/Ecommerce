@@ -1,6 +1,6 @@
 package dev.ecommerce.product.DTO;
 
-import dev.ecommerce.user.constant.UserItemType;
+import dev.ecommerce.userInfo.constant.UserItemType;
 import lombok.Getter;
 import lombok.Setter;
 

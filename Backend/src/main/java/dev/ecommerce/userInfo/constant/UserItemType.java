@@ -1,4 +1,4 @@
-package dev.ecommerce.user.constant;
+package dev.ecommerce.userInfo.constant;
 
 public enum UserItemType {
     CART,
