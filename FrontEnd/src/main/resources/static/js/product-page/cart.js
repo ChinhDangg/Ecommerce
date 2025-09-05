@@ -86,4 +86,4 @@ export function updateLocalCartItemType(productId, cart = true) {
     return false;
 }
 
-showCartTotal();
+window.onload = showCartTotal();
