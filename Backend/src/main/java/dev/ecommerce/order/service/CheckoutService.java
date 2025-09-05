@@ -51,6 +51,7 @@ public class CheckoutService {
 
         Order order = new Order(OrderStatus.PROCESSING, carts.getFirst().getUser(), Instant.now());
 
+        BigDecimal totalPrice = BigDecimal.ZERO;
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
                 continue;
@@ -67,6 +68,7 @@ public class CheckoutService {
 
             Product product = cart.getProduct();
             BigDecimal price = product.getSalePrice() == null ? product.getPrice() : product.getSalePrice();
+            totalPrice = totalPrice.add(price);
             OrderItem orderItem = new OrderItem(order, cart.getProduct(), cart.getQuantity(), price);
             order.getOrderItems().add(orderItem);
         }
@@ -82,6 +84,7 @@ public class CheckoutService {
             }
         }
 
+        order.setTotal(totalPrice);
         Order savedOrder = orderRepository.save(order);
 
         for (UserItem cart : carts) {
