@@ -4,18 +4,18 @@ import dev.ecommerce.order.entity.Order;
 import dev.ecommerce.order.entity.OrderItem;
 import dev.ecommerce.order.model.OrderInfo;
 import dev.ecommerce.order.model.OrderItemInfo;
-import dev.ecommerce.order.model.TotalOrderInfo;
+import dev.ecommerce.order.model.OrderHistory;
 import dev.ecommerce.order.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +25,11 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    public TotalOrderInfo getUserOrderInfo(Long userId, int monthCutOff, int page, int size) {
-        Instant cutOff =  Instant.now().minus(monthCutOff, ChronoUnit.MONTHS);
+    public OrderHistory getUserOrderHistory(Long userId, Instant start, Instant end, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<Order> userOrders = orderRepository.findAllByUserIdOrderByPlacedAtDesc(userId, cutOff, pageable);
+        Page<Order> userOrders = orderRepository.findByUserIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
+                userId, start, end, pageable
+        );
 
         List<OrderInfo> orderInfos = new ArrayList<>();
         for (Order order : userOrders) {
@@ -52,6 +53,12 @@ public class OrderService {
             orderInfos.add(orderInfo);
         }
 
-        return new TotalOrderInfo(orderRepository.countAllByUserIdOrderByPlacedAtDesc(userId, cutOff), orderInfos);
+        return new OrderHistory(
+                TimeFilter.buildOptions(orderRepository.findOldestPlacedAtByUserId(userId), ZoneId.systemDefault()),
+                new PageImpl<>(orderInfos, PageRequest.of(page, size),
+                        orderRepository.countAllByUserIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
+                                userId, start, end)
+                )
+        );
     }
 }
