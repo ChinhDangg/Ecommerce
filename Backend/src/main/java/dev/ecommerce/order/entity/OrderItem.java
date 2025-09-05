@@ -1,14 +1,17 @@
 package dev.ecommerce.order.entity;
 
+import dev.ecommerce.order.constant.OrderStatus;
 import dev.ecommerce.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
-@@Table(name = "order_item")
+@Table(name = "order_item")
 @NoArgsConstructor
 @Getter
 public class OrderItem {
@@ -29,6 +32,14 @@ public class OrderItem {
 
     // price paid at the time of order
     private BigDecimal unitPrice;
+
+    // individual status for each item in-case one item in the group order get returned or cancelled
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    @Setter
+    private Instant statusTime;
 
     public OrderItem(Order order, Product product, int quantity, BigDecimal unitPrice) {
         this.order = order;

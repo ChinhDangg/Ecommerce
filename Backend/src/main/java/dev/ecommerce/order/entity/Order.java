@@ -5,7 +5,9 @@ import dev.ecommerce.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +22,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private OrderStatus status;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -31,9 +31,20 @@ public class Order {
 
     private Instant placedAt;
 
+    @Setter
+    private BigDecimal total;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @Setter
+    private Instant statusTime; // for showing info for status like Delivered date or refunded date.
+
     public Order(OrderStatus status, User user, Instant placedAt) {
         this.status = status;
         this.user = user;
         this.placedAt = placedAt;
+        statusTime = placedAt;
     }
 }
