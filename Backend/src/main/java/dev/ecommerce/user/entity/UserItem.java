@@ -1,5 +1,6 @@
 package dev.ecommerce.user.entity;
 
+import dev.ecommerce.order.entity.UserUsageInfo;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.user.constant.UserItemType;
 import jakarta.persistence.*;
@@ -28,11 +29,11 @@ public class UserItem {
     private UserItemType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "user_info_id", nullable = false)
+    private UserUsageInfo userUsageInfo;
 
-    public UserItem(User user, Product product, int quantity, UserItemType type) {
-        this.user = user;
+    public UserItem(UserUsageInfo userUsageInfo, Product product, int quantity, UserItemType type) {
+        this.userUsageInfo = userUsageInfo;
         this.product = product;
         this.quantity = quantity;
         this.type = type;

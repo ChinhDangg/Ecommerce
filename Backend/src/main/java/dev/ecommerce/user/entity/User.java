@@ -1,13 +1,11 @@
 package dev.ecommerce.user.entity;
 
+import dev.ecommerce.order.entity.UserUsageInfo;
 import dev.ecommerce.user.constant.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -28,8 +26,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<UserItem> carts = new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    private UserUsageInfo userUsageInfo;
 
     public User(String firstname, String lastname, String username, String password, Role role) {
         this.firstname = firstname;
