@@ -92,6 +92,8 @@ public class Product {
     @OrderBy("sortOrder ASC")
     private final List<ProductMedia> media = new ArrayList<>();
 
+    private String thumbnail;
+
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")

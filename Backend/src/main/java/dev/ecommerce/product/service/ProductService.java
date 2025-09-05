@@ -111,12 +111,16 @@ public class ProductService {
             totalPrice = totalPrice.add(whichPrice.multiply(new BigDecimal(product.getQuantity())));
             totalQuantity += product.getQuantity();
         }
-        BigDecimal tax = totalPrice.multiply(new BigDecimal("0.0625"));
+        BigDecimal tax = totalPrice.multiply(getTax());
         BigDecimal priceAfterTax = totalPrice.add(tax);
         return new ProductCartDTO(productList, totalQuantity,
                 tax.setScale(2, RoundingMode.HALF_UP),
                 totalPrice.setScale(2, RoundingMode.HALF_UP),
                 priceAfterTax.setScale(2, RoundingMode.HALF_UP));
+    }
+
+    public static BigDecimal getTax() {
+        return new BigDecimal("0.0625");
     }
 
     @Transactional(readOnly = true)
@@ -194,6 +198,7 @@ public class ProductService {
             mediaList.add(new ProductMedia(savedProduct, mediaDTO.contentType(), mediaName, j));
         }
         productMediaRepository.saveAll(mediaList);
+        savedProduct.setThumbnail(mediaList.isEmpty() ? null : mediaList.getFirst().getContent());
 
         List<ProductDescription> descriptionList = new ArrayList<>();
         for (int j = 0; j < productDTO.getDescriptions().size(); j++) {
@@ -296,6 +301,11 @@ public class ProductService {
 
         product.getMedia().clear();
         product.getMedia().addAll(updatedMediaList);
+
+        if (!updatedMediaList.isEmpty()) {
+            if (!product.getThumbnail().equals(updatedMediaList.getFirst().getContent()))
+                product.setThumbnail(updatedMediaList.getFirst().getContent());
+        }
 
         // update description
         List<ProductDescription> oldDescription = product.getDescriptions();
