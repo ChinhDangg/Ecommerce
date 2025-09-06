@@ -8,8 +8,6 @@ import dev.ecommerce.product.DTO.ShortProductCartDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
-import dev.ecommerce.user.entity.User;
-import dev.ecommerce.user.repository.UserRepository;
 import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.repository.UserItemRepository;
@@ -24,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserInfoService {
+public class UserItemService {
 
     private final UserUsageInfoRepository userInfoRepository;
     private final UserItemRepository userItemRepository;

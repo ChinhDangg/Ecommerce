@@ -11,7 +11,7 @@ import dev.ecommerce.product.repository.ProductRepository;
 import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
-import dev.ecommerce.userInfo.service.UserInfoService;
+import dev.ecommerce.userInfo.service.UserItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -30,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CheckoutService {
 
-    private final UserInfoService userInfoService;
+    private final UserItemService userItemService;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final StringRedisTemplate stringRedisTemplate;
@@ -45,7 +45,7 @@ public class CheckoutService {
 
     @Transactional
     public Long placeOrder(Long userId) {
-        UserUsageInfo userInfo = userInfoService.findUserInfoByUserId(userId);
+        UserUsageInfo userInfo = userItemService.findUserInfoByUserId(userId);
 
         List<UserItem> carts = userInfo.getCarts();
         if (carts.isEmpty()) {
@@ -107,7 +107,7 @@ public class CheckoutService {
 
     @Transactional(readOnly = true)
     public ReserveStatus reserve(Long userId) {
-        List<UserItem> carts = userInfoService.findUserInfoByUserId(userId).getCarts();
+        List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
 
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
