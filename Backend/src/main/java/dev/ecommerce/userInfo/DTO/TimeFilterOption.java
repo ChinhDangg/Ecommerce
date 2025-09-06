@@ -1,4 +1,4 @@
-package dev.ecommerce.order.model;
+package dev.ecommerce.userInfo.DTO;
 
 import java.time.Instant;
 

@@ -1,7 +1,7 @@
-package dev.ecommerce.order.entity;
+package dev.ecommerce.userInfo.entity;
 
+import dev.ecommerce.order.entity.Order;
 import dev.ecommerce.user.entity.User;
-import dev.ecommerce.userInfo.entity.UserItem;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,11 +21,9 @@ import java.util.List;
 @Entity
 @Table(name = "user_info")
 @Getter
-@Setter
 @NoArgsConstructor
 public class UserUsageInfo {
 
-    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,14 +32,20 @@ public class UserUsageInfo {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Instant createdAt;
-
-    private Instant firstOrderAt;
-
     @OneToMany(mappedBy = "user_info", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private final List<UserItem> carts = new ArrayList<>();
 
-    public UserUsageInfo(User user) {
+    @Getter(AccessLevel.NONE) // should not be retrieving all by getter - must be limit
+    @OneToMany(mappedBy = "user_info", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private final List<Order> orders = new ArrayList<>();
+
+    private Instant createdAt;
+
+    @Setter
+    private Instant firstOrderAt;
+
+    public UserUsageInfo(User user, Instant createdAt) {
+        this.createdAt = createdAt;
         this.user = user;
     }
 }
