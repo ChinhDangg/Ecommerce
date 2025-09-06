@@ -8,9 +8,10 @@ import dev.ecommerce.order.constant.ReserveStatus;
 import dev.ecommerce.order.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.repository.ProductRepository;
-import dev.ecommerce.user.constant.UserItemType;
-import dev.ecommerce.user.entity.UserItem;
-import dev.ecommerce.user.repository.UserItemRepository;
+import dev.ecommerce.userInfo.constant.UserItemType;
+import dev.ecommerce.userInfo.entity.UserItem;
+import dev.ecommerce.userInfo.entity.UserUsageInfo;
+import dev.ecommerce.userInfo.service.UserInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -29,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CheckoutService {
 
-    private final UserItemRepository userItemRepository;
+    private final UserInfoService userInfoService;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final StringRedisTemplate stringRedisTemplate;
@@ -44,12 +45,14 @@ public class CheckoutService {
 
     @Transactional
     public Long placeOrder(Long userId) {
-        List<UserItem> carts = userItemRepository.getUserItemsByUserId(userId);
+        UserUsageInfo userInfo = userInfoService.findUserInfoByUserId(userId);
+
+        List<UserItem> carts = userInfo.getCarts();
         if (carts.isEmpty()) {
-            throw new IllegalArgumentException("No items found for user " + userId);
+            throw new IllegalArgumentException("No items found for user");
         }
 
-        Order order = new Order(OrderStatus.PROCESSING, carts.getFirst().getUser(), Instant.now());
+        Order order = new Order(OrderStatus.PROCESSING, userInfo, Instant.now());
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (UserItem cart : carts) {
@@ -74,7 +77,7 @@ public class CheckoutService {
         }
 
         if (order.getOrderItems().isEmpty()) {
-            throw new IllegalArgumentException("No items found for user " + userId);
+            throw new IllegalArgumentException("No items found for user");
         }
 
         for (OrderItem orderItem : order.getOrderItems()) {
@@ -104,7 +107,7 @@ public class CheckoutService {
 
     @Transactional(readOnly = true)
     public ReserveStatus reserve(Long userId) {
-        List<UserItem> carts = userItemRepository.getUserItemsByUserId(userId);
+        List<UserItem> carts = userInfoService.findUserInfoByUserId(userId).getCarts();
 
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
