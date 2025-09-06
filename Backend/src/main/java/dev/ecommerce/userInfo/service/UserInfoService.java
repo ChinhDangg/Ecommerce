@@ -13,6 +13,8 @@ import dev.ecommerce.user.repository.UserRepository;
 import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.repository.UserItemRepository;
+import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,25 +23,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserInfoService {
 
-    private final UserRepository userRepository;
+    private final UserUsageInfoRepository userInfoRepository;
     private final UserItemRepository userItemRepository;
     private final ProductService productService;
     private final ProductMapper productMapper;
 
-    public UserInfoService(UserRepository userRepository, UserItemRepository userItemRepository, ProductService productService, ProductMapper productMapper) {
-        this.userRepository = userRepository;
-        this.userItemRepository = userItemRepository;
-        this.productService = productService;
-        this.productMapper = productMapper;
-    }
-
     public UserUsageInfo findUserInfoByUserId(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
+        return userInfoRepository.findByUserId(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id: " + userId)
         );
-        return user.getUserUsageInfo();
     }
 
     private UserItem findUserCartByProductId(UserUsageInfo userInfo, Long userId, Long productId, boolean nullable) {
