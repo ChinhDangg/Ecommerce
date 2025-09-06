@@ -1,5 +1,6 @@
 package dev.ecommerce.order.service;
 
+import dev.ecommerce.exceptionHandler.PaymentFailException;
 import dev.ecommerce.order.constant.OrderStatus;
 import dev.ecommerce.order.entity.Order;
 import dev.ecommerce.order.entity.OrderItem;
@@ -13,6 +14,7 @@ import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.userInfo.service.UserItemService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -52,7 +54,9 @@ public class CheckoutService {
             throw new IllegalArgumentException("No items found for user");
         }
 
-        Order order = new Order(OrderStatus.PROCESSING, userInfo, Instant.now());
+        Instant now = Instant.now();
+        Order order = new Order(OrderStatus.PROCESSING, userInfo, now);
+        orderRepository.saveAndFlush(order);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (UserItem cart : carts) {
@@ -66,6 +70,8 @@ public class CheckoutService {
             int held = (qtyStr == null) ? 0 : Integer.parseInt(qtyStr);
 
             if (held <= 0 || held != expectedQuantity) {
+                order.setStatus(OrderStatus.CANCELLED);
+                orderRepository.saveAndFlush(order);
                 throw new IllegalArgumentException("Reservation missing or quantity mismatched");
             }
 
@@ -77,17 +83,26 @@ public class CheckoutService {
         }
 
         if (order.getOrderItems().isEmpty()) {
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.saveAndFlush(order);
             throw new IllegalArgumentException("No items found for user");
         }
 
         for (OrderItem orderItem : order.getOrderItems()) {
             int res = productRepository.decreaseStockIfEnough(orderItem.getProduct().getId(), orderItem.getQuantity());
             if (res <= 0) {
+                order.setStatus(OrderStatus.CANCELLED);
+                orderRepository.saveAndFlush(order);
                 throw new IllegalArgumentException("Cannot decrease stock as not enough");
             }
         }
 
         order.setTotal(totalPrice);
+        if (!processOrderPayment(totalPrice)) {
+            order.setStatus(OrderStatus.UNPAID);
+            orderRepository.saveAndFlush(order);
+            throw new PaymentFailException("Cannot process order");
+        }
         Order savedOrder = orderRepository.save(order);
 
         for (UserItem cart : carts) {
@@ -95,6 +110,12 @@ public class CheckoutService {
         }
 
         return savedOrder.getId();
+    }
+
+    // placeholder for payment in the future
+    private boolean processOrderPayment(BigDecimal totalPrice) {
+        System.out.println(totalPrice);
+        return true;
     }
 
     private void cleanReservation(long pid, long cartId) {
