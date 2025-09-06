@@ -1,12 +1,18 @@
 package dev.ecommerce;
 
+import dev.ecommerce.userInfo.entity.UserUsageInfo;
+import dev.ecommerce.order.service.CheckoutService;
+import dev.ecommerce.order.constant.ReserveStatus;
 import dev.ecommerce.product.constant.ConditionType;
 import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.user.constant.Role;
+import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.user.entity.User;
+import dev.ecommerce.userInfo.entity.UserItem;
+import dev.ecommerce.userInfo.repository.UserItemRepository;
 import dev.ecommerce.user.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,7 +38,7 @@ public class EcommerceApplication {
         SpringApplication.run(EcommerceApplication.class, args);
     }
 
-    //@Bean
+    @Bean
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
@@ -44,18 +51,21 @@ public class EcommerceApplication {
             ProductFeatureRepository productFeatureRepository,
             ProductOptionRepository productOptionRepository,
             ProductSpecificationRepository productSpecificationRepository,
-            ProductCoreSpecificationRepository productCoreSpecificationRepository, UserRepository userRepository) {
+            ProductCoreSpecificationRepository productCoreSpecificationRepository, UserRepository userRepository, UserItemRepository userItemRepository, CheckoutService checkoutService) {
         return _ -> {
+
 
             User user = new User(
                     "chinh", "dang", "e@mail.com", passwordEncoder.encode("s"), Role.ADMIN
             );
             userRepository.save(user);
 
+            UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now());
+
+
 
             ProductCategory electronics = new ProductCategory("Electronics", null);
             ProductCategory computers = new ProductCategory("Computers", electronics);
-            ProductCategory display = new ProductCategory("Display", electronics);
             ProductCategory laptops = new ProductCategory("Laptops", computers);
             ProductCategory gamingLaptops = new ProductCategory("Gaming Laptops", laptops);
             ProductCategory macs = new ProductCategory("Mac", laptops);
@@ -241,6 +251,15 @@ public class EcommerceApplication {
                     1
             );
             productDescriptionRepository.saveAll(List.of(product2Description1, product2Description2));
+
+
+            UserItem userItem = new UserItem(
+                    userInfo, product1, 3, UserItemType.CART
+            );
+            userItemRepository.save(userItem);
+
+            ReserveStatus status = checkoutService.reserve(1L);
+            System.out.println(status.name());
 
         };
     }
