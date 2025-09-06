@@ -1,5 +1,6 @@
 package dev.ecommerce.userInfo.service;
 
+import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.order.entity.Order;
 import dev.ecommerce.order.entity.OrderItem;
 import dev.ecommerce.userInfo.DTO.TimeFilterOption;
@@ -8,6 +9,8 @@ import dev.ecommerce.userInfo.DTO.UserOrderItemInfo;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
 import dev.ecommerce.order.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
+import dev.ecommerce.userInfo.entity.UserUsageInfo;
+import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,6 +32,13 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class UserOrderService {
 
     private final OrderRepository orderRepository;
+    private final UserUsageInfoRepository userInfoRepository;
+
+    public UserUsageInfo findUserInfoByUserId(Long userId) {
+        return userInfoRepository.findByUserId(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id: " + userId)
+        );
+    }
 
     public UserOrderHistory getUserOrderHistory(Long userId, Instant start, Instant end, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -59,7 +69,7 @@ public class UserOrderService {
         }
 
         return new UserOrderHistory(
-                buildOptions(orderRepository.findOldestPlacedAtByUserId(userId), ZoneId.systemDefault()),
+                buildOptions(findUserInfoByUserId(userId).getFirstOrderAt(), ZoneId.systemDefault()),
                 new PageImpl<>(userOrderInfos, PageRequest.of(page, size),
                         orderRepository.countAllByUserUsageInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
                                 userId, start, end)
