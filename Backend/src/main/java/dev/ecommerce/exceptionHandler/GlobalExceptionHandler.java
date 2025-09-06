@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(PaymentFailException.class)
+    public ResponseEntity<?> handlePaymentFailException(PaymentFailException e) {
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getMessage());
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException(BadCredentialsException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials: " + e.getMessage());
@@ -24,8 +29,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        e.printStackTrace();
-        // TODO see why image is not found when updating
         return ResponseEntity.badRequest().body("Illegal argument passed: " + e.getMessage());
     }
 
@@ -37,7 +40,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        e.printStackTrace();
         return ResponseEntity.badRequest().body("Required request body is missing or mismatched type");
     }
 
