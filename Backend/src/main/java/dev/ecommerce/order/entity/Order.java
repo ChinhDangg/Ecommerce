@@ -1,7 +1,7 @@
 package dev.ecommerce.order.entity;
 
 import dev.ecommerce.order.constant.OrderStatus;
-import dev.ecommerce.user.entity.User;
+import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,10 +23,10 @@ public class Order {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "user_info_id", nullable = false)
+    private UserUsageInfo userUsageInfo;
 
-    @OneToMany(cascade =  CascadeType.ALL)
+    @OneToMany(cascade =  CascadeType.ALL, orphanRemoval = true)
     private final List<OrderItem> orderItems = new ArrayList<>();
 
     private Instant placedAt;
@@ -41,9 +41,9 @@ public class Order {
     @Setter
     private Instant statusTime; // for showing info for status like Delivered date or refunded date.
 
-    public Order(OrderStatus status, User user, Instant placedAt) {
+    public Order(OrderStatus status, UserUsageInfo userUsageInfo, Instant placedAt) {
         this.status = status;
-        this.user = user;
+        this.userUsageInfo = userUsageInfo;
         this.placedAt = placedAt;
         statusTime = placedAt;
     }

@@ -1,6 +1,5 @@
 package dev.ecommerce.userInfo.entity;
 
-import dev.ecommerce.order.entity.UserUsageInfo;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.userInfo.constant.UserItemType;
 import jakarta.persistence.*;

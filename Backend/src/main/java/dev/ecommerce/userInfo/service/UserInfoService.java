@@ -1,7 +1,7 @@
 package dev.ecommerce.userInfo.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
-import dev.ecommerce.order.entity.UserUsageInfo;
+import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ShortProductCartDTO;

@@ -1,6 +1,6 @@
 package dev.ecommerce.user.entity;
 
-import dev.ecommerce.order.entity.UserUsageInfo;
+import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.user.constant.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
