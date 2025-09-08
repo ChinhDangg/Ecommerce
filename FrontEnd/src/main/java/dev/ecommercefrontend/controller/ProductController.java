@@ -49,4 +49,9 @@ public class ProductController {
     public String getCartPage() {
         return "/product-page/cart-page";
     }
+
+    @GetMapping("/checkout")
+    public String getCheckoutPage() {
+        return "/product-page/checkout-page";
+    }
 }

@@ -44,8 +44,30 @@ public class UserUsageInfo {
     @Setter
     private Instant firstOrderAt;
 
+    @Setter
+    private String street = "";
+    @Setter
+    private String city = "";
+    @Setter
+    private String state = "";
+    @Setter
+    private String zipCode = "";
+    @Setter
+    private String country = "";
+
     public UserUsageInfo(User user, Instant createdAt) {
         this.createdAt = createdAt;
         this.user = user;
+    }
+
+    // temporary for now
+    public String getUserAddress() {
+        if (!haveAddress())
+            return null;
+        return street + ", " + city + ", " + state + ", " + zipCode + ", " + country;
+    }
+
+    public boolean haveAddress() {
+        return !street.isEmpty() && !city.isEmpty() && !state.isEmpty() && !zipCode.isEmpty() && !country.isEmpty();
     }
 }
