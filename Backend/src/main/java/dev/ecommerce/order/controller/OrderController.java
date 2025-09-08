@@ -2,7 +2,6 @@ package dev.ecommerce.order.controller;
 
 import dev.ecommerce.order.service.CheckoutService;
 import dev.ecommerce.order.constant.ReserveStatus;
-import dev.ecommerce.order.service.OrderService;
 import dev.ecommerce.user.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

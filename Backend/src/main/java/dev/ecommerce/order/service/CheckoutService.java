@@ -2,11 +2,14 @@ package dev.ecommerce.order.service;
 
 import dev.ecommerce.exceptionHandler.PaymentFailException;
 import dev.ecommerce.order.constant.OrderStatus;
+import dev.ecommerce.order.constant.PaymentStatus;
 import dev.ecommerce.order.entity.Order;
 import dev.ecommerce.order.entity.OrderItem;
+import dev.ecommerce.order.entity.Payment;
 import dev.ecommerce.order.model.ReserveResult;
 import dev.ecommerce.order.constant.ReserveStatus;
 import dev.ecommerce.order.repository.OrderRepository;
+import dev.ecommerce.order.repository.PaymentRepository;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.repository.ProductRepository;
 import dev.ecommerce.userInfo.constant.UserItemType;
@@ -14,7 +17,6 @@ import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.userInfo.service.UserItemService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -34,6 +36,7 @@ public class CheckoutService {
 
     private final UserItemService userItemService;
     private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisScript<List> reserveScript;
@@ -98,9 +101,7 @@ public class CheckoutService {
         }
 
         order.setTotal(totalPrice);
-        if (!processOrderPayment(totalPrice)) {
-            order.setStatus(OrderStatus.UNPAID);
-            orderRepository.saveAndFlush(order);
+        if (!processOrderPayment(order)) {
             throw new PaymentFailException("Cannot process order");
         }
         Order savedOrder = orderRepository.save(order);
@@ -113,9 +114,20 @@ public class CheckoutService {
     }
 
     // placeholder for payment in the future
-    private boolean processOrderPayment(BigDecimal totalPrice) {
-        System.out.println(totalPrice);
-        return true;
+    @Transactional
+    public boolean processOrderPayment(Order order) {
+        System.out.println(order.getTotal());
+        Payment payment = new Payment(order, "VISA", "Who");
+        if (true) {
+            payment.setStatus(PaymentStatus.SUCCESS);
+            payment.setConfirmedAt(Instant.now());
+        } else {
+            order.setStatus(OrderStatus.UNPAID);
+            payment.setFailedAt(Instant.now());
+            payment.setStatus(PaymentStatus.FAILED);
+            orderRepository.save(order);
+        }
+        return paymentRepository.save(payment).getStatus().equals(PaymentStatus.SUCCESS);
     }
 
     private void cleanReservation(long pid, long cartId) {
