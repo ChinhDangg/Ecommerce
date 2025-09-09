@@ -29,10 +29,10 @@ public class UserItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_info_id", nullable = false)
-    private UserUsageInfo userUsageInfo;
+    private UserUsageInfo userInfo;
 
-    public UserItem(UserUsageInfo userUsageInfo, Product product, int quantity, UserItemType type) {
-        this.userUsageInfo = userUsageInfo;
+    public UserItem(UserUsageInfo userInfo, Product product, int quantity, UserItemType type) {
+        this.userInfo = userInfo;
         this.product = product;
         this.quantity = quantity;
         this.type = type;

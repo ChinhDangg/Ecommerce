@@ -26,8 +26,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
-    private UserUsageInfo userUsageInfo;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    private UserUsageInfo userInfo;
 
     public User(String firstname, String lastname, String username, String password, Role role) {
         this.firstname = firstname;
