@@ -24,7 +24,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final RsaKeyProperties rsaKey;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -33,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/media/**").permitAll()
+                        .requestMatchers("/.well-known/jwks.json").permitAll()
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/product/cart").permitAll()
                         .requestMatchers(
