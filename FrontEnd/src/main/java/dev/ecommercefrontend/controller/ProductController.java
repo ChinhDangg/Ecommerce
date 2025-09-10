@@ -44,14 +44,4 @@ public class ProductController {
         model.addAttribute("filter", filterParam);
         return "/product-page/product-search";
     }
-
-    @GetMapping("/cart")
-    public String getCartPage() {
-        return "/product-page/cart-page";
-    }
-
-    @GetMapping("/checkout")
-    public String getCheckoutPage() {
-        return "/product-page/checkout-page";
-    }
 }
