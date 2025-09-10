@@ -24,7 +24,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_info_id", nullable = false)
-    private UserUsageInfo userUsageInfo;
+    private UserUsageInfo userInfo;
 
     @OneToMany(cascade =  CascadeType.ALL, orphanRemoval = true)
     private final List<OrderItem> orderItems = new ArrayList<>();
@@ -41,9 +41,9 @@ public class Order {
     @Setter
     private Instant statusTime; // for showing info for status like Delivered date or refunded date.
 
-    public Order(OrderStatus status, UserUsageInfo userUsageInfo, Instant placedAt) {
+    public Order(OrderStatus status, UserUsageInfo userInfo, Instant placedAt) {
         this.status = status;
-        this.userUsageInfo = userUsageInfo;
+        this.userInfo = userInfo;
         this.placedAt = placedAt;
         statusTime = placedAt;
     }

@@ -15,6 +15,7 @@ import dev.ecommerce.user.entity.User;
 import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.repository.UserItemRepository;
 import dev.ecommerce.user.repository.UserRepository;
+import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -54,7 +55,7 @@ public class EcommerceApplication {
             ProductFeatureRepository productFeatureRepository,
             ProductOptionRepository productOptionRepository,
             ProductSpecificationRepository productSpecificationRepository,
-            ProductCoreSpecificationRepository productCoreSpecificationRepository, UserRepository userRepository, UserItemRepository userItemRepository, CheckoutService checkoutService) {
+            ProductCoreSpecificationRepository productCoreSpecificationRepository, UserRepository userRepository, UserItemRepository userItemRepository, CheckoutService checkoutService, UserUsageInfoRepository userUsageInfoRepository) {
         return _ -> {
 
 
@@ -64,7 +65,7 @@ public class EcommerceApplication {
             userRepository.save(user);
 
             UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now());
-
+            userUsageInfoRepository.save(userInfo);
 
 
             ProductCategory electronics = new ProductCategory("Electronics", null);
@@ -261,8 +262,8 @@ public class EcommerceApplication {
             );
             userItemRepository.save(userItem);
 
-            ReserveStatus status = checkoutService.reserve(1L);
-            System.out.println(status.name());
+//            ReserveStatus status = checkoutService.reserve(1L);
+//            System.out.println(status.name());
 
         };
     }

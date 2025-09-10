@@ -42,7 +42,7 @@ public class UserOrderService {
 
     public UserOrderHistory getUserOrderHistory(Long userId, Instant start, Instant end, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Order> userOrders = orderRepository.findByUserUsageInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
+        Page<Order> userOrders = orderRepository.findByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
                 userId, start, end, pageable
         );
 
@@ -71,7 +71,7 @@ public class UserOrderService {
         return new UserOrderHistory(
                 buildOptions(findUserInfoByUserId(userId).getFirstOrderAt(), ZoneId.systemDefault()),
                 new PageImpl<>(userOrderInfos, PageRequest.of(page, size),
-                        orderRepository.countAllByUserUsageInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
+                        orderRepository.countAllByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
                                 userId, start, end)
                 )
         );

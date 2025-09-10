@@ -11,7 +11,7 @@ import java.time.Instant;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    Page<Order> findByUserUsageInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(Long id, Instant start, Instant end,  Pageable pageable);
+    Page<Order> findByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(Long id, Instant start, Instant end,  Pageable pageable);
 
-    long countAllByUserUsageInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(Long id, Instant start, Instant end);
+    long countAllByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(Long id, Instant start, Instant end);
 }

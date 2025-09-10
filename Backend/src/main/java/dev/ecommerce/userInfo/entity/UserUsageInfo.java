@@ -32,11 +32,11 @@ public class UserUsageInfo {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "user_info", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userInfo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private final List<UserItem> carts = new ArrayList<>();
 
     @Getter(AccessLevel.NONE) // should not be retrieving all by getter - must be limit
-    @OneToMany(mappedBy = "user_info", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userInfo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private final List<Order> orders = new ArrayList<>();
 
     private Instant createdAt;
