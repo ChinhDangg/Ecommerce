@@ -1,7 +1,5 @@
 package dev.ecommerce.auth.jwt;
 
-import java.security.MessageDigest;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 import dev.ecommerce.configuration.RsaKeyProperties;
@@ -14,7 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -26,28 +23,17 @@ public class JwtService {
         Date now = new Date(nowMillis);
         Date exp = new Date(nowMillis + (1000 * 60 * 30)); // 30 minutes for token expiry
 
-        String kid = computeKid(rsaKey.publicKey());
-
         return Jwts.builder()
                 .header()                    // --- begin header edits ---
-                    .keyId(kid)              // sets "kid" header
+                    .keyId(rsaKey.getKid())              // sets "kid" header
                 .and()
+                .issuer("issuer")
                 .claims(claims) // replaces setClaims()
                 .subject(userDetails.getUsername()) // replaces setSubject()
                 .issuedAt(now)
                 .expiration(exp) // 15 minutes for token expiry
-                .signWith(rsaKey.privateKey(), Jwts.SIG.RS256)
+                .signWith(rsaKey.getPrivateKey(), Jwts.SIG.RS256)
                 .compact();
-    }
-
-    public static String computeKid(RSAPublicKey publicKey) {
-        try {
-            byte[] der = publicKey.getEncoded(); // X.509 SubjectPublicKeyInfo
-            byte[] sha256 = MessageDigest.getInstance("SHA-256").digest(der);
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(sha256);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to compute kid", e);
-        }
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -79,7 +65,7 @@ public class JwtService {
 
     public Claims extractClaims(String token) {
         return Jwts.parser()
-                .verifyWith(rsaKey.publicKey())
+                .verifyWith(rsaKey.getPublicKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
