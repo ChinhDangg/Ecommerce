@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,80 +30,78 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        // if requesting for authentication then skip token filter
-        if (request.getServletPath().startsWith("/api/auth/")) {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        // Allow auth endpoints and CORS preflight to pass through
+        String path = request.getServletPath();
+        if (path.startsWith("/api/auth/") || "OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
-        final String headerPrefix = "Bearer ";
-        Cookie[] cookies = request.getCookies();
+        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String bearer = "Bearer ";
+        final Cookie[] cookies = request.getCookies();
 
-        // if Authorization header doesn't have Bearer token, and doesn't have cookie with Auth name,
-        // then fail the jwt filter
-        if (authHeader == null || !authHeader.startsWith(headerPrefix)) {
-            if (cookies == null || checkCookiesHaveName(cookies, "Auth") == -1) {
-                filterChain.doFilter(request, response);
-                return;
+        // Prefer Authorization header; if absent, fall back to Auth cookie
+        String token = null;
+        if (header != null && header.regionMatches(true, 0, bearer, 0, bearer.length())) {
+            String candidate = header.substring(bearer.length()).trim();
+            if (!candidate.isEmpty()) token = candidate;
+        }
+        if (token == null && cookies != null) {
+            Cookie authCookie = getCookieByName(cookies, "Auth");
+            if (authCookie != null && authCookie.getValue() != null && !authCookie.getValue().isBlank()) {
+                token = authCookie.getValue();
             }
         }
 
-        // get auth cookie value or get authorization header
-        String jwtToken;
-        if (cookies != null) {
-            int cookieAuthIndex = checkCookiesHaveName(cookies, "Auth");
-            jwtToken = cookieAuthIndex == -1 ? cookies[0].getValue() : cookies[cookieAuthIndex].getValue();
-        } else {
-            jwtToken = authHeader.substring(headerPrefix.length());
+        // If no credentials, continue as anonymous
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
         }
-        final String username = jwtService.extractUsername(jwtToken);
-        boolean isTokenValid = false;
 
-        // every request will have different SecurityContextHolder, will always be null initially,
-        // but still check to avoid same thread authentication (next filter)
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(jwtToken, userDetails)) {
-                isTokenValid = true;
-                setDetailInSecurityContextHolder(userDetails, request);
+        try {
+            // Validate signature & expiry first (your jwtService should do full verification)
+            String username = jwtService.extractUsername(token);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Optional: check revocation/blacklist/jti here
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    setAuth(userDetails, request);
+                } else {
+                    // Token present but invalid -> reject
+                    throw new BadCredentialsException("Invalid token");
+                }
             }
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Access token expired — do NOT refresh here. Let client call /api/auth/refresh.
+            throw new BadCredentialsException("Token expired", e);
+        } catch (Exception e) {
+            // Any other parsing/validation failure
+            throw new BadCredentialsException("Invalid token", e);
         }
 
-        // cookie is still valid but the jwt inside has expired as it has shorter duration
-        // still authenticate the user but update the jwt with a new one and new cookie time
-        if (username != null && !isTokenValid && cookies != null && checkCookiesHaveName(cookies, "Auth") != -1) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isCookieTokenValid(jwtToken, userDetails)) {
-                isTokenValid = true;
-                setDetailInSecurityContextHolder(userDetails, request);
-                ResponseCookie cookie = jwtService.makeAuthenticateCookie(userDetails);
-                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-                //response.addCookie(jwtService.makeAuthenticateCookie(userDetails));
-            }
-        }
-
-        if (!isTokenValid)
-            throw new BadCredentialsException("Invalid token");
         filterChain.doFilter(request, response);
     }
 
-    private int checkCookiesHaveName(Cookie[] cookies, String name) {
-        for (int j = 0; j < cookies.length; j++) {
-            if (cookies[j].getName().equals(name)) {
-                return j;
-            }
+    private Cookie getCookieByName(Cookie[] cookies, String name) {
+        if (cookies == null) return null;
+        for (Cookie c : cookies) {
+            if (name.equals(c.getName())) return c;
         }
-        return -1;
+        return null;
     }
 
-    private void setDetailInSecurityContextHolder(UserDetails userDetails, HttpServletRequest request) {
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities()
-        );
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+    private void setAuth(UserDetails userDetails, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
 }
