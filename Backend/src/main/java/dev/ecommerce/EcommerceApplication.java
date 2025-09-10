@@ -1,5 +1,6 @@
 package dev.ecommerce;
 
+import dev.ecommerce.configuration.RsaKeyProperties;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.order.service.CheckoutService;
 import dev.ecommerce.order.constant.ReserveStatus;
@@ -17,6 +18,7 @@ import dev.ecommerce.user.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,6 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootApplication
+@EnableConfigurationProperties(RsaKeyProperties.class)
 public class EcommerceApplication {
 
     private final PasswordEncoder passwordEncoder;
