@@ -42,7 +42,7 @@ public class EcommerceApplication {
         SpringApplication.run(EcommerceApplication.class, args);
     }
 
-    @Bean
+    //@Bean
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
