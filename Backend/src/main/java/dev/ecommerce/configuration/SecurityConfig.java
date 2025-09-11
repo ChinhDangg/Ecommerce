@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/media/**").permitAll()
-                        .requestMatchers("/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/api/.well-known/jwks.json").permitAll()
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/product/cart").permitAll()
                         .requestMatchers(
