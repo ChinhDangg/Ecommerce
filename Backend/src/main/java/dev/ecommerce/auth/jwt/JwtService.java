@@ -6,6 +6,7 @@ import dev.ecommerce.configuration.RsaKeyProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,6 +72,8 @@ public class JwtService {
                 .getPayload();
     }
 
+   public static final String AUTH_COOKIE_NAME = "Auth";
+
     public ResponseCookie makeAuthenticateCookie(UserDetails userDetails) {
         long maxAgeSeconds = 60 * 60; // 1 hour
         Date cookieMaxTime = new Date(System.currentTimeMillis() + (maxAgeSeconds * 1000));
@@ -85,12 +88,19 @@ public class JwtService {
         claims.put("scope", roles);
         String token = generateToken(claims, userDetails);
 
-        return ResponseCookie.from("Auth", token)
+        return ResponseCookie.from(AUTH_COOKIE_NAME, token)
                 .httpOnly(true)
                 .secure(false) // change to true upon production with https enable
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .build();
+    }
+
+    public static Cookie removeAuthCookie() {
+        Cookie cookie = new Cookie(AUTH_COOKIE_NAME, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        return cookie;
     }
 }
