@@ -5,7 +5,6 @@ import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
-import dev.ecommerce.userInfo.constant.UserItemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -102,21 +101,56 @@ public class ProductService {
     }
 
     public ProductCartDTO getProductCartInfo(List<ShortProductCartDTO> productList) {
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        int totalQuantity = 0;
-        for (ShortProductCartDTO product : productList) {
-            if (product.getItemType() == UserItemType.SAVED)
-                continue;
-            BigDecimal whichPrice = product.getDiscountedPrice() == null ? product.getPrice() : product.getDiscountedPrice();
-            totalPrice = totalPrice.add(whichPrice.multiply(new BigDecimal(product.getQuantity())));
-            totalQuantity += product.getQuantity();
+        int totalQuantity = productList.stream()
+                .map(ShortProductCartDTO::getQuantity)
+                .reduce(0, Integer::sum);
+
+        BigDecimal priceBeforeTax = getPriceBeforeTax(productList, ShortProductCartDTO::getQuantity,
+                ShortProductCartDTO::getDiscountedPrice, ShortProductCartDTO::getPrice);
+        BigDecimal priceAfterTax = getPriceAfterTax(priceBeforeTax);
+        BigDecimal taxedAmount = priceAfterTax.subtract(priceBeforeTax).setScale(2, RoundingMode.HALF_UP);
+
+        return new ProductCartDTO(productList,
+                totalQuantity,
+                taxedAmount,
+                priceBeforeTax,
+                priceAfterTax);
+    }
+
+    public static BigDecimal getLowestPrice(BigDecimal salePrice, BigDecimal originalPrice) {
+        if (salePrice == null)
+            return originalPrice;
+        if (salePrice.compareTo(originalPrice) > 0)
+            throw new IllegalArgumentException("SalePrice cannot be greater than originalPrice");
+        return salePrice;
+    }
+
+    // pair: price + quantity
+    public static <T> BigDecimal getPriceBeforeTax(List<T> userItems,
+                                                   Function<T, Integer> quantityGetter,
+                                                   Function<T, BigDecimal> salePriceGetter,
+                                                   Function<T, BigDecimal> priceGetter) {
+        BigDecimal priceBeforeTax = BigDecimal.ZERO;
+        for (T userItem : userItems) {
+            BigDecimal price = getLowestPrice(salePriceGetter.apply(userItem), priceGetter.apply(userItem))
+                    .multiply(BigDecimal.valueOf(quantityGetter.apply(userItem)));
+            priceBeforeTax = priceBeforeTax.add(price);
         }
-        BigDecimal tax = totalPrice.multiply(getTax());
-        BigDecimal priceAfterTax = totalPrice.add(tax);
-        return new ProductCartDTO(productList, totalQuantity,
-                tax.setScale(2, RoundingMode.HALF_UP),
-                totalPrice.setScale(2, RoundingMode.HALF_UP),
-                priceAfterTax.setScale(2, RoundingMode.HALF_UP));
+        return priceBeforeTax.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public static BigDecimal getPriceAfterTax(BigDecimal priceBeforeTax) {
+        BigDecimal priceAfterTax = priceBeforeTax;
+        priceAfterTax = priceAfterTax.add(priceAfterTax.multiply(getTax()));
+        return priceAfterTax.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public static <T> BigDecimal getPriceAfterTax(List<T> userItems,
+                                              Function<T, Integer> quantityGetter,
+                                              Function<T, BigDecimal> salePriceGetter,
+                                              Function<T, BigDecimal> priceGetter) {
+        BigDecimal priceBeforeTax = getPriceBeforeTax(userItems, quantityGetter, salePriceGetter, priceGetter);
+        return getPriceAfterTax(priceBeforeTax);
     }
 
     public static BigDecimal getTax() {
@@ -240,7 +274,6 @@ public class ProductService {
     public Long updateProductInfo(ProductDTO productDTO, Integer productLineId, Map<String, MultipartFile> fileMap) {
         Product product = findProductById(productDTO.getId());
 
-        List<String> oldFilenames = new ArrayList<>();
         List<String> updatedFilenames = new ArrayList<>();
 
         // update basic info
@@ -283,7 +316,7 @@ public class ProductService {
 
         // update media
         List<ProductMedia> oldMedia = product.getMedia();
-        oldFilenames.addAll(oldMedia.stream()
+        List<String> oldFilenames = new ArrayList<>(oldMedia.stream()
                 .map(ProductMedia::getContent)
                 .toList());
         Map<Long, ProductMedia> currentMediaMap = oldMedia

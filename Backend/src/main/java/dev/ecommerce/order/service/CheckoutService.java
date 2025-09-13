@@ -66,7 +66,6 @@ public class CheckoutService {
         Instant now = Instant.now();
         Order order = new Order(OrderStatus.PROCESSING, userInfo, now);
 
-        BigDecimal totalPrice = BigDecimal.ZERO;
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
                 continue;
@@ -84,8 +83,7 @@ public class CheckoutService {
             }
 
             Product product = cart.getProduct();
-            BigDecimal price = product.getSalePrice() == null ? product.getPrice() : product.getSalePrice();
-            totalPrice = totalPrice.add(price);
+            BigDecimal price = ProductService.getLowestPrice(product.getSalePrice(), product.getPrice());
             OrderItem orderItem = new OrderItem(order, cart.getProduct(), cart.getQuantity(), price);
             order.getOrderItems().add(orderItem);
         }
@@ -105,7 +103,11 @@ public class CheckoutService {
             }
         }
 
-        order.setTotal(totalPrice.add(totalPrice.multiply(ProductService.getTax()).setScale(2, RoundingMode.HALF_UP)));
+        order.setTotal(ProductService.getPriceAfterTax(
+                carts, UserItem::getQuantity,
+                item -> item.getProduct().getSalePrice(),
+                item -> item.getProduct().getPrice()
+        ));
         Order savedOrder = orderRepository.save(order);
         if (!processOrderPayment(savedOrder)) {
             throw new PaymentFailException("Cannot process order");
