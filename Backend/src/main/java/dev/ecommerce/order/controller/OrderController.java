@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
@@ -32,6 +34,12 @@ public class OrderController {
         } else {
             return ResponseEntity.badRequest().body(status.name());
         }
+    }
+
+    @GetMapping("/check-reserve")
+    public ResponseEntity<Map<Long, Integer>> checkReserve(Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok(checkoutService.getUserReservations(userId));
     }
 
     @GetMapping("/place")
