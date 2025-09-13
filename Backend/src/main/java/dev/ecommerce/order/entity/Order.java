@@ -26,7 +26,7 @@ public class Order {
     @JoinColumn(name = "user_info_id", nullable = false)
     private UserUsageInfo userInfo;
 
-    @OneToMany(cascade =  CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade =  CascadeType.ALL, orphanRemoval = true)
     private final List<OrderItem> orderItems = new ArrayList<>();
 
     private Instant placedAt;
