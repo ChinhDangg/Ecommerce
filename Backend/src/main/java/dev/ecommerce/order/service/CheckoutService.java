@@ -12,6 +12,7 @@ import dev.ecommerce.order.repository.OrderRepository;
 import dev.ecommerce.order.repository.PaymentRepository;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.repository.ProductRepository;
+import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -72,7 +74,7 @@ public class CheckoutService {
             long pid = cart.getProduct().getId();
             int expectedQuantity = cart.getQuantity();
 
-            String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(pid), cart.getId());
+            String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(pid), String.valueOf(cart.getId()));
             int held = (qtyStr == null) ? 0 : Integer.parseInt(qtyStr);
 
             if (held <= 0 || held != expectedQuantity) {
@@ -103,11 +105,11 @@ public class CheckoutService {
             }
         }
 
-        order.setTotal(totalPrice);
-        if (!processOrderPayment(order)) {
+        order.setTotal(totalPrice.add(totalPrice.multiply(ProductService.getTax()).setScale(2, RoundingMode.HALF_UP)));
+        Order savedOrder = orderRepository.save(order);
+        if (!processOrderPayment(savedOrder)) {
             throw new PaymentFailException("Cannot process order");
         }
-        Order savedOrder = orderRepository.save(order);
 
         if (userInfo.getFirstOrderAt() == null) {
             userInfo.setFirstOrderAt(now);
@@ -124,7 +126,7 @@ public class CheckoutService {
     // placeholder for payment in the future
     @Transactional
     public boolean processOrderPayment(Order order) {
-        System.out.println(order.getTotal());
+        System.out.println("Total: " + order.getTotal());
         Payment payment = new Payment(order, "VISA", "Who");
         if (true) {
             payment.setStatus(PaymentStatus.SUCCESS);
@@ -155,7 +157,7 @@ public class CheckoutService {
                 continue;
 
             int expectedQuantity = cart.getQuantity();
-            String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(cart.getProduct().getId()), cart.getId());
+            String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(cart.getProduct().getId()), String.valueOf(cart.getId()));
             int held = (qtyStr == null) ? 0 : Integer.parseInt(qtyStr);
 
             if (held <= 0 || held != expectedQuantity)
