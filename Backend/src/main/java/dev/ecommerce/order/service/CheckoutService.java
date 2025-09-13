@@ -15,6 +15,7 @@ import dev.ecommerce.product.repository.ProductRepository;
 import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
+import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;
 import dev.ecommerce.userInfo.service.UserItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @EnableScheduling
@@ -35,6 +38,7 @@ import java.util.List;
 public class CheckoutService {
 
     private final UserItemService userItemService;
+    private final UserUsageInfoRepository userInfoRepository;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
@@ -59,7 +63,6 @@ public class CheckoutService {
 
         Instant now = Instant.now();
         Order order = new Order(OrderStatus.PROCESSING, userInfo, now);
-        orderRepository.saveAndFlush(order);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (UserItem cart : carts) {
@@ -106,6 +109,11 @@ public class CheckoutService {
         }
         Order savedOrder = orderRepository.save(order);
 
+        if (userInfo.getFirstOrderAt() == null) {
+            userInfo.setFirstOrderAt(now);
+            userInfoRepository.save(userInfo);
+        }
+
         for (UserItem cart : carts) {
             cleanReservation(cart.getProduct().getId(), cart.getId());
         }
@@ -139,15 +147,35 @@ public class CheckoutService {
     }
 
     @Transactional(readOnly = true)
+    public Map<Long, Integer> getUserReservations(Long userId) {
+        List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
+        Map<Long, Integer> res = new HashMap<>();
+        for (UserItem cart : carts) {
+            if (cart.getType() != UserItemType.CART)
+                continue;
+
+            int expectedQuantity = cart.getQuantity();
+            String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(cart.getProduct().getId()), cart.getId());
+            int held = (qtyStr == null) ? 0 : Integer.parseInt(qtyStr);
+
+            if (held <= 0 || held != expectedQuantity)
+                return null;
+
+            res.put(cart.getProduct().getId(), held);
+        }
+        return res;
+    }
+
+    @Transactional(readOnly = true)
     public ReserveStatus reserve(Long userId) {
         List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
 
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
                 continue;
-            ReserveResult result = reserveWithCache(cart.getProduct().getId(), cart.getId(), cart.getQuantity());
+            Product product = cart.getProduct();
+            ReserveResult result = reserveWithCache(product.getId(), cart.getId(), cart.getQuantity());
             if (result.status() == ReserveStatus.NO_CACHE) {
-                Product product = cart.getProduct();
                 addProductQuantityCache(product.getId(), product.getQuantity());
                 ReserveResult retry = reserveWithCache(product.getId(), cart.getId(), cart.getQuantity());
                 return retry.status();
