@@ -102,7 +102,7 @@ public class RedisConfig {
             
             -- update reservation
             if req == 0 then
-              -- releasing reservation
+              -- releasing reservation - do not use for cleaning reservation as it give back to stock
               redis.call('HDEL', holdsKey, cart)
               redis.call('ZREM', expKey, cart)
               redis.call('ZREM', expAll, globalMember)
