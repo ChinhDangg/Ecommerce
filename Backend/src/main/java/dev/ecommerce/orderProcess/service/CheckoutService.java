@@ -6,10 +6,12 @@ import dev.ecommerce.orderProcess.constant.PaymentStatus;
 import dev.ecommerce.orderProcess.entity.Order;
 import dev.ecommerce.orderProcess.entity.OrderItem;
 import dev.ecommerce.orderProcess.entity.Payment;
+import dev.ecommerce.orderProcess.model.CheckoutDTO;
 import dev.ecommerce.orderProcess.model.ReserveResult;
 import dev.ecommerce.orderProcess.constant.ReserveStatus;
 import dev.ecommerce.orderProcess.repository.OrderRepository;
 import dev.ecommerce.orderProcess.repository.PaymentRepository;
+import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.repository.ProductRepository;
 import dev.ecommerce.product.service.ProductService;
@@ -149,6 +151,21 @@ public class CheckoutService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public CheckoutDTO getUserCheckoutDTO(Long userId) {
+        var reserveInfo = getUserReservations(userId);
+        if (reserveInfo == null)
+            return null;
+
+        ProductCartDTO cartDTO = userItemService.getUserCartInfo(userId, true, false);
+        UserUsageInfo userInfo = userItemService.findUserInfoByUserId(userId);
+        return new CheckoutDTO(
+                userInfo.getDisplayName(),
+                userInfo.getUserAddress(),
+                cartDTO,
+                reserveInfo
+        );
+    }
 
     // redis:
     // key{pid} - field - value - where
