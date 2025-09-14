@@ -42,6 +42,9 @@ public class UserUsageInfo {
     private Instant createdAt;
 
     @Setter
+    private String displayName;
+
+    @Setter
     private Instant firstOrderAt;
 
     @Setter
