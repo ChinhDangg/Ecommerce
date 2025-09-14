@@ -1,6 +1,6 @@
-package dev.ecommerce.order.entity;
+package dev.ecommerce.orderProcess.entity;
 
-import dev.ecommerce.order.constant.OrderStatus;
+import dev.ecommerce.orderProcess.constant.OrderStatus;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package dev.ecommerce.userInfo.entity;
 
-import dev.ecommerce.order.entity.Order;
+import dev.ecommerce.orderProcess.entity.Order;
 import dev.ecommerce.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

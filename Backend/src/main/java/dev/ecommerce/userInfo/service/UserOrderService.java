@@ -1,13 +1,13 @@
 package dev.ecommerce.userInfo.service;
 
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
-import dev.ecommerce.order.entity.Order;
-import dev.ecommerce.order.entity.OrderItem;
+import dev.ecommerce.orderProcess.entity.Order;
+import dev.ecommerce.orderProcess.entity.OrderItem;
 import dev.ecommerce.userInfo.DTO.TimeFilterOption;
 import dev.ecommerce.userInfo.DTO.UserOrderInfo;
 import dev.ecommerce.userInfo.DTO.UserOrderItemInfo;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
-import dev.ecommerce.order.repository.OrderRepository;
+import dev.ecommerce.orderProcess.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;

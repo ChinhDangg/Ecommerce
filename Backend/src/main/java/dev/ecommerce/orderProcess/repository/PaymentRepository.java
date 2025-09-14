@@ -1,6 +1,6 @@
-package dev.ecommerce.order.repository;
+package dev.ecommerce.orderProcess.repository;
 
-import dev.ecommerce.order.entity.Payment;
+import dev.ecommerce.orderProcess.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {

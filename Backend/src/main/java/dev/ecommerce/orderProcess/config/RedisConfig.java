@@ -1,4 +1,4 @@
-package dev.ecommerce.order.config;
+package dev.ecommerce.orderProcess.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

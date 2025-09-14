@@ -1,6 +1,6 @@
 package dev.ecommerce.userInfo.DTO;
 
-import dev.ecommerce.order.constant.OrderStatus;
+import dev.ecommerce.orderProcess.constant.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

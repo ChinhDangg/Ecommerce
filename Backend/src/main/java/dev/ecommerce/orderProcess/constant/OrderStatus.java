@@ -1,4 +1,4 @@
-package dev.ecommerce.order.constant;
+package dev.ecommerce.orderProcess.constant;
 
 public enum OrderStatus {
     PROCESSING,
