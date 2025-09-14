@@ -37,7 +37,7 @@ public class OrderController {
     }
 
     @GetMapping("/check-reserve")
-    public ResponseEntity<Map<Long, Integer>> checkReserve(Authentication authentication) {
+    public ResponseEntity<Map<Long, Map<String, Long>>> checkReserve(Authentication authentication) {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok(checkoutService.getUserReservations(userId));
     }
