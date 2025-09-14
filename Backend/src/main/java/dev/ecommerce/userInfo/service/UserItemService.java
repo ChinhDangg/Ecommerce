@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,15 +59,15 @@ public class UserItemService {
     }
 
     @Transactional(readOnly = true)
-    public ProductCartDTO getUserCartInfo(Long userId) {
+    public ProductCartDTO getUserCartInfo(Long userId, boolean getFinalTotal, boolean getProductOption) {
         List<UserItem> userItem = findUserCart(userId);
         if (userItem.isEmpty())
             return new ProductCartDTO();
 
         List<ShortProductCartDTO> shortProductDTOs = productService.getShortProductCartInfo(
-                userItem, UserItem::getProduct, UserItem::getQuantity, UserItem::getType
+                userItem, UserItem::getProduct, UserItem::getQuantity, UserItem::getType, getProductOption
         );
-        return productService.getProductCartInfo(shortProductDTOs, false);
+        return productService.getProductCartInfo(shortProductDTOs, getFinalTotal);
     }
 
     @Transactional

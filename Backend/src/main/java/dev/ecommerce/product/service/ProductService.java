@@ -86,22 +86,23 @@ public class ProductService {
                 userCartDTOList,
                 userCartDTO -> findProductById(userCartDTO.getProductId()),
                 UserCartDTO::getQuantity,
-                UserCartDTO::getItemType);
+                UserCartDTO::getItemType,
+                true);
         return getProductCartInfo(shortProductDTOList, false);
     }
 
     @Transactional(readOnly = true)
     public <T> List<ShortProductCartDTO> getShortProductCartInfo(List<T> carts,
-                                                          Function<T, Product> productGetter,
-                                                          Function<T, Integer> quantityGetter,
-                                                          Function<T, UserItemType> itemTypeGetter) {
+                                                                 Function<T, Product> productGetter,
+                                                                 Function<T, Integer> quantityGetter,
+                                                                 Function<T, UserItemType> itemTypeGetter,
+                                                                 boolean getProductOption) {
         List<ShortProductCartDTO> shortProductCartDTOList = new ArrayList<>();
         for (T cart : carts) {
             Product product = productGetter.apply(cart);
             ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(getShortProductInfo(product, false));
-            shortProductCartDTO.setProductOptions(
-                    productMapper.toProductOptionDTOList(product.getOptions())
-            );
+            if (getProductOption)
+                shortProductCartDTO.setProductOptions(productMapper.toProductOptionDTOList(product.getOptions()));
             shortProductCartDTO.setItemType(itemTypeGetter.apply(cart));
             int maxQuantity = product.getQuantity() > 100 ? 100 : product.getQuantity();
             int cartQuantity = quantityGetter.apply(cart);
@@ -122,11 +123,7 @@ public class ProductService {
         BigDecimal priceAfterTax = getFinalTotal ? getPriceAfterTax(priceBeforeTax): null;
         BigDecimal taxedAmount = getFinalTotal ? priceAfterTax.subtract(priceBeforeTax).setScale(2, RoundingMode.HALF_UP) : null;
 
-        return new ProductCartDTO(productList,
-                totalQuantity,
-                taxedAmount,
-                priceBeforeTax,
-                priceAfterTax);
+        return new ProductCartDTO(productList, totalQuantity, taxedAmount, priceBeforeTax, priceAfterTax);
     }
 
     public static BigDecimal getLowestPrice(BigDecimal salePrice, BigDecimal originalPrice) {

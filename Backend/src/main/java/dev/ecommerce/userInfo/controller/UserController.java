@@ -37,7 +37,7 @@ public class UserController {
 
     @GetMapping("/cart")
     public ResponseEntity<ProductCartDTO> getCart(Authentication authentication) {
-        ProductCartDTO cart = userItemService.getUserCartInfo(getUserId(authentication));
+        ProductCartDTO cart = userItemService.getUserCartInfo(getUserId(authentication), false, false);
         return ResponseEntity.status(HttpStatus.OK).body(cart);
     }
 
