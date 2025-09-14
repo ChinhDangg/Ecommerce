@@ -178,13 +178,8 @@ function displayOrderSummary(cartInfo) {
     const item = cartInfo.totalQuantity > 1 ? 'items' : 'item';
     document.getElementById('order-num-item').innerText = `(${cartInfo.totalQuantity} ${item})`
     document.getElementById('price-before-tax').innerText = '$' + cartInfo.totalPrice;
-    document.getElementById('tax-amount').innerText = '$' + cartInfo.taxAmount;
-    document.getElementById('price-after-tax').innerText = '$' + cartInfo.priceAfterTax;
     document.getElementById('price-before-tax').classList.remove('hidden');
     const orderContainer = document.getElementById('order-summary-container');
-    orderContainer.querySelector('.shipping-section').classList.remove('hidden');
-    orderContainer.querySelector('.tax-section').classList.remove('hidden');
-    orderContainer.querySelector('.total-section').classList.remove('hidden');
     orderContainer.querySelector('.check-out-btn').classList.remove('hidden');
 }
 
@@ -192,9 +187,6 @@ function removeOrderSummary() {
     const orderContainer = document.getElementById('order-summary-container');
     document.getElementById('price-before-tax').classList.add('hidden');
     document.getElementById('order-num-item').innerText = '(0 item)';
-    orderContainer.querySelector('.shipping-section').classList.add('hidden');
-    orderContainer.querySelector('.tax-section').classList.add('hidden');
-    orderContainer.querySelector('.total-section').classList.add('hidden');
     orderContainer.querySelector('.check-out-btn').classList.add('hidden');
 }
 

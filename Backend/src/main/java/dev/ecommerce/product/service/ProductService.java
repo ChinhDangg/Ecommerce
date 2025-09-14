@@ -97,18 +97,18 @@ public class ProductService {
             );
             shortProductDTOList.add(shortProductCartDTO);
         }
-        return getProductCartInfo(shortProductDTOList);
+        return getProductCartInfo(shortProductDTOList, false);
     }
 
-    public ProductCartDTO getProductCartInfo(List<ShortProductCartDTO> productList) {
+    public ProductCartDTO getProductCartInfo(List<ShortProductCartDTO> productList, boolean getFinalTotal) {
         int totalQuantity = productList.stream()
                 .map(ShortProductCartDTO::getQuantity)
                 .reduce(0, Integer::sum);
 
         BigDecimal priceBeforeTax = getPriceBeforeTax(productList, ShortProductCartDTO::getQuantity,
                 ShortProductCartDTO::getDiscountedPrice, ShortProductCartDTO::getPrice);
-        BigDecimal priceAfterTax = getPriceAfterTax(priceBeforeTax);
-        BigDecimal taxedAmount = priceAfterTax.subtract(priceBeforeTax).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal priceAfterTax = getFinalTotal ? getPriceAfterTax(priceBeforeTax): null;
+        BigDecimal taxedAmount = getFinalTotal ? priceAfterTax.subtract(priceBeforeTax).setScale(2, RoundingMode.HALF_UP) : null;
 
         return new ProductCartDTO(productList,
                 totalQuantity,

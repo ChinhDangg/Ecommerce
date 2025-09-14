@@ -84,7 +84,7 @@ public class UserItemService {
             );
             shortProductDTOs.add(shortProductCartDTO);
         }
-        return productService.getProductCartInfo(shortProductDTOs);
+        return productService.getProductCartInfo(shortProductDTOs, false);
     }
 
     @Transactional
