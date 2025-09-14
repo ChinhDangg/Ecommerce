@@ -149,10 +149,15 @@ public class CheckoutService {
         );
     }
 
+
+    // redis:
+    // key{pid} - field - value - where
+    // exp:{1} - cart id - epoch time - sorted sets
+    // hold:{1} - cart id - quantity - hash tables
     @Transactional(readOnly = true)
-    public Map<Long, Integer> getUserReservations(Long userId) {
+    public Map<Long, Map<String, Long>> getUserReservations(Long userId) {
         List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
-        Map<Long, Integer> res = new HashMap<>();
+        Map<Long, Map<String, Long>> res = new HashMap<>();
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
                 continue;
@@ -160,11 +165,19 @@ public class CheckoutService {
             int expectedQuantity = cart.getQuantity();
             String qtyStr = (String) stringRedisTemplate.opsForHash().get(holdsKey(cart.getProduct().getId()), String.valueOf(cart.getId()));
             int held = (qtyStr == null) ? 0 : Integer.parseInt(qtyStr);
-
             if (held <= 0 || held != expectedQuantity)
                 return null;
 
-            res.put(cart.getProduct().getId(), held);
+            Double expiryScore = stringRedisTemplate.opsForZSet().score(expAll(), cart.getProduct().getId() + ":" + cart.getId());
+            long expiryTime = expiryScore == null ? 0 : expiryScore.longValue();
+            if (expiryTime <= 0) {
+                return null;
+            }
+
+            Instant storedTime = Instant.ofEpochMilli(expiryTime);
+            long minutesDiff = Duration.between(Instant.now(), storedTime).toMinutes();
+
+            res.put(cart.getProduct().getId(), Map.of("held", (long) held, "minLeft", minutesDiff));
         }
         return res;
     }
