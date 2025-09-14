@@ -1,12 +1,15 @@
 package dev.ecommerce.orderProcess.controller;
 
+import dev.ecommerce.orderProcess.model.CheckoutDTO;
 import dev.ecommerce.orderProcess.service.CheckoutService;
 import dev.ecommerce.orderProcess.constant.ReserveStatus;
 import dev.ecommerce.user.SecurityUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +28,7 @@ public class OrderController {
         return ((SecurityUser) authentication.getPrincipal()).user().getId();
     }
 
-    @GetMapping("/reserve")
+    @PostMapping("/reserve")
     public ResponseEntity<String> reserve(Authentication authentication) {
         Long userId = getUserId(authentication);
         ReserveStatus status = checkoutService.reserve(userId);
@@ -36,10 +39,11 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/check-reserve")
-    public ResponseEntity<Map<Long, Map<String, Long>>> checkReserve(Authentication authentication) {
+    @GetMapping("/checkout")
+    public ResponseEntity<CheckoutDTO> getCheckout(Authentication authentication) {
         Long userId = getUserId(authentication);
-        return ResponseEntity.ok(checkoutService.getUserReservations(userId));
+        CheckoutDTO checkoutInfo = checkoutService.getUserCheckoutDTO(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(checkoutInfo);
     }
 
     @GetMapping("/place")
