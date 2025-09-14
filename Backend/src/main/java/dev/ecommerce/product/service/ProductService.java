@@ -5,6 +5,7 @@ import dev.ecommerce.product.DTO.*;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
+import dev.ecommerce.userInfo.constant.UserItemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -81,23 +82,34 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductCartDTO getLocalCartInfo(List<UserCartDTO> userCartDTOList) {
-        List<ShortProductCartDTO> shortProductDTOList = new ArrayList<>();
+        List<ShortProductCartDTO> shortProductDTOList = getShortProductCartInfo(
+                userCartDTOList,
+                userCartDTO -> findProductById(userCartDTO.getProductId()),
+                UserCartDTO::getQuantity,
+                UserCartDTO::getItemType);
+        return getProductCartInfo(shortProductDTOList, false);
+    }
 
-        for (UserCartDTO userCartDTO : userCartDTOList) {
-            Product product = findProductById(userCartDTO.getProductId());
+    @Transactional(readOnly = true)
+    public <T> List<ShortProductCartDTO> getShortProductCartInfo(List<T> carts,
+                                                          Function<T, Product> productGetter,
+                                                          Function<T, Integer> quantityGetter,
+                                                          Function<T, UserItemType> itemTypeGetter) {
+        List<ShortProductCartDTO> shortProductCartDTOList = new ArrayList<>();
+        for (T cart : carts) {
+            Product product = productGetter.apply(cart);
             ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(getShortProductInfo(product, false));
             shortProductCartDTO.setProductOptions(
                     productMapper.toProductOptionDTOList(product.getOptions())
             );
-            shortProductCartDTO.setItemType(userCartDTO.getItemType());
+            shortProductCartDTO.setItemType(itemTypeGetter.apply(cart));
             int maxQuantity = product.getQuantity() > 100 ? 100 : product.getQuantity();
+            int cartQuantity = quantityGetter.apply(cart);
             shortProductCartDTO.setMaxQuantity(maxQuantity);
-            shortProductCartDTO.setQuantity(
-                    userCartDTO.getQuantity() > maxQuantity ? maxQuantity : userCartDTO.getQuantity()
-            );
-            shortProductDTOList.add(shortProductCartDTO);
+            shortProductCartDTO.setQuantity(Math.min(cartQuantity, maxQuantity));
+            shortProductCartDTOList.add(shortProductCartDTO);
         }
-        return getProductCartInfo(shortProductDTOList, false);
+        return shortProductCartDTOList;
     }
 
     public ProductCartDTO getProductCartInfo(List<ShortProductCartDTO> productList, boolean getFinalTotal) {
@@ -161,7 +173,10 @@ public class ProductService {
     public ShortProductDTO getShortProductInfo(Product product, boolean getFeatures) {
         ShortProductDTO shortProductDTO = (getFeatures) ? productMapper.toShortProductWithFeaturesDTO(product)
                 : productMapper.toShortProductWithoutFeaturesDTO(product);
-        shortProductDTO.setImageName(product.getMedia().stream().findFirst().map(ProductMedia::getContent).orElse(null));
+        shortProductDTO.setImageName(
+                product.getThumbnail() != null ? product.getThumbnail() :
+                product.getMedia().stream().findFirst().map(ProductMedia::getContent).orElse(null)
+        );
         shortProductDTO.setDiscountedPrice(
                 product.getSaleEndDate() == null ? null : product.getSaleEndDate().isAfter(LocalDate.now()) ? product.getSalePrice() : null
         );

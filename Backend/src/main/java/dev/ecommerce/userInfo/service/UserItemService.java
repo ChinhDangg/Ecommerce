@@ -54,12 +54,9 @@ public class UserItemService {
     @Transactional(readOnly = true)
     public Integer getCartTotal(Long userId) {
         List<UserItem> userItem = findUserCart(userId);
-        if (userItem.isEmpty())
-            return 0;
-        else
-            return userItem.stream()
-                    .filter(ut -> ut.getType() == UserItemType.CART)
-                    .mapToInt(UserItem::getQuantity).sum();
+        return userItem.isEmpty() ? 0 : userItem.stream()
+                .filter(ut -> ut.getType() == UserItemType.CART)
+                .mapToInt(UserItem::getQuantity).sum();
     }
 
     @Transactional(readOnly = true)
@@ -68,22 +65,9 @@ public class UserItemService {
         if (userItem.isEmpty())
             return new ProductCartDTO();
 
-        List<ShortProductCartDTO> shortProductDTOs = new ArrayList<>();
-        for (UserItem cart : userItem) {
-            Product product = cart.getProduct();
-            ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(
-                    productService.getShortProductInfo(product, false));
-            shortProductCartDTO.setProductOptions(
-                    productMapper.toProductOptionDTOList(product.getOptions())
-            );
-            shortProductCartDTO.setItemType(cart.getType());
-            int maxQuantity = product.getQuantity() > 100 ? 100 : product.getQuantity();
-            shortProductCartDTO.setMaxQuantity(maxQuantity);
-            shortProductCartDTO.setQuantity(
-                    cart.getQuantity() > maxQuantity ? maxQuantity : cart.getQuantity()
-            );
-            shortProductDTOs.add(shortProductCartDTO);
-        }
+        List<ShortProductCartDTO> shortProductDTOs = productService.getShortProductCartInfo(
+                userItem, UserItem::getProduct, UserItem::getQuantity, UserItem::getType
+        );
         return productService.getProductCartInfo(shortProductDTOs, false);
     }
 
