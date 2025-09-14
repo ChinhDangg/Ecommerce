@@ -30,10 +30,9 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/media/**").permitAll()
-                        .requestMatchers("/api/.well-known/jwks.json").permitAll()
                         .requestMatchers("/api/user/**").authenticated()
+                        .requestMatchers("/api/order/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/product/cart").permitAll()
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/product/**", "POST"),
