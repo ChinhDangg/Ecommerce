@@ -180,7 +180,11 @@ function displayOrderSummary(cartInfo) {
     document.getElementById('price-before-tax').innerText = '$' + cartInfo.totalPrice;
     document.getElementById('price-before-tax').classList.remove('hidden');
     const orderContainer = document.getElementById('order-summary-container');
-    orderContainer.querySelector('.check-out-btn').classList.remove('hidden');
+    const checkOutBtn = orderContainer.querySelector('.check-out-btn');
+    checkOutBtn.classList.remove('hidden');
+    checkOutBtn.addEventListener('click', async function() {
+        window.location.href = 'http://localhost:8080/user/checkout';
+    });
 }
 
 function removeOrderSummary() {
