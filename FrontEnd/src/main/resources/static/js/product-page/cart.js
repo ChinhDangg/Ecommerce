@@ -1,5 +1,7 @@
 export const cartKey = 'cart-items';
 
+window.onload = showCartTotal();
+
 export async function updateCart(productId, quantity, addToCartBtn = null, maxQuantity = null) {
     addToCartBtn.disabled = true;
     const cartInfo = {
@@ -85,5 +87,3 @@ export function updateLocalCartItemType(productId, cart = true) {
     }
     return false;
 }
-
-window.onload = showCartTotal();

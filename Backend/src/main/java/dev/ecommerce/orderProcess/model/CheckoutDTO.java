@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 public class CheckoutDTO {
-    private String username;
+    private String displayName;
     private String address;
     private ProductCartDTO productInfo;
     private Map<Long, Map<String, Long>> reserveInfo;

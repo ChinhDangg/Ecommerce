@@ -40,7 +40,7 @@ public class OrderController {
     }
 
     @GetMapping("/checkout")
-    public ResponseEntity<CheckoutDTO> getCheckout(Authentication authentication) {
+    public ResponseEntity<CheckoutDTO> getCheckoutInfo(Authentication authentication) {
         Long userId = getUserId(authentication);
         CheckoutDTO checkoutInfo = checkoutService.getUserCheckoutDTO(userId);
         return ResponseEntity.status(HttpStatus.OK).body(checkoutInfo);

@@ -6,6 +6,8 @@ import {
     updateLocalCartItemType
 } from "./cart.js";
 
+window.onload = loadUserCart();
+
 let localLoaded = false;
 async function loadUserCart() {
     const response = await fetchUserCart();
@@ -381,5 +383,3 @@ function removeItemDisplayFromSaved(productId) {
         console.error('Unable to remove item from cart');
     }
 }
-
-loadUserCart();
