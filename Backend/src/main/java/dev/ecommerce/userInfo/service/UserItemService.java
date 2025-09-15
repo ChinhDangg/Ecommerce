@@ -59,13 +59,14 @@ public class UserItemService {
     }
 
     @Transactional(readOnly = true)
-    public ProductCartDTO getUserCartInfo(Long userId, boolean getFinalTotal, boolean getProductOption) {
+    public ProductCartDTO getUserCartInfo(Long userId, boolean getFinalTotal,
+                                          boolean getProductOption, boolean getCartItemOnly) {
         List<UserItem> userItem = findUserCart(userId);
         if (userItem.isEmpty())
             return new ProductCartDTO();
 
         List<ShortProductCartDTO> shortProductDTOs = productService.getShortProductCartInfo(
-                userItem, UserItem::getProduct, UserItem::getQuantity, UserItem::getType, getProductOption
+                userItem, UserItem::getProduct, UserItem::getQuantity, UserItem::getType, getProductOption, getCartItemOnly
         );
         return productService.getProductCartInfo(shortProductDTOs, getFinalTotal);
     }

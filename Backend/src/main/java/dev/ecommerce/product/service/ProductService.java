@@ -87,7 +87,8 @@ public class ProductService {
                 userCartDTO -> findProductById(userCartDTO.getProductId()),
                 UserCartDTO::getQuantity,
                 UserCartDTO::getItemType,
-                true);
+                true,
+                false);
         return getProductCartInfo(shortProductDTOList, false);
     }
 
@@ -96,9 +97,13 @@ public class ProductService {
                                                                  Function<T, Product> productGetter,
                                                                  Function<T, Integer> quantityGetter,
                                                                  Function<T, UserItemType> itemTypeGetter,
-                                                                 boolean getProductOption) {
+                                                                 boolean getProductOption,
+                                                                 boolean getCartItemOnly) {
         List<ShortProductCartDTO> shortProductCartDTOList = new ArrayList<>();
         for (T cart : carts) {
+            if (getCartItemOnly && !itemTypeGetter.apply(cart).equals(UserItemType.CART))
+                continue;
+
             Product product = productGetter.apply(cart);
             ShortProductCartDTO shortProductCartDTO = productMapper.toShortProductCartDTO(getShortProductInfo(product, false));
             if (getProductOption)

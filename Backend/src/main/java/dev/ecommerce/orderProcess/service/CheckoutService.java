@@ -157,7 +157,7 @@ public class CheckoutService {
         if (reserveInfo == null)
             return null;
 
-        ProductCartDTO cartDTO = userItemService.getUserCartInfo(userId, true, false);
+        ProductCartDTO cartDTO = userItemService.getUserCartInfo(userId, true, false, true);
         UserUsageInfo userInfo = userItemService.findUserInfoByUserId(userId);
         return new CheckoutDTO(
                 userInfo.getDisplayName(),
