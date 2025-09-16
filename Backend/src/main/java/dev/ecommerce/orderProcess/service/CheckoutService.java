@@ -153,7 +153,7 @@ public class CheckoutService {
 
     @Transactional(readOnly = true)
     public CheckoutDTO getUserCheckoutDTO(Long userId) {
-        var reserveInfo = getUserReservations(userId);
+        var reserveInfo = getUserReservations(userId, false);
         if (reserveInfo == null)
             return null;
 
@@ -172,7 +172,7 @@ public class CheckoutService {
     // exp:{1} - cart id - epoch time - sorted sets
     // hold:{1} - cart id - quantity - hash tables
     @Transactional(readOnly = true)
-    public Map<Long, Map<String, Long>> getUserReservations(Long userId) {
+    public Map<Long, Map<String, Long>> getUserReservations(Long userId, boolean getFirstOnly) {
         List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
         Map<Long, Map<String, Long>> res = new HashMap<>();
         for (UserItem cart : carts) {
@@ -195,12 +195,20 @@ public class CheckoutService {
             long minutesDiff = Duration.between(Instant.now(), storedTime).toMinutes();
 
             res.put(cart.getProduct().getId(), Map.of("held", (long) held, "minLeft", minutesDiff));
+
+            if (getFirstOnly)
+                break;
         }
         return res;
     }
 
     @Transactional(readOnly = true)
     public ReserveStatus reserve(Long userId) {
+        var userReservations = getUserReservations(userId, true);
+        if (userReservations != null) {
+            return ReserveStatus.ONGOING;
+        }
+
         List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
 
         for (UserItem cart : carts) {
