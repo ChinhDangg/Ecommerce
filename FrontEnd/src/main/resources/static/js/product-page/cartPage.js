@@ -185,7 +185,15 @@ function displayOrderSummary(cartInfo) {
     const checkOutBtn = orderContainer.querySelector('.check-out-btn');
     checkOutBtn.classList.remove('hidden');
     checkOutBtn.addEventListener('click', async function() {
-        window.location.href = 'http://localhost:8080/user/checkout';
+        const reserveResponse  = await fetch('http://localhost:8080/api/order/reserve', {
+            method: 'POST',
+        });
+        if (reserveResponse.ok)
+            window.location.href = 'http://localhost:8080/user/checkout';
+        else {
+            alert('Failed to checkout: ' + await reserveResponse.json())
+            window.location.reload();
+        }
     });
 }
 

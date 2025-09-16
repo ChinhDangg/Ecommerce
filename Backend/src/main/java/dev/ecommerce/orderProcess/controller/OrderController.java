@@ -27,8 +27,8 @@ public class OrderController {
     public ResponseEntity<String> reserve(@RequestParam boolean extend, Authentication authentication) {
         Long userId = getUserId(authentication);
         ReserveStatus status = checkoutService.reserve(userId, extend);
-        if (status == ReserveStatus.OK) {
-            return ResponseEntity.ok("OK");
+        if (status == ReserveStatus.OK || status == ReserveStatus.ONGOING) {
+            return ResponseEntity.ok(status.name());
         } else {
             return ResponseEntity.badRequest().body(status.name());
         }
