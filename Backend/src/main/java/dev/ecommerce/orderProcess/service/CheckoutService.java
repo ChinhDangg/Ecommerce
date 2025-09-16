@@ -9,6 +9,7 @@ import dev.ecommerce.orderProcess.entity.Payment;
 import dev.ecommerce.orderProcess.model.CheckoutDTO;
 import dev.ecommerce.orderProcess.model.ReserveResult;
 import dev.ecommerce.orderProcess.constant.ReserveStatus;
+import dev.ecommerce.orderProcess.model.UserReservationInfo;
 import dev.ecommerce.orderProcess.repository.OrderRepository;
 import dev.ecommerce.orderProcess.repository.PaymentRepository;
 import dev.ecommerce.product.DTO.ProductCartDTO;
@@ -31,9 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @EnableScheduling
@@ -172,9 +172,9 @@ public class CheckoutService {
     // exp:{1} - cart id - epoch time - sorted sets
     // hold:{1} - cart id - quantity - hash tables
     @Transactional(readOnly = true)
-    public Map<Long, Map<String, Long>> getUserReservations(Long userId, boolean getFirstOnly) {
+    public List<UserReservationInfo> getUserReservations(Long userId, boolean getFirstOnly) {
         List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();
-        Map<Long, Map<String, Long>> res = new HashMap<>();
+        List<UserReservationInfo> userReservationInfoList = new ArrayList<>();
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
                 continue;
@@ -194,19 +194,25 @@ public class CheckoutService {
             Instant storedTime = Instant.ofEpochMilli(expiryTime);
             long minutesDiff = Duration.between(Instant.now(), storedTime).toMinutes();
 
-            res.put(cart.getProduct().getId(), Map.of("held", (long) held, "minLeft", minutesDiff));
+            userReservationInfoList.add(new UserReservationInfo(cart.getProduct().getId(), held, minutesDiff));
 
             if (getFirstOnly)
                 break;
         }
-        return res;
+        return userReservationInfoList;
     }
 
     @Transactional(readOnly = true)
-    public ReserveStatus reserve(Long userId) {
-        var userReservations = getUserReservations(userId, true);
-        if (userReservations != null) {
+    public ReserveStatus reserve(Long userId, boolean extend) {
+        List<UserReservationInfo> userReservations = getUserReservations(userId, true);
+        if (!extend && userReservations != null) {
             return ReserveStatus.ONGOING;
+        }
+
+        // if trying to extend reservation while still have more than 5 minutes left
+        final int MIN_MINUTE_TO_RE_RESERVE = 5;
+        if (extend && userReservations.getFirst().minuteLeft() > MIN_MINUTE_TO_RE_RESERVE) {
+            return ReserveStatus.BAD_REQUEST;
         }
 
         List<UserItem> carts = userItemService.findUserInfoByUserId(userId).getCarts();

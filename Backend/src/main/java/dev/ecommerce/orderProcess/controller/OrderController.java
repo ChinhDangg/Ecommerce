@@ -8,12 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/order")
@@ -29,9 +24,9 @@ public class OrderController {
     }
 
     @PostMapping("/reserve")
-    public ResponseEntity<String> reserve(Authentication authentication) {
+    public ResponseEntity<String> reserve(@RequestParam boolean extend, Authentication authentication) {
         Long userId = getUserId(authentication);
-        ReserveStatus status = checkoutService.reserve(userId);
+        ReserveStatus status = checkoutService.reserve(userId, extend);
         if (status == ReserveStatus.OK) {
             return ResponseEntity.ok("OK");
         } else {
