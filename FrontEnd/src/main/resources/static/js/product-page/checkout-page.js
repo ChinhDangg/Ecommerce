@@ -46,6 +46,16 @@ async function displayOrderSummary(orderInfo) {
     orderContainer.querySelector('.tax-section').classList.remove('hidden');
     orderContainer.querySelector('.total-section').classList.remove('hidden');
     orderContainer.querySelector('.check-out-btn').classList.remove('hidden');
+    document.getElementById('place-order-btn').addEventListener('click', async function () {
+       const response = await fetch('http://localhost:8080/api/order/place', {
+           method: 'POST',
+       });
+       if (response.ok) {
+           window.location.href = 'http://localhost:8080/user/account';
+       } else {
+           alert('Failed to place order');
+       }
+    });
 }
 
 async function removeOrderSummary() {

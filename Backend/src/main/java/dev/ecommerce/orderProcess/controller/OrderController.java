@@ -41,7 +41,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(checkoutInfo);
     }
 
-    @GetMapping("/place")
+    @PostMapping("/place")
     public ResponseEntity<Long> placeOrder(Authentication authentication) {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(checkoutService.placeOrder(userId));

@@ -2,8 +2,8 @@ package dev.ecommerce;
 
 import dev.ecommerce.configuration.RsaKeyProperties;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
-import dev.ecommerce.order.service.CheckoutService;
-import dev.ecommerce.order.constant.ReserveStatus;
+import dev.ecommerce.orderProcess.service.CheckoutService;
+import dev.ecommerce.orderProcess.constant.ReserveStatus;
 import dev.ecommerce.product.constant.ConditionType;
 import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
@@ -42,7 +42,7 @@ public class EcommerceApplication {
         SpringApplication.run(EcommerceApplication.class, args);
     }
 
-    //@Bean
+    @Bean
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
@@ -65,6 +65,7 @@ public class EcommerceApplication {
             userRepository.save(user);
 
             UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now());
+            userInfo.setDisplayName(user.getFirstname());
             userUsageInfoRepository.save(userInfo);
 
 
@@ -262,8 +263,19 @@ public class EcommerceApplication {
             );
             userItemRepository.save(userItem);
 
-//            ReserveStatus status = checkoutService.reserve(1L);
-//            System.out.println(status.name());
+            ReserveStatus status = checkoutService.reserve(1L, true);
+            System.out.println(status.name());
+
+//            if (status.equals(ReserveStatus.OK)) {
+//                Long orderId = checkoutService.placeOrder(1L);
+//                System.out.println(orderId);
+//            } else {
+//                System.out.println("Failed to place order as reserve failed: ");
+//                System.out.println(status.name());
+//            }
+
+            var t = checkoutService.getUserReservations(1L, false);
+            System.out.println(t);
 
         };
     }
