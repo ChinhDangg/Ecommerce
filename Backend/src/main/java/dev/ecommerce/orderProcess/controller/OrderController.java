@@ -24,7 +24,7 @@ public class OrderController {
     }
 
     @PostMapping("/reserve")
-    public ResponseEntity<String> reserve(@RequestParam boolean extend, Authentication authentication) {
+    public ResponseEntity<String> reserve(@RequestParam(required = false, defaultValue = "false") boolean extend, Authentication authentication) {
         Long userId = getUserId(authentication);
         ReserveStatus status = checkoutService.reserve(userId, extend);
         if (status == ReserveStatus.OK || status == ReserveStatus.ONGOING) {
