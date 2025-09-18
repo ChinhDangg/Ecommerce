@@ -211,7 +211,7 @@ public class CheckoutService {
 
         // if trying to extend reservation while still have more than 5 minutes left
         final int MIN_MINUTE_TO_RE_RESERVE = 5;
-        if (extend && userReservations.getFirst().minuteLeft() > MIN_MINUTE_TO_RE_RESERVE) {
+        if (extend && userReservations != null && userReservations.getFirst().minuteLeft() > MIN_MINUTE_TO_RE_RESERVE) {
             return ReserveStatus.BAD_REQUEST;
         }
 
