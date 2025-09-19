@@ -45,8 +45,9 @@ async function displayOrderSummary(orderInfo) {
     orderContainer.querySelector('.shipping-section').classList.remove('hidden');
     orderContainer.querySelector('.tax-section').classList.remove('hidden');
     orderContainer.querySelector('.total-section').classList.remove('hidden');
-    orderContainer.querySelector('.check-out-btn').classList.remove('hidden');
-    document.getElementById('place-order-btn').addEventListener('click', async function () {
+    const placeOrderBtn = orderContainer.querySelector('#place-order-btn');
+    placeOrderBtn.classList.remove('hidden');
+    placeOrderBtn.addEventListener('click', async function () {
        const response = await fetch('http://localhost:8080/api/order/place', {
            method: 'POST',
        });
@@ -65,7 +66,7 @@ async function removeOrderSummary() {
     orderContainer.querySelector('.shipping-section').classList.add('hidden');
     orderContainer.querySelector('.tax-section').classList.add('hidden');
     orderContainer.querySelector('.total-section').classList.add('hidden');
-    orderContainer.querySelector('.check-out-btn').classList.add('hidden');
+    orderContainer.querySelector('#place-order-btn').classList.add('hidden');
 }
 
 async function displayAllItems(items) {
