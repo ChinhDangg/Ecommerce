@@ -65,12 +65,12 @@ public class UserUsageInfo {
 
     // temporary for now
     public String getUserAddress() {
-        if (!haveAddress())
+        if (!hasAddress())
             return null;
         return street + ", " + city + ", " + state + ", " + zipCode + ", " + country;
     }
 
-    public boolean haveAddress() {
+    public boolean hasAddress() {
         return !street.isEmpty() && !city.isEmpty() && !state.isEmpty() && !zipCode.isEmpty() && !country.isEmpty();
     }
 }
