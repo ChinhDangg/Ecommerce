@@ -73,10 +73,9 @@ public class UserController {
     }
 
     @GetMapping("/order/history")
-    public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam Instant start,
-                                                                @RequestParam Instant end,
+    public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam(required = false) Instant start,
                                                                 @RequestParam int page, Authentication authentication) {
         Long userId = getUserId(authentication);
-        return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, start, end, page, 10));
+        return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, start, page, 10));
     }
 }

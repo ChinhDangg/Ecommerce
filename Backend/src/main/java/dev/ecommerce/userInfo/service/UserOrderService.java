@@ -40,8 +40,11 @@ public class UserOrderService {
         );
     }
 
-    public UserOrderHistory getUserOrderHistory(Long userId, Instant start, Instant end, int page, int size) {
+    // start should be the current date and end is at some point in the past
+    public UserOrderHistory getUserOrderHistory(Long userId, Instant start, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        start = start == null ? Instant.now().minus(30, DAYS) : start;
+        Instant end = Instant.now();
         Page<Order> userOrders = orderRepository.findByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
                 userId, start, end, pageable
         );
@@ -54,7 +57,7 @@ public class UserOrderService {
                 UserOrderItemInfo itemInfo = new UserOrderItemInfo(
                         product.getId(), product.getThumbnail(), product.getName(),
                         orderItem.getUnitPrice(), orderItem.getOrderStatus(),
-                        orderItem.getStatusTime().atZone(ZoneId.systemDefault()).toLocalDate());
+                        orderItem.getStatusTime() == null ? null : orderItem.getStatusTime().atZone(ZoneId.systemDefault()).toLocalDate());
                 userOrderItemInfos.add(itemInfo);
             }
             UserOrderInfo userOrderInfo = new UserOrderInfo(
