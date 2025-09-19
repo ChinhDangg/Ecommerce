@@ -1,10 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Account</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="Account page with three‑column grid of account tiles." />
 </head>
-<body>
-    THis is the account page
+<body class="bg-gray-50 text-gray-900 antialiased">
+
+<header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
+</header>
+
+<!-- Page heading -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Your Account</h1>
+        <p class="mt-2 text-gray-600">View and manage your orders, login & security, addresses, and payment options.</p>
+    </div>
+
+    <!-- 3-column responsive grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Your Orders -->
+        <article class="group relative rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-start gap-4">
+                <div class="rounded-xl bg-amber-100 p-3 text-amber-700">
+                    <!-- Package icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                        <path d="M21 7.5V18a2.25 2.25 0 0 1-2.25 2.25h-13.5A2.25 2.25 0 0 1 3 18V7.5m18 0L12 3 3 7.5m18 0-9 4.5M3 7.5l9 4.5" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold tracking-tight">Your Orders</h2>
+                    <p class="mt-1 text-sm text-gray-600">Track, return, or buy things again.</p>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+                <a href="#orders" class="inline-flex items-center gap-2 text-sm font-medium text-amber-700 hover:text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 rounded-lg px-3 py-2">
+                    Manage orders
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+<!--                <span class="text-xs text-gray-500">Last updated: 2 days ago</span>-->
+            </div>
+        </article>
+
+        <!-- Login & Security -->
+        <article class="group relative rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-start gap-4">
+                <div class="rounded-xl bg-blue-100 p-3 text-blue-700">
+                    <!-- Shield icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                        <path fill-rule="evenodd" d="M11.48 3.499a1.5 1.5 0 0 1 1.04 0l6.75 2.571c.31.118.53.39.58.717a12 12 0 0 1-9.85 13.57 1.5 1.5 0 0 1-.98 0A12 12 0 0 1 2.15 6.787c.05-.327.27-.6.58-.717l6.75-2.571z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold tracking-tight">Login &amp; Security</h2>
+                    <p class="mt-1 text-sm text-gray-600">Update email, phone number, password, and 2‑step verification.</p>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+                <a href="#security" class="inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg px-3 py-2">
+                    Edit settings
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+<!--                <span class="text-xs text-gray-500">2FA: On</span>-->
+            </div>
+        </article>
+
+        <!-- Your Addresses -->
+        <article class="group relative rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-start gap-4">
+                <div class="rounded-xl bg-emerald-100 p-3 text-emerald-700">
+                    <!-- Map pin icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                        <path fill-rule="evenodd" d="M12 2.25a7.5 7.5 0 0 0-7.5 7.5c0 5.25 7.5 12 7.5 12s7.5-6.75 7.5-12a7.5 7.5 0 0 0-7.5-7.5Zm0 10.125a2.625 2.625 0 1 1 0-5.25 2.625 2.625 0 0 1 0 5.25Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold tracking-tight">Your Addresses</h2>
+                    <p class="mt-1 text-sm text-gray-600">Edit, add, or remove delivery addresses and preferences.</p>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+                <a href="#addresses" class="inline-flex items-center gap-2 text-sm font-medium text-emerald-700 hover:text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded-lg px-3 py-2">
+                    Manage addresses
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+<!--                <span class="text-xs text-gray-500">Default: Home</span>-->
+            </div>
+        </article>
+
+        <!-- Payment Options -->
+        <article class="group relative rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-start gap-4">
+                <div class="rounded-xl bg-purple-100 p-3 text-purple-700">
+                    <!-- Credit card icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                        <path d="M2.25 7.5A2.25 2.25 0 0 1 4.5 5.25h15a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-15A2.25 2.25 0 0 1 2.25 16.5v-9Z" />
+                        <path d="M2.25 9.75h19.5" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold tracking-tight">Payment Options</h2>
+                    <p class="mt-1 text-sm text-gray-600">Add or edit payment methods, gift cards, and billing addresses.</p>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+                <a href="#payment" class="inline-flex items-center gap-2 text-sm font-medium text-purple-700 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-lg px-3 py-2">
+                    Manage payment
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+<!--                <span class="text-xs text-gray-500">Visa •••• 4242</span>-->
+            </div>
+        </article>
+
+        <!-- Customer Service -->
+        <article class="group relative rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-start gap-4">
+                <div class="rounded-xl bg-rose-100 p-3 text-rose-700">
+                    <!-- Lifebuoy icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                        <path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 0 19.5 9.75 9.75 0 0 0 0-19.5Zm0 3a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5Zm0 2.25a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold tracking-tight">Customer Service</h2>
+                    <p class="mt-1 text-sm text-gray-600">Help with orders, returns, and more.</p>
+                </div>
+            </div>
+            <div class="mt-6">
+                <a href="#support" class="inline-flex items-center gap-2 text-sm font-medium text-rose-700 hover:text-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 rounded-lg px-3 py-2">
+                    Get help
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </article>
+
+        <!-- Membership -->
+        <article class="group relative rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-start gap-4">
+                <div class="rounded-xl bg-yellow-100 p-3 text-yellow-700">
+                    <!-- Star icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                        <path d="M11.48 3.5a.75.75 0 0 1 1.04 0l2.41 2.45 3.4.63a.75.75 0 0 1 .42 1.27l-2.46 2.56.53 3.55a.75.75 0 0 1-1.1.78L12 13.97l-3.72 1.77a.75.75 0 0 1-1.1-.78l.53-3.55L5.25 7.85a.75.75 0 0 1 .42-1.27l3.4-.63 2.41-2.45Z" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold tracking-tight">Membership</h2>
+                    <p class="mt-1 text-sm text-gray-600">View benefits and manage subscriptions.</p>
+                </div>
+            </div>
+            <div class="mt-6">
+                <a href="#membership" class="inline-flex items-center gap-2 text-sm font-medium text-yellow-700 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 rounded-lg px-3 py-2">
+                    Manage membership
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </article>
+    </div>
+
+    <!-- Info banner -->
+<!--    <div role="status" class="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">-->
+<!--        <p class="text-sm"><span class="font-semibold">Tip:</span> This is a static template. Wire each card to your routes (e.g., <code>/orders</code>, <code>/account/security</code>, <code>/account/addresses</code>, <code>/wallet</code>) and feed the badges with real data from your backend.</p>-->
+<!--    </div>-->
+</section>
+
+<footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
+</footer>
+
+<script>
+    // Set current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
