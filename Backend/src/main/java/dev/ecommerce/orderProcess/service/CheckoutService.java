@@ -64,8 +64,12 @@ public class CheckoutService {
             throw new IllegalArgumentException("No items found for user");
         }
 
+        if (!userInfo.hasAddress()) {
+            throw new IllegalArgumentException("No user address found for user");
+        }
+
         Instant now = Instant.now();
-        Order order = new Order(OrderStatus.PROCESSING, userInfo, now);
+        Order order = new Order(OrderStatus.PROCESSING, userInfo, now, userInfo.getUserAddress());
 
         for (UserItem cart : carts) {
             if (cart.getType() != UserItemType.CART)
