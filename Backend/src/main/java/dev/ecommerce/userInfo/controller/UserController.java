@@ -4,6 +4,7 @@ import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.user.SecurityUser;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
+import dev.ecommerce.userInfo.constant.OrderPlacedWindow;
 import dev.ecommerce.userInfo.service.UserItemService;
 import dev.ecommerce.userInfo.service.UserOrderService;
 import jakarta.validation.Valid;
@@ -73,9 +74,9 @@ public class UserController {
     }
 
     @GetMapping("/order/history")
-    public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam(required = false) Instant start,
-                                                                @RequestParam int page, Authentication authentication) {
+    public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam(required = false) OrderPlacedWindow orderPlacedWindow,
+                                                                @RequestParam(required = false) int page, Authentication authentication) {
         Long userId = getUserId(authentication);
-        return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, start, page, 10));
+        return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, start, end, page, 10));
     }
 }

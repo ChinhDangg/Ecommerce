@@ -17,4 +17,9 @@ public class UserController {
     public String getAccountPage() {
         return "/user-page/account-page";
     }
+
+    @GetMapping("/account/order")
+    public String getAccountOrderPage() {
+        return "/user-page/your-order-page";
+    }
 }

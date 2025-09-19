@@ -9,54 +9,85 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
 
-<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
+</header>
+
+<main id="orders-container" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumbs -->
     <nav aria-label="Breadcrumb" class="mb-6 text-sm text-gray-600">
         <ol class="flex items-center gap-2">
-            <li><a href="#" class="hover:text-amber-700">Account</a></li>
+            <li><a href="/user/account" class="hover:text-amber-700">Account</a></li>
             <li class="text-gray-400">/</li>
-            <li><a href="#" class="hover:text-amber-700">Your Orders</a></li>
+            <li>Your Orders</li>
         </ol>
     </nav>
 
+    <div class="flex items-center flex-wrap gap-2 text-sm text-gray-800 mb-4">
+        <span><span id="total-orders" class="font-semibold">9</span> orders placed in</span>
+
+        <label class="relative inline-block">
+            <span class="sr-only">Time range</span>
+            <select id="select-place-in" class="appearance-none border border-gray-300 bg-white pl-3 pr-8 py-1.5 rounded-md text-sm leading-5 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                <option selected>Past 30 days</option>
+                <option>Past 3 months</option>
+                <option>Past 6 months</option>
+                <option>Past year</option>
+                <option>2025</option>
+                <option>2024</option>
+                <option>2023</option>
+            </select>
+
+            <!-- caret -->
+            <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"/>
+            </svg>
+        </label>
+    </div>
+
+
     <!-- ORDER CONTAINER (one column) -->
-    <section class="rounded-2xl border bg-white shadow-sm overflow-hidden">
+    <section class="order-node rounded-2xl border bg-white shadow-sm overflow-hidden mb-4">
         <!-- Top Bar: Order Info -->
         <div class="border-b bg-gray-50/60 p-4 sm:p-6">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div class="space-y-1">
-                    <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Order placed <span class="font-normal text-gray-700">September 10, 2025</span></h1>
+                    <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Order placed <span class="order-placed-date font-normal text-gray-700">September 10, 2025</span></h1>
                     <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
-                        <p><span class="font-medium">Order #:</span> 112‑4587234‑8800123</p>
-                        <p><span class="font-medium">Total:</span> $128.47</p>
+                        <p><span class="font-medium">Order #:</span><span class="order-id">112‑4587234‑8800123</span></p>
+                        <p><span class="font-medium">Total:</span><span class="order-total">$128.47</span></p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <a href="#" class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium hover:bg-gray-50">View order details</a>
+                    <a href="#" class="inline-flex items-center justify-center rounded-lg border border-blue-600 text-blue-600 px-3 py-2 text-sm font-medium hover:bg-blue-50 hover:text-blue-700 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-colors">
+                        View order details
+                    </a>
                 </div>
+
             </div>
         </div>
 
         <!-- Bottom: Order Items -->
-        <div>
-            <div class="pl-5 pb-4">
+        <div class="order-item-node-container">
+            <div class="green-status-item pl-5 pb-4">
                 <div class="mt-2 flex items-center gap-">
-                    <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium text-emerald-700 border-emerald-200 bg-emerald-50">Delivered Sep 14</span>
+                    <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium text-emerald-700 border-emerald-200 bg-emerald-50">
+                        <span class="green-status-name">Delivered</span>&nbsp;<span class="green-status-date">Sep 14</span>
+                    </span>
                 </div>
-                <span>Package was left at front-door</span>
+                <span class="order-status-note">Package was left at front-door</span>
             </div>
             <!-- Item 1 -->
-            <article class="pl-5 pb-4">
+            <article class="order-item-node pl-5 pb-4">
                 <div class="flex flex-col sm:flex-row sm:items-start gap-4">
-                    <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=400&auto=format&fit=crop" alt="Wireless headphones" class="h-28 w-28 flex-none rounded-lg border object-cover" />
+                    <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=400&auto=format&fit=crop" alt="Wireless headphones" class="item-node-thumbnail h-28 w-28 flex-none rounded-lg border object-cover" />
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                             <div>
-                                <h2 class="text-base sm:text-lg font-medium leading-snug">
+                                <h2 class="item-node-title text-base sm:text-lg font-medium leading-snug">
                                     Wireless Noise‑Cancelling Headphones
                                 </h2>
-                                <p class="mt-1 text-sm text-gray-600">Qty: 1</p>
-                                <p class="mt-1 text-sm font-semibold">$99.99</p>
+                                <p class="mt-1 text-sm text-gray-600">Qty: <span class="item-node-quantity">1</span></p>
+                                <p class="mt-1 text-sm font-semibold">$<span class="item-node-price">99.99</span></p>
                             </div>
                         </div>
                     </div>
@@ -85,6 +116,9 @@
     </section>
 
 </main>
+
+<footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
+</footer>
 
 </body>
 </html>

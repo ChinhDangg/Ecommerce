@@ -9,6 +9,7 @@ import dev.ecommerce.userInfo.DTO.UserOrderItemInfo;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
 import dev.ecommerce.orderProcess.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
+import dev.ecommerce.userInfo.constant.OrderPlacedWindow;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,10 +42,19 @@ public class UserOrderService {
     }
 
     // start should be the current date and end is at some point in the past
-    public UserOrderHistory getUserOrderHistory(Long userId, Instant start, int page, int size) {
+    public UserOrderHistory getUserOrderHistory(Long userId, OrderPlacedWindow orderPlacedWindow, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        start = start == null ? Instant.now().minus(30, DAYS) : start;
-        Instant end = Instant.now();
+
+        Instant start = null;
+        Instant end = null;
+
+        if (orderPlacedWindow.isYear()) {
+            OrderPlacedWindow.TimeRange t = orderPlacedWindow.rangeForYear()
+        }
+
+        start = orderPlacedWindow == null ? Instant.now().minus(30, DAYS) : start;
+        end = end == null ? Instant.now() : end;
+
         Page<Order> userOrders = orderRepository.findByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
                 userId, start, end, pageable
         );
