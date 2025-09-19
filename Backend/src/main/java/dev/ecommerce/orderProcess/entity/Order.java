@@ -41,10 +41,16 @@ public class Order {
     @Setter
     private Instant statusTime; // for showing info for status like Delivered date or refunded date.
 
-    public Order(OrderStatus status, UserUsageInfo userInfo, Instant placedAt) {
+    private String addressSnapShot;
+
+    @Setter
+    private String paymentSnapShot;
+
+    public Order(OrderStatus status, UserUsageInfo userInfo, Instant placedAt, String addressSnapShot) {
         this.status = status;
         this.userInfo = userInfo;
         this.placedAt = placedAt;
         statusTime = placedAt;
+        this.addressSnapShot = addressSnapShot;
     }
 }
