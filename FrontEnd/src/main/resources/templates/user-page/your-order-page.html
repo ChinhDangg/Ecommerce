@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Order</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="Amazon‑style single order detail page: top bar with order info, bottom list of order items." />
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumbs -->
+    <nav aria-label="Breadcrumb" class="mb-6 text-sm text-gray-600">
+        <ol class="flex items-center gap-2">
+            <li><a href="#" class="hover:text-amber-700">Account</a></li>
+            <li class="text-gray-400">/</li>
+            <li><a href="#" class="hover:text-amber-700">Your Orders</a></li>
+        </ol>
+    </nav>
+
+    <!-- ORDER CONTAINER (one column) -->
+    <section class="rounded-2xl border bg-white shadow-sm overflow-hidden">
+        <!-- Top Bar: Order Info -->
+        <div class="border-b bg-gray-50/60 p-4 sm:p-6">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div class="space-y-1">
+                    <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Order placed <span class="font-normal text-gray-700">September 10, 2025</span></h1>
+                    <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
+                        <p><span class="font-medium">Order #:</span> 112‑4587234‑8800123</p>
+                        <p><span class="font-medium">Total:</span> $128.47</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="#" class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium hover:bg-gray-50">View order details</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom: Order Items -->
+        <div>
+            <div class="pl-5 pb-4">
+                <div class="mt-2 flex items-center gap-">
+                    <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium text-emerald-700 border-emerald-200 bg-emerald-50">Delivered Sep 14</span>
+                </div>
+                <span>Package was left at front-door</span>
+            </div>
+            <!-- Item 1 -->
+            <article class="pl-5 pb-4">
+                <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=400&auto=format&fit=crop" alt="Wireless headphones" class="h-28 w-28 flex-none rounded-lg border object-cover" />
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                            <div>
+                                <h2 class="text-base sm:text-lg font-medium leading-snug">
+                                    Wireless Noise‑Cancelling Headphones
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-600">Qty: 1</p>
+                                <p class="mt-1 text-sm font-semibold">$99.99</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Item 2 -->
+            <article class="pl-5 pb-4">
+                <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=400&auto=format&fit=crop" alt="USB‑C Wall Charger" class="h-28 w-28 flex-none rounded-lg border object-cover" />
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                            <div>
+                                <h2 class="text-base sm:text-lg font-medium leading-snug">
+                                    65W USB‑C Wall Charger (GaN)
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-600">Qty: 1</p>
+                                <p class="mt-1 text-sm font-semibold">$24.99</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>
