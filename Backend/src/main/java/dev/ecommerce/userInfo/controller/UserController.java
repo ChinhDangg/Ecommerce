@@ -74,9 +74,9 @@ public class UserController {
     }
 
     @GetMapping("/order/history")
-    public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam(required = false) OrderPlacedWindow orderPlacedWindow,
+    public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam(required = false) String orderPlacedWindow,
                                                                 @RequestParam(required = false) int page, Authentication authentication) {
         Long userId = getUserId(authentication);
-        return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, start, end, page, 10));
+        return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, orderPlacedWindow, page, 10));
     }
 }

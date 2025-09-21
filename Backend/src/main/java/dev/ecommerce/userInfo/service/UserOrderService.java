@@ -19,12 +19,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -42,18 +41,24 @@ public class UserOrderService {
     }
 
     // start should be the current date and end is at some point in the past
-    public UserOrderHistory getUserOrderHistory(Long userId, OrderPlacedWindow orderPlacedWindow, int page, int size) {
+    public UserOrderHistory getUserOrderHistory(Long userId, String orderPlacedWindow, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Instant start = null;
-        Instant end = null;
+        orderPlacedWindow = orderPlacedWindow == null ? OrderPlacedWindow.DAYS_30.name() : orderPlacedWindow;
 
-        if (orderPlacedWindow.isYear()) {
-            OrderPlacedWindow.TimeRange t = orderPlacedWindow.rangeForYear()
+        TimeRange timeRange;
+
+        OrderPlacedWindow day = isDay(orderPlacedWindow);
+        if (day == null) {
+            if (!orderPlacedWindow.matches("\\d{4}"))
+                throw new ResourceNotFoundException("Order Placed Window in year is not valid");
+            timeRange = rangeForYear(Integer.parseInt(orderPlacedWindow), ZoneId.systemDefault());
+        } else {
+            timeRange = rangeForDays(Instant.now(), day.getDays(), ZoneId.systemDefault());
         }
 
-        start = orderPlacedWindow == null ? Instant.now().minus(30, DAYS) : start;
-        end = end == null ? Instant.now() : end;
+        Instant start = timeRange.start;
+        Instant end = timeRange.end;
 
         Page<Order> userOrders = orderRepository.findByUserInfoIdAndPlacedAtGreaterThanEqualAndPlacedAtLessThanOrderByPlacedAtDesc(
                 userId, start, end, pageable
@@ -65,8 +70,12 @@ public class UserOrderService {
             for (OrderItem orderItem : order.getOrderItems()) {
                 Product product = orderItem.getProduct();
                 UserOrderItemInfo itemInfo = new UserOrderItemInfo(
-                        product.getId(), product.getThumbnail(), product.getName(),
-                        orderItem.getUnitPrice(), orderItem.getOrderStatus(),
+                        product.getId(),
+                        product.getThumbnail(),
+                        product.getName(),
+                        orderItem.getUnitPrice(),
+                        orderItem.getQuantity(),
+                        orderItem.getOrderStatus(),
                         orderItem.getStatusTime() == null ? null : orderItem.getStatusTime().atZone(ZoneId.systemDefault()).toLocalDate());
                 userOrderItemInfos.add(itemInfo);
             }
@@ -90,20 +99,50 @@ public class UserOrderService {
         );
     }
 
+    public OrderPlacedWindow isDay(String value) {
+        try {
+            return OrderPlacedWindow.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public TimeRange rangeForYear(int year, ZoneId zone) {
+        Objects.requireNonNull(zone, "zone");
+        ZonedDateTime startZdt = Year.of(year).atDay(1).atStartOfDay(zone); // Jan 1, 00:00
+        // Dec 31, 23:59:59.999999999 in the same zone
+        ZonedDateTime endZdt = Year.of(year)
+                .atMonth(Month.DECEMBER)
+                .atEndOfMonth()
+                .atTime(LocalTime.MAX)
+                .atZone(zone);
+        return new TimeRange(startZdt.toInstant(), endZdt.toInstant());
+    }
+
+    public TimeRange rangeForDays(Instant reference, int days, ZoneId zone) {
+        Objects.requireNonNull(reference, "reference");
+        Objects.requireNonNull(zone, "zone");
+        Instant end = reference;
+        Instant start = reference.minus(days, ChronoUnit.DAYS);
+        return new TimeRange(start, end);
+    }
+
+    public record TimeRange(Instant start, Instant end) {}
+
     public static List<TimeFilterOption> buildOptions(Instant oldestOrder, ZoneId zone) {
         Instant now = Instant.now();
         long historyDays = DAYS.between(oldestOrder, now);
 
         // Always include: Last 30 days
         List<TimeFilterOption> options = new ArrayList<>();
-        options.add(window("last_30_days", "Last 30 days", now.minus(30, DAYS), now));
+        options.add(window(OrderPlacedWindow.DAYS_30.name(), "Last 30 days"));
 
         // Special case: if history < 30 days → only that one option
         if (historyDays < 30) return options;
 
         // Include Last 90 days if the user has at least 90 days of history
         if (historyDays >= 90) {
-            options.add(window("last_90_days", "Last 90 days", now.minus(90, DAYS), now));
+            options.add(window(OrderPlacedWindow.DAYS_90.name(), "Last 90 days"));
         }
 
         // Year buckets from current year down to oldest year (inclusive)
@@ -120,15 +159,15 @@ public class UserOrderService {
 
             // Only add if the interval has any overlap with [oldestOrder, now)
             if (start.isBefore(end)) {
-                options.add(window("year_" + year, String.valueOf(year), start, end));
+                options.add(window(String.valueOf(year), "Year " + year));
             }
         }
 
         return options;
     }
 
-    private static TimeFilterOption window(String key, String label, Instant start, Instant end) {
-        return new TimeFilterOption(key, label, start, end);
+    private static TimeFilterOption window(String key, String label) {
+        return new TimeFilterOption(key, label);
     }
 
     private static Instant floorToStartOfDay(Instant instant, ZoneId zone) {
