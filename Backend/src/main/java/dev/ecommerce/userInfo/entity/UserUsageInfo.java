@@ -63,6 +63,14 @@ public class UserUsageInfo {
         this.user = user;
     }
 
+    public void setAddress(String street, String city, String state, String zipCode, String country) {
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+    }
+
     // temporary for now
     public String getUserAddress() {
         if (!hasAddress())
