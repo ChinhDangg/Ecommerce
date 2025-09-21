@@ -158,8 +158,8 @@ public class CheckoutService {
     @Transactional(readOnly = true)
     public CheckoutDTO getUserCheckoutDTO(Long userId) {
         var reserveInfo = getUserReservations(userId, false);
-        if (reserveInfo == null)
-            return null;
+        if (reserveInfo == null || reserveInfo.isEmpty())
+            throw new IllegalArgumentException("No reserve info found for user");
 
         ProductCartDTO cartDTO = userItemService.getUserCartInfo(userId, true, false, true);
         UserUsageInfo userInfo = userItemService.findUserInfoByUserId(userId);
