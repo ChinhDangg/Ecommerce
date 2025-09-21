@@ -40,13 +40,12 @@
 
 
     <div class="flex items-center flex-wrap gap-2 text-sm text-gray-800 mb-4">
-        <span><span id="total-orders" class="font-semibold">9</span> orders placed in</span>
+        <span><span id="total-orders" class="font-semibold">0</span> orders placed in</span>
 
         <label class="relative inline-block">
             <span class="sr-only">Time range</span>
             <select id="select-place-in" class="appearance-none border border-gray-300 bg-white pl-3 pr-8 py-1.5 rounded-md text-sm leading-5 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                 <option selected>Past 30 days</option>
-                <option>Past 3 months</option>
                 <option>2025</option>
             </select>
 
@@ -64,10 +63,10 @@
         <div class="border-b bg-gray-50/60 p-4 sm:p-6">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div class="space-y-1">
-                    <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Order placed <span class="order-placed-date font-normal text-gray-700">September 10, 2025</span></h1>
+                    <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Order placed <span class="order-placed-date font-normal text-gray-700">September 10</span></h1>
                     <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
                         <p><span class="font-medium">Order #:</span><span class="order-id">112‑4587234‑8800123</span></p>
-                        <p><span class="font-medium">Total:</span><span class="order-total">$128.47</span></p>
+                        <p><span class="font-medium">Total: $</span><span class="order-total">0</span></p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -89,10 +88,10 @@
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                             <div>
                                 <h2 class="item-node-title text-base sm:text-lg font-medium leading-snug">
-                                    Wireless Noise‑Cancelling Headphones
+                                    title
                                 </h2>
                                 <p class="mt-1 text-sm text-gray-600">Qty: <span class="item-node-quantity">1</span></p>
-                                <p class="mt-1 text-sm font-semibold">$<span class="item-node-price">99.99</span></p>
+                                <p class="mt-1 text-sm font-semibold">$<span class="item-node-price">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -113,83 +112,26 @@
             <!-- Desktop: numbered pages -->
             <div class="hidden w-full sm:flex sm:items-center sm:justify-center">
                 <div id="pagination-wrapper" class="inline-flex items-center gap-1 rounded-xl border bg-white p-1 shadow-sm">
+
                     <!-- Prev -->
-                    <div class="page-item inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    <div id="prev-page-btn" class="page-item select-none inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                        aria-label="Previous page">
                         ‹
                     </div>
 
+                    <span class="three-dots hidden px-2 text-sm text-gray-500 select-none">…</span>
+
                     <div id="page-container">
-
-                        <!-- Page numbers -->
-                        <a href="?page=1"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50"
-                           aria-label="Page 1">
-                            1
-                        </a>
-
-                        <span class="px-2 text-sm text-gray-500 select-none">…</span>
-
-                        <a href="?page=3"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50"
-                           aria-label="Page 3">
-                            3
-                        </a>
-
-                        <a href="?page=3"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50"
-                           aria-label="Page 3">
-                            4
-                        </a>
-
-                        <a href="?page=2"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium bg-amber-600 text-white hover:bg-amber-700"
-                           aria-current="page" aria-label="Page 2, current">
-                            5
-                        </a>
-
-                        <a href="?page=18"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50"
-                           aria-label="Page 18">
-                            6
-                        </a>
-                        <a href="?page=19"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50"
-                           aria-label="Page 19">
-                            7
-                        </a>
-
-                        <span class="px-2 text-sm text-gray-500 select-none">…</span>
-
-                        <a href="?page=20"
-                           class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50"
-                           aria-label="Page 20">
-                            9
-                        </a>
 
                     </div>
 
                     <!-- Next -->
-                    <div class="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    <div id="next-page-btn" class="select-none inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                          aria-label="Next page">
-                        >
+                        ›
                     </div>
                 </div>
 
-                <!-- Optional: quick jump -->
-                <div class="ml-3 hidden items-center gap-2 lg:flex">
-                    <label for="pageJump" class="text-sm text-gray-600">Jump to</label>
-                    <select id="pageJump"
-                            class="rounded-lg border px-3 py-2 text-sm"
-                            onchange="if (this.value) window.location = `?page=${this.value}`;">
-                        <option value="">Page…</option>
-                        <option value="1">1</option>
-                        <option value="2" selected>2</option>
-                        <option value="3">3</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                    </select>
-                </div>
             </div>
         </nav>
     </div>
@@ -200,7 +142,7 @@
 <footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
 </footer>
 
-<script src="your-order-page.js"></script>
+<script th:src="@{/js/user-page/your-order-page.js}"></script>
 
 </body>
 </html>
