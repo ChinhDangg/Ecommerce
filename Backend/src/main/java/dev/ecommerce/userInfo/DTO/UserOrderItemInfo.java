@@ -10,6 +10,7 @@ public record UserOrderItemInfo(
     String thumbnail,
     String productName,
     BigDecimal price,
+    int quantity,
     OrderStatus status,
     LocalDate statusDate
 ) {
