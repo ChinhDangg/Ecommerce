@@ -133,12 +133,17 @@ public class UserOrderService {
     public record TimeRange(Instant start, Instant end) {}
 
     public static List<TimeFilterOption> buildOptions(Instant oldestOrder, ZoneId zone) {
-        Instant now = Instant.now();
-        long historyDays = DAYS.between(oldestOrder, now);
 
         // Always include: Last 30 days
         List<TimeFilterOption> options = new ArrayList<>();
         options.add(window(OrderPlacedWindow.DAYS_30.name(), "Last 30 days"));
+
+        if (oldestOrder == null) {
+            return options;
+        }
+
+        Instant now = Instant.now();
+        long historyDays = DAYS.between(oldestOrder, now);
 
         // Special case: if history < 30 days → only that one option
         if (historyDays < 30) return options;
