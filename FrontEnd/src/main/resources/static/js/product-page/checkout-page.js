@@ -54,7 +54,7 @@ async function displayOrderSummary(orderInfo) {
            method: 'POST',
        });
        if (response.ok) {
-           window.location.href = 'http://localhost:8080/user/account';
+           window.location.href = 'http://localhost:8080/user/account/order';
        } else {
            alert('Failed to place order');
        }
