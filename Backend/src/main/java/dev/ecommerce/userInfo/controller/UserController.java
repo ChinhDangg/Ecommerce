@@ -2,6 +2,7 @@ package dev.ecommerce.userInfo.controller;
 
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.user.SecurityUser;
+import dev.ecommerce.userInfo.DTO.UserAddress;
 import dev.ecommerce.userInfo.DTO.UserBasicInfo;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
@@ -111,6 +112,18 @@ public class UserController {
     public ResponseEntity<String> updateUserPassword(@RequestBody UserBasicInfo userBasicInfo, Authentication authentication) {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(userInfoService.updatePassword(userId, userBasicInfo));
+    }
+
+    @GetMapping("/info/address")
+    public ResponseEntity<UserAddress> getAddress(Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userInfoService.getAddress(userId));
+    }
+
+    @PutMapping("/info/address")
+    public ResponseEntity<UserAddress> updateAddress(@RequestBody UserAddress userAddress, Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userInfoService.updateAddress(userId, userAddress));
     }
 
 }

@@ -27,4 +27,9 @@ public class UserController {
     public String getAccountSecurityPage() {
         return "/user-page/edit-info-page";
     }
+
+    @GetMapping("/account/address")
+    public String getAccountAddressPage() {
+        return "/user-page/edit-address-page";
+    }
 }
