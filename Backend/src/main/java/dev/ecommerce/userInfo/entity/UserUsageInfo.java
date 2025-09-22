@@ -2,6 +2,7 @@ package dev.ecommerce.userInfo.entity;
 
 import dev.ecommerce.orderProcess.entity.Order;
 import dev.ecommerce.user.entity.User;
+import dev.ecommerce.userInfo.DTO.UserAddress;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Table as helper about retrieving the user info to not tie with the user table directly.
@@ -78,7 +80,14 @@ public class UserUsageInfo {
         return street + ", " + city + ", " + state + ", " + zipCode + ", " + country;
     }
 
+    public UserAddress getUserAddressDetails() {
+        if  (!hasAddress())
+            return null;
+        return new UserAddress(street, city, state, zipCode, country);
+    }
+
     public boolean hasAddress() {
-        return !street.isEmpty() && !city.isEmpty() && !state.isEmpty() && !zipCode.isEmpty() && !country.isEmpty();
+        return Stream.of(street, city, state, zipCode, country)
+                .allMatch(s -> s != null && !s.isBlank());
     }
 }

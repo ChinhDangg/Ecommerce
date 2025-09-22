@@ -3,6 +3,7 @@ async function fetchUserInfo() {
     const response = await fetch('http://localhost:8080/api/user/info');
     if (!response.ok) {
         console.error(response);
+        return;
     }
     return response.json();
 }
