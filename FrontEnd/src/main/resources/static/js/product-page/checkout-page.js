@@ -3,6 +3,8 @@ window.onload = async function () {
     const result = await getUserCheckout();
     if (!result) {
         console.log('Failed to get checkout info, redirect next - maybe to cart')
+        alert('Failed to checkout');
+        window.location.href = '/product/cart';
     }
 }
 
