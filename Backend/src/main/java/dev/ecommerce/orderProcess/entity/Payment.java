@@ -29,7 +29,7 @@ public class Payment {
 
     private String method;
 
-    @Column(name = "provider_txn_id", length = 100, unique = true)
+    @Column(name = "provider_txn_id", length = 100) // apply unique in the future for processing
     private String providerTxnId;
 
     private final Instant createdAt = Instant.now();
