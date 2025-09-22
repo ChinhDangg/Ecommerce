@@ -100,6 +100,12 @@ public class UserItemService {
     }
 
     @Transactional
+    public void removeUserCart(Long userId) {
+        List<UserItem> userItem = findUserCart(userId);
+        userItemRepository.deleteAll(userItem);
+    }
+
+    @Transactional
     public void updateProductQuantityInCart(Long userId, UserCartDTO userCartDTO) {
         UserItem userItem = findUserCartByProductId(null, userId, userCartDTO.getProductId(), false);
         userItem.setQuantity(userItem.getQuantity());

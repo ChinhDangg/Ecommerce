@@ -125,6 +125,7 @@ public class CheckoutService {
 
         for (UserItem cart : carts) {
             cleanReservation(cart.getProduct().getId(), cart.getId());
+            userItemService.removeUserCart(userId);
         }
 
         return savedOrder.getId();
