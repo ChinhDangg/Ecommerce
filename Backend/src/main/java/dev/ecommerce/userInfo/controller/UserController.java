@@ -2,8 +2,10 @@ package dev.ecommerce.userInfo.controller;
 
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.user.SecurityUser;
+import dev.ecommerce.userInfo.DTO.UserBasicInfo;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
+import dev.ecommerce.userInfo.service.UserInfoService;
 import dev.ecommerce.userInfo.service.UserItemService;
 import dev.ecommerce.userInfo.service.UserOrderService;
 import jakarta.validation.Valid;
@@ -20,6 +22,7 @@ public class UserController {
 
     private final UserItemService userItemService;
     private final UserOrderService userOrderService;
+    private final UserInfoService userInfoService;
 
     private Long getUserId(Authentication authentication) {
         if (authentication == null)
@@ -77,4 +80,29 @@ public class UserController {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, orderPlacedWindow, page, 10));
     }
+
+    @GetMapping("/info")
+    public ResponseEntity<UserBasicInfo> getUserInfo(Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userInfoService.getUserBasicInfo(userId));
+    }
+
+    @PutMapping("/info/name")
+    public ResponseEntity<String> updateUserName(@RequestBody UserBasicInfo userBasicInfo, Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userInfoService.updateFirstNameAndLastName(userId, userBasicInfo));
+    }
+
+    @PutMapping("/info/email")
+    public ResponseEntity<String> updateUserEmail(@RequestBody UserBasicInfo userBasicInfo, Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userInfoService.updateEmail(userId, userBasicInfo));
+    }
+
+    @PutMapping("/info/password")
+    public ResponseEntity<String> updateUserPassword(@RequestBody UserBasicInfo userBasicInfo, Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userInfoService.updatePassword(userId, userBasicInfo));
+    }
+
 }
