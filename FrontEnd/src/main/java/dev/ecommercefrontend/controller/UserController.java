@@ -22,4 +22,9 @@ public class UserController {
     public String getAccountOrderPage() {
         return "/user-page/your-order-page";
     }
+
+    @GetMapping("/account/security")
+    public String getAccountSecurityPage() {
+        return "/user-page/edit-info-page";
+    }
 }
