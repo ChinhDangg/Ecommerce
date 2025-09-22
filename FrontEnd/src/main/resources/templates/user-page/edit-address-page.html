@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Address</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
+</header>
+
+<div class="max-w-2xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">Update Address</h1>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <form id="address-form" class="space-y-4">
+
+            <!-- Street -->
+            <div>
+                <label for="street-input" class="block text-sm font-medium text-gray-700">Street</label>
+                <input type="text" id="street-input" name="street" placeholder="123 Main St"
+                       class="mt-1 w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+            </div>
+
+            <!-- City -->
+            <div>
+                <label for="city-input" class="block text-sm font-medium text-gray-700">City</label>
+                <input type="text" id="city-input" name="city" placeholder="New York"
+                       class="mt-1 w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+            </div>
+
+            <!-- State -->
+            <div>
+                <label for="state-input" class="block text-sm font-medium text-gray-700">State</label>
+                <input type="text" id="state-input" name="state" placeholder="NY"
+                       class="mt-1 w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+            </div>
+
+            <!-- ZIP -->
+            <div>
+                <label for="zip-input" class="block text-sm font-medium text-gray-700">ZIP Code</label>
+                <input type="text" id="zip-input" name="zip" placeholder="10001"
+                       class="mt-1 w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+            </div>
+
+            <!-- Country -->
+            <div>
+                <label for="country-input" class="block text-sm font-medium text-gray-700">Country</label>
+                <input type="text" id="country-input" name="country" placeholder="United States"
+                       class="mt-1 w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+            </div>
+
+            <!-- Update Button -->
+            <div class="pt-4">
+                <button type="submit"
+                        class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Update Address
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module" th:src="@{/js/user-page/edit-address-page.js}"></script>
+
+<footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
+</footer>
+
+</body>
+</html>
