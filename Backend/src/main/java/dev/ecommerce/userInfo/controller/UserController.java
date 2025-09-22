@@ -8,9 +8,13 @@ import dev.ecommerce.userInfo.DTO.UserOrderHistory;
 import dev.ecommerce.userInfo.service.UserInfoService;
 import dev.ecommerce.userInfo.service.UserItemService;
 import dev.ecommerce.userInfo.service.UserOrderService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -94,9 +98,13 @@ public class UserController {
     }
 
     @PutMapping("/info/email")
-    public ResponseEntity<String> updateUserEmail(@RequestBody UserBasicInfo userBasicInfo, Authentication authentication) {
+    public ResponseEntity<String> updateUserEmail(@RequestBody UserBasicInfo userBasicInfo,
+                                                  Authentication authentication,
+                                                  HttpServletResponse response) {
         Long userId = getUserId(authentication);
-        return ResponseEntity.ok().body(userInfoService.updateEmail(userId, userBasicInfo));
+        Pair<ResponseCookie, String> updated = userInfoService.updateEmail(userId, userBasicInfo);
+        response.addHeader(HttpHeaders.SET_COOKIE, updated.getFirst().toString());
+        return ResponseEntity.ok().body(updated.getSecond());
     }
 
     @PutMapping("/info/password")

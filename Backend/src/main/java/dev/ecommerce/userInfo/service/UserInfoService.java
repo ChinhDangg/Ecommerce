@@ -1,10 +1,14 @@
 package dev.ecommerce.userInfo.service;
 
+import dev.ecommerce.auth.jwt.JwtService;
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
+import dev.ecommerce.user.SecurityUser;
 import dev.ecommerce.user.entity.User;
 import dev.ecommerce.user.repository.UserRepository;
 import dev.ecommerce.userInfo.DTO.UserBasicInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,7 @@ public class UserInfoService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public User findUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
@@ -54,13 +59,14 @@ public class UserInfoService {
     }
 
     @Transactional
-    public String updateEmail(Long userId, UserBasicInfo userBasicInfo) {
+    public Pair<ResponseCookie, String> updateEmail(Long userId, UserBasicInfo userBasicInfo) {
         if (userBasicInfo.getEmail() == null || userBasicInfo.getEmail().isBlank()) {
             throw new IllegalArgumentException("No email provided");
         }
         User user = findUserById(userId);
         user.setUsername(userBasicInfo.getEmail());
-        return userRepository.save(user).getUsername();
+        User savedUser = userRepository.save(user);
+        return Pair.of(jwtService.makeAuthenticateCookie(new SecurityUser(savedUser)), savedUser.getUsername());
     }
 
     @Transactional
