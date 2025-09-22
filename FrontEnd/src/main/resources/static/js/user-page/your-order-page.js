@@ -2,74 +2,21 @@
 let currentStartTimeRange = null;
 
 async function fetchUserOrderHistory(start = null, page = 0) {
-    // const queryParams = new URLSearchParams({
-    //     page: page,
-    // });
-    // if (start) {
-    //     queryParams.append('start', start);
-    // }
-    //
-    // const response = await fetch(`http://localhost:8080/api/user/order/history?${queryParams.toString()}`);
-    // if (!response.ok) {
-    //     console.error('Failed to get user order history')
-    //     return;
-    // }
-    //
-    // return response.json();
+    const queryParams = new URLSearchParams();
+    if (page) {
+        queryParams.append('page', page.toString());
+    }
+    if (start) {
+        queryParams.append('start', start);
+    }
+
+    const response = await fetch(`http://localhost:8080/api/user/order/history?${queryParams.toString()}`);
+    if (!response.ok) {
+        console.error('Failed to get user order history')
+        return;
+    }
     currentStartTimeRange = start;
-    return {
-        "timeFilterOptions": [
-            {
-                "key": "DAYS_30",
-                "label": "Last 30 days",
-            },
-            {
-                "key": "DAYS_90",
-                "label": "Last 90 days",
-            },
-            {
-                "key": "2025",
-                "label": "Year 2025",
-            }
-        ],
-        "orders": {
-            "content": [
-                {
-                    "orderPlaced": "2025-09-19",
-                    "total": 318.75,
-                    "orderId": 1,
-                    "orderStatus": "PROCESSING",
-                    "statusDate": "2025-09-19",
-                    "items": [
-                        {
-                            "productId": 1,
-                            "thumbnail": null,
-                            "productName": "Product Name 1",
-                            "quantity": 1,
-                            "price": 100.00,
-                            "status": null,
-                            "statusDate": null
-                        },
-                        {
-                            "productId": 2,
-                            "thumbnail": null,
-                            "productName": "Product Name 2",
-                            "quantity": 1,
-                            "price": 100.00,
-                            "status": 'CANCELLED',
-                            "statusDate": '2025-09-19'
-                        }
-                    ]
-                }
-            ],
-            "page": {
-                "size": 10,
-                "number": 0,
-                "totalElements": 1,
-                "totalPages": 10
-            }
-        }
-    };
+    return response.json();
 }
 
 async function initializeUserOrderHistory() {
