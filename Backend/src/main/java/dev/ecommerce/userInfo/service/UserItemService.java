@@ -3,7 +3,6 @@ package dev.ecommerce.userInfo.service;
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.product.DTO.ProductCartDTO;
-import dev.ecommerce.product.DTO.ProductMapper;
 import dev.ecommerce.product.DTO.ShortProductCartDTO;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.product.service.ProductService;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -26,7 +26,6 @@ public class UserItemService {
     private final UserUsageInfoRepository userInfoRepository;
     private final UserItemRepository userItemRepository;
     private final ProductService productService;
-    private final ProductMapper productMapper;
 
     public UserUsageInfo findUserInfoByUserId(Long userId) {
         return userInfoRepository.findByUserId(userId).orElseThrow(
@@ -37,7 +36,7 @@ public class UserItemService {
     private UserItem findUserCartByProductId(UserUsageInfo userInfo, Long userId, Long productId, boolean nullable) {
         UserUsageInfo findUser = userInfo == null ? findUserInfoByUserId(userId) : userInfo;
         Optional<UserItem> userCart = findUser.getCarts().stream()
-                .filter(p -> p.getId() == productId)
+                .filter(p -> Objects.equals(p.getId(), productId))
                 .findFirst();
         if (nullable) {
             return userCart.orElse(null);
@@ -101,8 +100,9 @@ public class UserItemService {
 
     @Transactional
     public void removeUserCart(Long userId) {
-        List<UserItem> userItem = findUserCart(userId);
-        userItemRepository.deleteAll(userItem);
+        UserUsageInfo userInfo = findUserInfoByUserId(userId);
+        userItemRepository.deleteAll(userInfo.getCarts());
+        userInfo.getCarts().clear();
     }
 
     @Transactional
@@ -114,7 +114,9 @@ public class UserItemService {
 
     @Transactional
     public void removeProductFromCart(Long userId, Long productId) {
-        UserItem userItem = findUserCartByProductId(null, userId, productId, false);
+        UserUsageInfo userInfo = findUserInfoByUserId(userId);
+        UserItem userItem = findUserCartByProductId(userInfo, userId, productId, false);
+        userInfo.getCarts().remove(userItem);
         userItemRepository.delete(userItem);
     }
 
