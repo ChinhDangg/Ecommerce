@@ -216,9 +216,8 @@ async function removeFromCart(productId, updateCount = true) {
 }
 
 async function removeProductFromUserCart(productId) {
-    const response = await fetch('http://localhost:8080/api/user/cart', {
+    const response = await fetch('http://localhost:8080/api/user/cart' + `/${productId}`, {
         method: 'DELETE',
-        body: JSON.stringify({productId}),
         headers: {
             'Content-Type': 'application/json'
         }
@@ -266,12 +265,8 @@ async function moveCartToSaved(item) {
 }
 
 async function moveUserCartToSaved(productId) {
-    const response = await fetch('http://localhost:8080/api/user/cart/to-save', {
+    const response = await fetch('http://localhost:8080/api/user/cart/to-save' + `/${productId}`, {
         method: 'POST',
-        body: JSON.stringify({productId}),
-        headers: {
-            'Content-Type': 'application/json'
-        }
     });
     if (!response.ok) {
         throw new Error('Fail to move product to saved');
@@ -366,12 +361,8 @@ async function moveSavedToCart(item) {
 }
 
 async function moveUserSavedToCart(productId) {
-    const response = await fetch('http://localhost:8080/api/user/cart/to-cart', {
+    const response = await fetch('http://localhost:8080/api/user/cart/to-cart' + `/${productId}`, {
         method: 'POST',
-        body: JSON.stringify({productId}),
-        headers: {
-            'Content-Type': 'application/json'
-        }
     });
     if (!response.ok) {
         throw new Error('Fail to move product to cart');

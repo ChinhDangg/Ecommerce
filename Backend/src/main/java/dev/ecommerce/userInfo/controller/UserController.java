@@ -4,7 +4,6 @@ import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.user.SecurityUser;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import dev.ecommerce.userInfo.DTO.UserOrderHistory;
-import dev.ecommerce.userInfo.constant.OrderPlacedWindow;
 import dev.ecommerce.userInfo.service.UserItemService;
 import dev.ecommerce.userInfo.service.UserOrderService;
 import jakarta.validation.Valid;
@@ -13,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Instant;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,27 +52,28 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/cart")
-    public ResponseEntity<?> deleteFromCart(@RequestParam Long productId, Authentication authentication) {
+    @DeleteMapping("/cart/{productId}")
+    public ResponseEntity<?> deleteFromCart(@PathVariable Long productId, Authentication authentication) {
         userItemService.removeProductFromCart(getUserId(authentication), productId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/cart/to-save")
-    public ResponseEntity<?> cartToSaved(@RequestParam Long productId, Authentication authentication) {
+    @PostMapping("/cart/to-save/{productId}")
+    public ResponseEntity<?> cartToSaved(@PathVariable Long productId, Authentication authentication) {
         userItemService.moveProductFromCartToSaved(getUserId(authentication), productId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/cart/to-cart")
-    public ResponseEntity<?> savedToCart(@RequestParam Long productId, Authentication authentication) {
+    @PostMapping("/cart/to-cart/{productId}")
+    public ResponseEntity<?> savedToCart(@PathVariable Long productId, Authentication authentication) {
         userItemService.moveProductFromSavedToCart(getUserId(authentication), productId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/order/history")
     public ResponseEntity<UserOrderHistory> getUserOrderHistory(@RequestParam(required = false) String orderPlacedWindow,
-                                                                @RequestParam(required = false) int page, Authentication authentication) {
+                                                                @RequestParam(required = false) Integer page,
+                                                                Authentication authentication) {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(userOrderService.getUserOrderHistory(userId, orderPlacedWindow, page, 10));
     }
