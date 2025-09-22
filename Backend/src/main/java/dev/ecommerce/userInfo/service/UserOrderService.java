@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
@@ -41,7 +42,9 @@ public class UserOrderService {
     }
 
     // start should be the current date and end is at some point in the past
-    public UserOrderHistory getUserOrderHistory(Long userId, String orderPlacedWindow, int page, int size) {
+    @Transactional(readOnly = true)
+    public UserOrderHistory getUserOrderHistory(Long userId, String orderPlacedWindow, Integer page, int size) {
+        page = page == null ? 0 : page;
         Pageable pageable = PageRequest.of(page, size);
 
         orderPlacedWindow = orderPlacedWindow == null ? OrderPlacedWindow.DAYS_30.name() : orderPlacedWindow;
