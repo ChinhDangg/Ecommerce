@@ -2,10 +2,7 @@ package dev.ecommerce.userInfo.controller;
 
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.user.SecurityUser;
-import dev.ecommerce.userInfo.DTO.UserAddress;
-import dev.ecommerce.userInfo.DTO.UserBasicInfo;
-import dev.ecommerce.userInfo.DTO.UserCartDTO;
-import dev.ecommerce.userInfo.DTO.UserOrderHistory;
+import dev.ecommerce.userInfo.DTO.*;
 import dev.ecommerce.userInfo.service.UserInfoService;
 import dev.ecommerce.userInfo.service.UserItemService;
 import dev.ecommerce.userInfo.service.UserOrderService;
@@ -13,12 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -124,6 +119,21 @@ public class UserController {
     public ResponseEntity<UserAddress> updateAddress(@RequestBody UserAddress userAddress, Authentication authentication) {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(userInfoService.updateAddress(userId, userAddress));
+    }
+
+    @GetMapping("/review/{productId}")
+    public ResponseEntity<UserProductReviewInfo> getUserProductReviewInfo(@PathVariable Long productId,
+                                                                          Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userOrderService.getUserProductReviewInfo(userId, productId));
+    }
+
+    @PostMapping(value="/review", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Long> addUserProductReview(@RequestPart("review") @Valid UserProductReviewInfo userProductReviewInfo,
+                                                                      @RequestPart(value="image", required=false) MultipartFile image,
+                                                                      Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok().body(userOrderService.addUserProductReviewInfo(userId, userProductReviewInfo, image));
     }
 
 }
