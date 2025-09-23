@@ -86,6 +86,12 @@ function displayOrderHistory(orders) {
             } else {
                 sameAsParentOrderStatusNode.push(orderItemNode);
             }
+
+            if (orderItem.status === 'CANCELLED') {
+                orderItemNode.querySelector('.write-review-link').remove();
+            } else {
+                orderItemNode.querySelector('.write-review-link').href = '/user/product/review?pid=' + orderItem.productId;
+            }
         });
 
         if (sameAsParentOrderStatusNode.length) {
