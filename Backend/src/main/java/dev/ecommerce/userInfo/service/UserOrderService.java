@@ -3,10 +3,11 @@ package dev.ecommerce.userInfo.service;
 import dev.ecommerce.exceptionHandler.ResourceNotFoundException;
 import dev.ecommerce.orderProcess.entity.Order;
 import dev.ecommerce.orderProcess.entity.OrderItem;
-import dev.ecommerce.userInfo.DTO.TimeFilterOption;
-import dev.ecommerce.userInfo.DTO.UserOrderInfo;
-import dev.ecommerce.userInfo.DTO.UserOrderItemInfo;
-import dev.ecommerce.userInfo.DTO.UserOrderHistory;
+import dev.ecommerce.orderProcess.repository.OrderItemRepository;
+import dev.ecommerce.product.entity.ProductReview;
+import dev.ecommerce.product.repository.ProductReviewRepository;
+import dev.ecommerce.product.service.MediaService;
+import dev.ecommerce.userInfo.DTO.*;
 import dev.ecommerce.orderProcess.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
 import dev.ecommerce.userInfo.constant.OrderPlacedWindow;
@@ -19,12 +20,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -34,11 +38,77 @@ public class UserOrderService {
 
     private final OrderRepository orderRepository;
     private final UserUsageInfoRepository userInfoRepository;
+    private final ProductReviewRepository productReviewRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final MediaService mediaService;
 
     public UserUsageInfo findUserInfoByUserId(Long userId) {
         return userInfoRepository.findByUserId(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found with id: " + userId)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public UserProductReviewInfo getUserProductReviewInfo(Long userId, Long productId) {
+        UserUsageInfo userInfo = findUserInfoByUserId(userId);
+        Optional<ProductReview> review = productReviewRepository.findByProductIdAndUserInfoId(productId, userInfo.getId());
+
+        if (review.isPresent()) {
+            ProductReview productReview = review.get();
+            Product product = productReview.getProduct();
+            return new UserProductReviewInfo(
+                    product.getId(),
+                    product.getThumbnail(),
+                    product.getName(),
+                    productReview.getComment(),
+                    productReview.getMediaURL(),
+                    productReview.getRating(),
+                    productReview.getTitle()
+            );
+        }
+        return null;
+    }
+
+    @Transactional
+    public Long addUserProductReviewInfo(Long userId, UserProductReviewInfo reviewInfo, MultipartFile file) {
+        UserUsageInfo userInfo = findUserInfoByUserId(userId);
+        Optional<OrderItem> bought = orderItemRepository.findFirstByOrderUserInfoIdAndProductId(userInfo.getId(), reviewInfo.productId());
+        if (bought.isEmpty()) {
+            throw new IllegalArgumentException("Reviewing for non-purchased product");
+        }
+
+        List<String> filenames = new ArrayList<>();
+        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(filenames));
+
+        String fileName = file.isEmpty() ? null : mediaService.saveMedia(file, true);
+        filenames.add(fileName);
+
+        Product product = bought.get().getProduct();
+
+        Optional<ProductReview> userReview = productReviewRepository.findByProductIdAndUserInfoId(product.getId(), userInfo.getId());
+        if (userReview.isPresent()) { // update review if review already existed
+            ProductReview productReview = userReview.get();
+            productReview.setTitle(productReview.getTitle());
+            productReview.setComment(productReview.getComment());
+            productReview.setRating(productReview.getRating());
+            if (!productReview.getMediaURL().equals(reviewInfo.reviewMediaURL())) {
+                if (file.isEmpty())
+                    productReview.setMediaURL(productReview.getMediaURL());
+                else
+                    productReview.setMediaURL(fileName);
+            }
+            return productReviewRepository.save(productReview).getId();
+        } else {
+            ProductReview productReview = new ProductReview(
+                    product,
+                    userInfo,
+                    reviewInfo.reviewTitle(),
+                    reviewInfo.comment(),
+                    reviewInfo.rating(),
+                    fileName
+            );
+            return productReviewRepository.save(productReview).getId();
+        }
     }
 
     // start should be the current date and end is at some point in the past
