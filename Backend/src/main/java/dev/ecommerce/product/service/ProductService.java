@@ -6,6 +6,7 @@ import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import dev.ecommerce.userInfo.constant.UserItemType;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
@@ -39,31 +41,6 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final ProductLineService productLineService;
     private final MediaService mediaService;
-
-    public ProductService(
-            ProductCategoryRepository productCategoryRepository,
-            ProductRepository productRepository,
-            ProductFeatureRepository productFeatureRepository,
-            ProductMediaRepository productMediaRepository,
-            ProductDescriptionRepository productDescriptionRepository,
-            ProductOptionRepository productOptionRepository,
-            ProductSpecificationRepository productSpecificationRepository,
-            ProductCoreSpecificationRepository productCoreSpecificationRepository,
-            ProductMapper productMapper,
-            ProductLineService productLineService,
-            MediaService mediaService) {
-        this.productCategoryRepository = productCategoryRepository;
-        this.productRepository = productRepository;
-        this.productFeatureRepository = productFeatureRepository;
-        this.productMediaRepository = productMediaRepository;
-        this.productDescriptionRepository = productDescriptionRepository;
-        this.productOptionRepository = productOptionRepository;
-        this.productSpecificationRepository = productSpecificationRepository;
-        this.productCoreSpecificationRepository = productCoreSpecificationRepository;
-        this.productMapper = productMapper;
-        this.productLineService = productLineService;
-        this.mediaService = mediaService;
-    }
 
     public Product findProductById(Long id) {
         if (id == null)
