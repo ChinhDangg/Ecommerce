@@ -32,4 +32,9 @@ public class UserController {
     public String getAccountAddressPage() {
         return "/user-page/edit-address-page";
     }
+
+    @GetMapping("/product/review")
+    public String getProductReviewPage() {
+        return "/user-page/product-review-page";
+    }
 }
