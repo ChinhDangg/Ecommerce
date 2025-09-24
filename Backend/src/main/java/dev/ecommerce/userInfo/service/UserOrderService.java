@@ -87,26 +87,40 @@ public class UserOrderService {
             throw new IllegalArgumentException("Reviewing for non-purchased product");
         }
 
-        List<String> filenames = new ArrayList<>();
-        TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(filenames));
-
-        String fileName = file == null ? null : file.isEmpty() ? null : mediaService.saveMedia(file, true);
-        if (fileName != null && !fileName.isBlank())
-            filenames.add(fileName);
+        List<String> newFileNames = new ArrayList<>();
+        List<String> deleteFileNames = new ArrayList<>();
 
         Product product = bought.get().getProduct();
-
         Optional<ProductReview> userReview = productReviewRepository.findByProductIdAndUserInfoId(product.getId(), userInfo.getId());
+        if (userReview.isPresent()) {
+            TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForUpdating(deleteFileNames, newFileNames));
+        } else {
+            TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(newFileNames));
+        }
+
+        String fileName = file == null ? null : file.isEmpty() ? null : mediaService.saveMedia(file, true);
+        if (fileName != null)
+            newFileNames.add(fileName);
+
         if (userReview.isPresent()) { // update review if review already existed
             ProductReview productReview = userReview.get();
             productReview.setTitle(productReview.getTitle());
             productReview.setComment(productReview.getComment());
             productReview.setRating(productReview.getRating());
-            if (!productReview.getMediaURL().equals(reviewInfo.getReviewMediaURL())) {
-                if (file.isEmpty())
-                    productReview.setMediaURL(productReview.getMediaURL());
-                else
-                    productReview.setMediaURL(fileName);
+
+            if (file != null && !file.isEmpty()) { // if a file is given - then probably new file
+                if (productReview.getMediaURL() != null) {
+                    deleteFileNames.add(productReview.getMediaURL()); // mark previous media to be deleted
+                }
+                productReview.setMediaURL(fileName);
+            } else if (reviewInfo.getReviewMediaURL() == null) {
+                // if no file is given but medial url given back is null then probably removing
+                if (productReview.getMediaURL() != null) {
+                    deleteFileNames.add(productReview.getMediaURL()); // mark previous media to be deleted
+                }
+            } else if (!Objects.equals(reviewInfo.getReviewMediaURL(), productReview.getMediaURL())) {
+                // if not the same media URL but no file is given and is not null - bad request
+                throw new IllegalArgumentException("Bad review media URLs");
             }
             return productReviewRepository.save(productReview).getId();
         } else {
