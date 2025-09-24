@@ -34,7 +34,7 @@ async function getProductReviewInfo(productId) {
 
 function displayProductInfo(reviewInfo) {
     if (reviewInfo.thumbnail)
-        document.getElementById('product-image').src = '/api/media/' + reviewInfo.thumbnail;
+        document.getElementById('product-image').src = '/media/' + reviewInfo.thumbnail;
     document.getElementById('product-name').innerText = reviewInfo.productName;
 }
 
@@ -51,8 +51,10 @@ function displayPreviousProductReview(review) {
 
     reviewTitleInput.value = review.reviewTitle;
     reviewCommentTextInput.value = review.comment;
-    if (review.reviewMediaURL)
-        document.getElementById('previewImg').src = '/api/media/' + review.reviewMediaURL;
+    if (review.reviewMediaURL) {
+        previewImg.src = '/media/' + review.reviewMediaURL;
+        preview.classList.remove('hidden');
+    }
 }
 
 let selected = 0;
@@ -81,11 +83,10 @@ function initializeRatingStar() {
 }
 
 const input = document.getElementById('reviewImage');
+const preview = document.getElementById('preview');
+const previewImg = document.getElementById('previewImg');
 function initializeImageInput() {
     // Handle image preview
-    const preview = document.getElementById('preview');
-    const previewImg = document.getElementById('previewImg');
-
     input.addEventListener('change', () => {
         const file = input.files[0];
         if (file) {
