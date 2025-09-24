@@ -62,6 +62,7 @@ public class MediaService {
         for (String filename : filenames) {
             Path tempPath = Paths.get(TEMP_IMAGE_DIR).resolve(filename).normalize();
             Path finalPath = Paths.get(IMAGE_DIR).resolve(filename).normalize();
+            Files.createDirectories(finalPath.getParent()); // create the permanent path if not exist
             Files.move(tempPath, finalPath);
         }
     }
@@ -70,6 +71,7 @@ public class MediaService {
         for (String filename : filenames) {
             Path tempPath = Paths.get(TEMP_IMAGE_DIR).resolve(filename).normalize();
             Path finalPath = Paths.get(IMAGE_DIR).resolve(filename).normalize();
+            Files.createDirectories(tempPath.getParent()); // create the temp path if not exist
             Files.move(finalPath, tempPath);
         }
     }
