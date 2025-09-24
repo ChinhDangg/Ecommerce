@@ -3,6 +3,7 @@ package dev.ecommercefrontend.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/user")
@@ -34,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping("/product/review")
-    public String getProductReviewPage() {
+    public String getProductReviewPage(@RequestParam Long pid) {
         return "/user-page/product-review-page";
     }
 }

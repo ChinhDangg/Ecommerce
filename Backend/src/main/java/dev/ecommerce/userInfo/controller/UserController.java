@@ -130,8 +130,8 @@ public class UserController {
 
     @PostMapping(value="/review", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> addUserProductReview(@RequestPart("review") @Valid UserProductReviewInfo userProductReviewInfo,
-                                                                      @RequestPart(value="image", required=false) MultipartFile image,
-                                                                      Authentication authentication) {
+                                                     @RequestPart(value="image", required=false) MultipartFile image,
+                                                     Authentication authentication) {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(userOrderService.addUserProductReviewInfo(userId, userProductReviewInfo, image));
     }
