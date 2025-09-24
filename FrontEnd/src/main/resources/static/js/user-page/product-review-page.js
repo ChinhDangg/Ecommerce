@@ -15,7 +15,7 @@ async function initialize() {
     initializeRatingStar();
     initializeImageInput();
     document.getElementById('submit-review-btn').addEventListener('click', async function() {
-        await postUserProductReview(pid);
+        await postUserProductReview(reviewInfo);
     });
 }
 
@@ -102,7 +102,7 @@ function initializeImageInput() {
     });
 }
 
-async function postUserProductReview(pid) {
+async function postUserProductReview(reviewInfo) {
     if (!reviewTitleInput.value || selected === 0) {
         alert("Review Title and Rating are required");
         return;
@@ -110,9 +110,10 @@ async function postUserProductReview(pid) {
 
     const formData = new FormData();
     const jsonData = new Blob([JSON.stringify({
-        'productId': pid,
+        'productId': reviewInfo.productId,
         'reviewTitle' : reviewTitleInput.value,
         'comment' : reviewCommentTextInput.value,
+        'reviewMediaURL' : reviewInfo.reviewMediaURL,
         'rating': selected
     })], { type: 'application/json' });
     formData.append('review', jsonData);
