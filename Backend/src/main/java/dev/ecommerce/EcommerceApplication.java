@@ -1,6 +1,8 @@
 package dev.ecommerce;
 
 import dev.ecommerce.configuration.RsaKeyProperties;
+import dev.ecommerce.orderProcess.entity.OrderItem;
+import dev.ecommerce.orderProcess.repository.OrderItemRepository;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.orderProcess.service.CheckoutService;
 import dev.ecommerce.orderProcess.constant.ReserveStatus;
@@ -23,10 +25,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootApplication
 @EnableConfigurationProperties(RsaKeyProperties.class)
@@ -42,7 +46,7 @@ public class EcommerceApplication {
         SpringApplication.run(EcommerceApplication.class, args);
     }
 
-    @Bean
+    //@Bean
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
@@ -66,6 +70,13 @@ public class EcommerceApplication {
 
             UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now());
             userInfo.setDisplayName(user.getFirstname());
+            userInfo.setAddress(
+                    "Street",
+                    "city",
+                    "state",
+                    "zipcode",
+                    "country"
+            );
             userUsageInfoRepository.save(userInfo);
 
 
@@ -258,13 +269,13 @@ public class EcommerceApplication {
             productDescriptionRepository.saveAll(List.of(product2Description1, product2Description2));
 
 
-            UserItem userItem = new UserItem(
-                    userInfo, product1, 3, UserItemType.CART
-            );
-            userItemRepository.save(userItem);
-
-            ReserveStatus status = checkoutService.reserve(1L, true);
-            System.out.println(status.name());
+//            UserItem userItem = new UserItem(
+//                    userInfo, product1, 3, UserItemType.CART
+//            );
+//            userItemRepository.save(userItem);
+//
+//            ReserveStatus status = checkoutService.reserve(1L, true);
+//            System.out.println(status.name());
 
 //            if (status.equals(ReserveStatus.OK)) {
 //                Long orderId = checkoutService.placeOrder(1L);
@@ -274,8 +285,8 @@ public class EcommerceApplication {
 //                System.out.println(status.name());
 //            }
 
-            var t = checkoutService.getUserReservations(1L, false);
-            System.out.println(t);
+//            var t = checkoutService.getUserReservations(1L, false);
+//            System.out.println(t);
 
         };
     }
