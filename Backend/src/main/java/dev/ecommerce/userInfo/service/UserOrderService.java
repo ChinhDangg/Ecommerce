@@ -51,11 +51,18 @@ public class UserOrderService {
     @Transactional(readOnly = true)
     public UserProductReviewInfo getUserProductReviewInfo(Long userId, Long productId) {
         UserUsageInfo userInfo = findUserInfoByUserId(userId);
+
+        Optional<OrderItem> bought = orderItemRepository.findFirstByOrderUserInfoIdAndProductId(userInfo.getId(), productId);
+        if (bought.isEmpty()) {
+            throw new IllegalArgumentException("Reviewing for non-purchased product");
+        }
+
         Optional<ProductReview> review = productReviewRepository.findByProductIdAndUserInfoId(productId, userInfo.getId());
+
+        Product product = bought.get().getProduct();
 
         if (review.isPresent()) {
             ProductReview productReview = review.get();
-            Product product = productReview.getProduct();
             return new UserProductReviewInfo(
                     product.getId(),
                     product.getThumbnail(),
@@ -66,13 +73,16 @@ public class UserOrderService {
                     productReview.getTitle()
             );
         }
-        return null;
+        return new UserProductReviewInfo(product.getId(), product.getThumbnail(), product.getName());
     }
 
     @Transactional
     public Long addUserProductReviewInfo(Long userId, UserProductReviewInfo reviewInfo, MultipartFile file) {
         UserUsageInfo userInfo = findUserInfoByUserId(userId);
-        Optional<OrderItem> bought = orderItemRepository.findFirstByOrderUserInfoIdAndProductId(userInfo.getId(), reviewInfo.productId());
+        if (reviewInfo.getProductId() == null) {
+            throw new ResourceNotFoundException("Null product id");
+        }
+        Optional<OrderItem> bought = orderItemRepository.findFirstByOrderUserInfoIdAndProductId(userInfo.getId(), reviewInfo.getProductId());
         if (bought.isEmpty()) {
             throw new IllegalArgumentException("Reviewing for non-purchased product");
         }
@@ -80,8 +90,9 @@ public class UserOrderService {
         List<String> filenames = new ArrayList<>();
         TransactionSynchronizationManager.registerSynchronization(mediaService.getMediaTransactionSynForSaving(filenames));
 
-        String fileName = file.isEmpty() ? null : mediaService.saveMedia(file, true);
-        filenames.add(fileName);
+        String fileName = file == null ? null : file.isEmpty() ? null : mediaService.saveMedia(file, true);
+        if (fileName != null && !fileName.isBlank())
+            filenames.add(fileName);
 
         Product product = bought.get().getProduct();
 
@@ -91,7 +102,7 @@ public class UserOrderService {
             productReview.setTitle(productReview.getTitle());
             productReview.setComment(productReview.getComment());
             productReview.setRating(productReview.getRating());
-            if (!productReview.getMediaURL().equals(reviewInfo.reviewMediaURL())) {
+            if (!productReview.getMediaURL().equals(reviewInfo.getReviewMediaURL())) {
                 if (file.isEmpty())
                     productReview.setMediaURL(productReview.getMediaURL());
                 else
@@ -102,9 +113,9 @@ public class UserOrderService {
             ProductReview productReview = new ProductReview(
                     product,
                     userInfo,
-                    reviewInfo.reviewTitle(),
-                    reviewInfo.comment(),
-                    reviewInfo.rating(),
+                    reviewInfo.getReviewTitle(),
+                    reviewInfo.getComment(),
+                    reviewInfo.getRating(),
                     fileName
             );
             return productReviewRepository.save(productReview).getId();
