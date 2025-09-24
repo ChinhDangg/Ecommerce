@@ -14,6 +14,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -70,13 +73,26 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasAnyRole("USER","ADMIN")
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(o ->
-                        o.jwt(j -> j.decoder(dec).jwtAuthenticationConverter(conv))
-                        .bearerTokenResolver(resolver))
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2
+                                .authenticationEntryPoint((req,res,e) -> {
+                                    String uri = req.getRequestURI();
+                                    String query = req.getQueryString();
+                                    String fullPath = (query != null ? uri + "?" + query : uri);
+
+                                    String r = URLEncoder.encode(fullPath, StandardCharsets.UTF_8);
+                                    res.sendRedirect(gatewayUrl + "/login?r=" + r);
+                                })
+                                .jwt(j -> j.decoder(dec).jwtAuthenticationConverter(conv))
+                                .bearerTokenResolver(resolver))
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint((req,res,e) -> {
-                            var r = java.net.URLEncoder.encode(req.getRequestURI(), java.nio.charset.StandardCharsets.UTF_8);
-                            res.sendRedirect(gatewayUrl+"/login?r=" + r);
+                            String uri = req.getRequestURI();
+                            String query = req.getQueryString();
+                            String fullPath = (query != null ? uri + "?" + query : uri);
+
+                            String r = URLEncoder.encode(fullPath, StandardCharsets.UTF_8);
+                            res.sendRedirect(gatewayUrl + "/login?r=" + r);
                         }));
         return http.build();
     }
