@@ -6,104 +6,71 @@
     <title>Write a Review</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
-<div class="max-w-xl w-full bg-white rounded-2xl shadow p-6">
-    <!-- Product Section -->
-    <div class="flex items-start space-x-4 border-b pb-4">
-        <img src="https://via.placeholder.com/100" alt="Product" class="w-24 h-24 rounded-lg object-cover">
-        <h1 class="text-lg font-semibold">Sample Product Name</h1>
-    </div>
+<body>
 
-    <!-- Rating Section -->
-    <div class="mt-6">
-        <h2 class="text-lg font-medium mb-2">Your Rating:</h2>
-        <div id="stars" class="flex space-x-1 text-gray-300 text-3xl cursor-pointer">
-            <span data-value="1">★</span>
-            <span data-value="2">★</span>
-            <span data-value="3">★</span>
-            <span data-value="4">★</span>
-            <span data-value="5">★</span>
+<header class="bg-white shadow-md" th:insert="~{product-page/top-header-template :: top-header-content}">
+</header>
+
+<main class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow p-6">
+        <!-- Product Section -->
+        <div class="flex items-start space-x-4 border-b pb-4">
+            <img id="product-image" src="" alt="Product" class="w-24 h-24 rounded-lg object-cover">
+            <h1 id="product-name" class="text-lg font-semibold"></h1>
         </div>
-    </div>
 
-    <!-- Review Title -->
-    <div class="mt-6">
-        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Review Title</label>
-        <input type="text" id="title" class="w-full border rounded-lg p-2 outline outline-1 outline-blue-400 focus:ring focus:ring-blue-300">
-    </div>
+        <!-- Rating Section -->
+        <div class="mt-6">
+            <h2 class="text-lg font-medium mb-2">Your Rating:</h2>
+            <div id="stars" class="flex space-x-1 text-gray-300 text-3xl cursor-pointer">
+                <span data-value="1">★</span>
+                <span data-value="2">★</span>
+                <span data-value="3">★</span>
+                <span data-value="4">★</span>
+                <span data-value="5">★</span>
+            </div>
+        </div>
 
-    <!-- Review Comment -->
-    <div class="mt-6">
-        <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
-        <textarea id="comment" rows="4"
-                  class="w-full border rounded-lg p-2 outline outline-1 outline-blue-400 focus:ring focus:ring-blue-300"></textarea>
-    </div>
+        <!-- Review Title -->
+        <div class="mt-6">
+            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Review Title</label>
+            <input type="text" id="title" required class="w-full border rounded-lg p-2 outline outline-1 outline-blue-400 focus:ring focus:ring-blue-300">
+        </div>
 
-    <!-- Review Image Upload -->
-    <div class="mt-6">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Upload Image</label>
-        <input type="file" id="reviewImage" accept="image/*"
-               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+        <!-- Review Comment -->
+        <div class="mt-6">
+            <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
+            <textarea id="comment" rows="4"
+                      class="w-full border rounded-lg p-2 outline outline-1 outline-blue-400 focus:ring focus:ring-blue-300"></textarea>
+        </div>
+
+        <!-- Review Image Upload -->
+        <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Upload Image</label>
+            <input type="file" id="reviewImage" accept="image/*"
+                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
         file:rounded-lg file:border-0 file:text-sm file:font-semibold
         file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100">
 
-        <!-- Fixed-size preview -->
-        <div id="preview" class="mt-3 hidden">
-            <img id="previewImg" class="w-32 h-32 object-cover rounded-lg border">
+            <!-- Fixed-size preview -->
+            <div id="preview" class="mt-3 hidden">
+                <img id="previewImg" class="w-32 h-32 object-cover rounded-lg border">
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mt-6">
+            <button id="submit-review-btn" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700">
+                Submit Review
+            </button>
         </div>
     </div>
+</main>
 
-    <!-- Submit Button -->
-    <div class="mt-6">
-        <button class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700">
-            Submit Review
-        </button>
-    </div>
-</div>
+<footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
+</footer>
 
-<script>
-    const stars = document.querySelectorAll('#stars span');
-    let selected = 0;
+<script type="module" th:src="@{/js/user-page/product-review-page.js}"></script>
 
-    stars.forEach((star, idx) => {
-        star.addEventListener('mouseover', () => {
-            stars.forEach((s, i) => {
-                s.classList.toggle('text-yellow-400', i <= idx);
-                s.classList.toggle('text-gray-300', i > idx);
-            });
-        });
-
-        star.addEventListener('click', () => {
-            selected = idx + 1;
-        });
-
-        star.addEventListener('mouseout', () => {
-            stars.forEach((s, i) => {
-                s.classList.toggle('text-yellow-400', i < selected);
-                s.classList.toggle('text-gray-300', i >= selected);
-            });
-        });
-    });
-
-    // Handle image preview
-    const input = document.getElementById('reviewImage');
-    const preview = document.getElementById('preview');
-    const previewImg = document.getElementById('previewImg');
-
-    input.addEventListener('change', () => {
-        const file = input.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                previewImg.src = e.target.result;
-                preview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.classList.add('hidden');
-            previewImg.src = "";
-        }
-    });
-</script>
 </body>
 </html>
