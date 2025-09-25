@@ -2,12 +2,14 @@ package dev.ecommerce.product.controller;
 
 import dev.ecommerce.product.DTO.ProductCartDTO;
 import dev.ecommerce.product.DTO.ProductDTO;
+import dev.ecommerce.product.DTO.ProductReviewDTO;
 import dev.ecommerce.product.DTO.ProductSearchResultDTO;
 import dev.ecommerce.product.constant.SortOption;
 import dev.ecommerce.product.service.ProductSearchService;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.userInfo.DTO.UserCartDTO;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -98,6 +100,12 @@ public class ProductController {
     public ResponseEntity<ProductCartDTO> getLocalCartInfo(@Valid @RequestBody List<UserCartDTO> userCartDTOList) {
         ProductCartDTO shortProductDTOList = productService.getLocalCartInfo(userCartDTOList);
         return ResponseEntity.status(HttpStatus.OK).body(shortProductDTOList);
+    }
+
+    @GetMapping("/{id}/review")
+    public ResponseEntity<Slice<ProductReviewDTO>> getProductReviews(@PathVariable long id,
+                                                                     @RequestParam(required = false) int page) {
+        return ResponseEntity.ok().body(productService.getProductReview(id, page, 10));
     }
 
     @GetMapping("/{id}")
