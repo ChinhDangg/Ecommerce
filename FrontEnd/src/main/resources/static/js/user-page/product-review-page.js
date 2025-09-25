@@ -127,8 +127,6 @@ async function postUserProductReview(reviewInfo) {
     formData.append('review', jsonData);
     formData.append('image', input.files[0]);
 
-    console.log(jsonData);
-
     const postResponse = await fetch('/api/user/review', {
         method: 'POST',
         body: formData,
@@ -136,5 +134,7 @@ async function postUserProductReview(reviewInfo) {
     if (!postResponse.ok) {
         console.error(postResponse.error);
         alert('Failed to post a review');
+        return;
     }
+    alert('Thank you for your review!');
 }

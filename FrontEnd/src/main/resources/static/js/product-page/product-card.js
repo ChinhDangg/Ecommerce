@@ -446,7 +446,7 @@ function showProductReview(reviews) {
     const filledStar = reviewTab.querySelector('.filled-star').cloneNode(true);
     filledStar.classList.remove('hidden');
     const notFilledStar = reviewTab.querySelector('.not-filled-star').cloneNode(true);
-    filledStar.classList.remove('hidden');
+    notFilledStar.classList.remove('hidden');
     const allReviewContainer = reviewTab.querySelector('#all-review-container');
     allReviewContainer.innerHTML = '';
     const userReviewTemplate = reviewTab.querySelector('.user-review-template');
