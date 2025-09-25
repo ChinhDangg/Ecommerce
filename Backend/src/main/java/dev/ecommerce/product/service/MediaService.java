@@ -140,11 +140,13 @@ public class MediaService {
                         moveTempToPermanent(markForAddFiles);
                         deleteFromTemp(markForDeleteFiles);
                         System.out.println("File committed: " + markForAddFiles);
+                        System.out.println("File deleted for update: " + markForDeleteFiles);
                     } else {
                         // Rollback → delete temp file
                         deleteFromTemp(markForAddFiles);
                         // undo deletion
                         moveTempToPermanent(markForDeleteFiles);
+                        System.out.println("File moved to permanent due to rollback: " + markForAddFiles);
                         System.out.println("File deleted due to rollback: " + markForAddFiles + "\nand restored from permanent: " + markForDeleteFiles);
                     }
                 } catch (IOException e) {
