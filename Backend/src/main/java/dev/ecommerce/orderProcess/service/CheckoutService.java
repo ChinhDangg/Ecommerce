@@ -88,6 +88,9 @@ public class CheckoutService {
             }
 
             Product product = cart.getProduct();
+            product.setTotalSold(product.getTotalSold() + cart.getQuantity());
+            productRepository.save(product);
+
             BigDecimal price = ProductService.getLowestPrice(product.getSalePrice(), product.getPrice());
             OrderItem orderItem = new OrderItem(order, cart.getProduct(), cart.getQuantity(), price);
             order.getOrderItems().add(orderItem);
