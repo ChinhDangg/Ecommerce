@@ -13,7 +13,7 @@ async function initialize() {
     displayProductInfo(reviewInfo);
     displayPreviousProductReview(reviewInfo);
     initializeRatingStar();
-    initializeImageInput();
+    initializeImageInput(reviewInfo);
     document.getElementById('submit-review-btn').addEventListener('click', async function() {
         await postUserProductReview(reviewInfo);
     });
@@ -85,7 +85,8 @@ function initializeRatingStar() {
 const input = document.getElementById('reviewImage');
 const preview = document.getElementById('preview');
 const previewImg = document.getElementById('previewImg');
-function initializeImageInput() {
+const deleteMediaButton = document.getElementById('delete-media-btn');
+function initializeImageInput(reviewInfo) {
     // Handle image preview
     input.addEventListener('change', () => {
         const file = input.files[0];
@@ -100,6 +101,12 @@ function initializeImageInput() {
             preview.classList.add('hidden');
             previewImg.src = "";
         }
+    });
+    deleteMediaButton.addEventListener('click', () => {
+        input.value = '';
+        preview.classList.add('hidden');
+        previewImg.src = '';
+        reviewInfo.reviewMediaURL = null;
     });
 }
 
