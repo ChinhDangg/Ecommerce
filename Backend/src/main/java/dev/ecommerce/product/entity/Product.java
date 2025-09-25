@@ -99,11 +99,11 @@ public class Product {
     @OrderBy("sortOrder ASC")
     private final List<ProductDescription> descriptions = new ArrayList<>();
 
-    private Integer totalRatings;
+    private int totalRatings;
 
-    private Integer totalReviews;
+    private int totalReviews;
 
-    private Integer totalSold;
+    private int totalSold;
 
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
