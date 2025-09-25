@@ -57,7 +57,7 @@ const mediaURL = document.getElementById('media-url').innerText;
 const cardPageURL = document.getElementById('cardPage-url').innerText;
 
 function displayAllItems(cartInfo) {
-    if (!cartInfo.productList.length) {
+    if (cartInfo.productList == null || !cartInfo.productList.length) {
         removeOrderSummary();
         return;
     }
