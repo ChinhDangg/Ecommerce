@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
@@ -131,7 +133,7 @@ public class UserController {
     @PostMapping(value="/review", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> addUserProductReview(@RequestPart("review") @Valid UserProductReviewInfo userProductReviewInfo,
                                                      @RequestPart(value="image", required=false) MultipartFile image,
-                                                     Authentication authentication) {
+                                                     Authentication authentication) throws IOException {
         Long userId = getUserId(authentication);
         return ResponseEntity.ok().body(userOrderService.addUserProductReviewInfo(userId, userProductReviewInfo, image));
     }

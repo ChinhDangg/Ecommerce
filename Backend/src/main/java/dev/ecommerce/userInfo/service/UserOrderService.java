@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class UserOrderService {
     }
 
     @Transactional
-    public Long addUserProductReviewInfo(Long userId, UserProductReviewInfo reviewInfo, MultipartFile file) {
+    public Long addUserProductReviewInfo(Long userId, UserProductReviewInfo reviewInfo, MultipartFile file) throws IOException {
         UserUsageInfo userInfo = findUserInfoByUserId(userId);
         if (reviewInfo.getProductId() == null) {
             throw new ResourceNotFoundException("Null product id");
@@ -104,18 +105,23 @@ public class UserOrderService {
 
         if (userReview.isPresent()) { // update review if review already existed
             ProductReview productReview = userReview.get();
-            productReview.setTitle(productReview.getTitle());
-            productReview.setComment(productReview.getComment());
-            productReview.setRating(productReview.getRating());
+            if (!productReview.getTitle().equals(reviewInfo.getReviewTitle()))
+                productReview.setTitle(reviewInfo.getReviewTitle());
+            if (!productReview.getComment().equals(reviewInfo.getComment()))
+                productReview.setComment(reviewInfo.getComment());
+            if (!Objects.equals(productReview.getRating(), reviewInfo.getRating()))
+                productReview.setRating(reviewInfo.getRating());
 
             if (file != null && !file.isEmpty()) { // if a file is given - then probably new file
                 if (productReview.getMediaURL() != null) {
+                    mediaService.movePermanentToTemp(List.of(productReview.getMediaURL()));
                     deleteFileNames.add(productReview.getMediaURL()); // mark previous media to be deleted
                 }
                 productReview.setMediaURL(fileName);
             } else if (reviewInfo.getReviewMediaURL() == null) {
                 // if no file is given but medial url given back is null then probably removing
                 if (productReview.getMediaURL() != null) {
+                    mediaService.movePermanentToTemp(List.of(productReview.getMediaURL()));
                     deleteFileNames.add(productReview.getMediaURL()); // mark previous media to be deleted
                 }
             } else if (!Objects.equals(reviewInfo.getReviewMediaURL(), productReview.getMediaURL())) {
