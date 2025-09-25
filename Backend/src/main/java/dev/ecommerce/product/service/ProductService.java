@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -41,6 +42,7 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final ProductLineService productLineService;
     private final MediaService mediaService;
+    private final ProductReviewRepository productReviewRepository;
 
     public Product findProductById(Long id) {
         if (id == null)
@@ -179,6 +181,33 @@ public class ProductService {
         foundProduct.getMedia().size();
         foundProduct.getDescriptions().size();
         return productMapper.toProductDTO(foundProduct);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<ProductReviewDTO> getProductReview(Long productId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Slice<ProductReview> productReviews = productReviewRepository.findAllByProductId(productId, pageable);
+
+        return productReviews.map(r -> new ProductReviewDTO(
+                r.getUserInfo().getDisplayName(),
+                r.getRating(),
+                r.getTitle(),
+                r.getComment(),
+                r.getMediaURL()
+        ));
+    }
+
+    @Transactional
+    public void addProductRatingAndReviewTotal(Product product, Integer rating) {
+        product.setTotalReviews(product.getTotalReviews() + 1);
+        product.setTotalRatings(product.getTotalRatings() + rating);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public void updateProductRatingTotal(Product product, Integer previousRating, Integer newRating) {
+        product.setTotalRatings(product.getTotalRatings() - previousRating + newRating);
+        productRepository.save(product);
     }
 
     @Transactional
