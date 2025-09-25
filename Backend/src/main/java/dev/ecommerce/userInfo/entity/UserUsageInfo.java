@@ -60,9 +60,10 @@ public class UserUsageInfo {
     @Setter
     private String country = "";
 
-    public UserUsageInfo(User user, Instant createdAt) {
+    public UserUsageInfo(User user, Instant createdAt, String displayName) {
         this.createdAt = createdAt;
         this.user = user;
+        this.displayName = displayName;
     }
 
     public void setAddress(String street, String city, String state, String zipCode, String country) {

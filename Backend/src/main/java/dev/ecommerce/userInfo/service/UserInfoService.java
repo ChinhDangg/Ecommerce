@@ -60,7 +60,10 @@ public class UserInfoService {
         if (!updated) {
             throw new IllegalArgumentException("No name provided");
         }
-        return userRepository.save(user).getFirstname() + " " + user.getLastname();
+        UserUsageInfo userInfo = user.getUserInfo();
+        userInfo.setDisplayName(user.getFullName());
+        userUsageInfoRepository.save(userInfo);
+        return userRepository.save(user).getFullName();
     }
 
     @Transactional
