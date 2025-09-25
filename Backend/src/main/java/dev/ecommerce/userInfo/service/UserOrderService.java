@@ -7,6 +7,7 @@ import dev.ecommerce.orderProcess.repository.OrderItemRepository;
 import dev.ecommerce.product.entity.ProductReview;
 import dev.ecommerce.product.repository.ProductReviewRepository;
 import dev.ecommerce.product.service.MediaService;
+import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.userInfo.DTO.*;
 import dev.ecommerce.orderProcess.repository.OrderRepository;
 import dev.ecommerce.product.entity.Product;
@@ -42,6 +43,7 @@ public class UserOrderService {
     private final ProductReviewRepository productReviewRepository;
     private final OrderItemRepository orderItemRepository;
     private final MediaService mediaService;
+    private final ProductService productService;
 
     public UserUsageInfo findUserInfoByUserId(Long userId) {
         return userInfoRepository.findByUserId(userId).orElseThrow(
@@ -109,8 +111,10 @@ public class UserOrderService {
                 productReview.setTitle(reviewInfo.getReviewTitle());
             if (!productReview.getComment().equals(reviewInfo.getComment()))
                 productReview.setComment(reviewInfo.getComment());
-            if (!Objects.equals(productReview.getRating(), reviewInfo.getRating()))
+            if (!Objects.equals(productReview.getRating(), reviewInfo.getRating())) {
                 productReview.setRating(reviewInfo.getRating());
+                productService.updateProductRatingTotal(product, productReview.getRating(), reviewInfo.getRating());
+            }
 
             if (file != null && !file.isEmpty()) { // if a file is given - then probably new file
                 if (productReview.getMediaURL() != null) {
@@ -138,6 +142,7 @@ public class UserOrderService {
                     reviewInfo.getRating(),
                     fileName
             );
+            productService.addProductRatingAndReviewTotal(product, reviewInfo.getRating());
             return productReviewRepository.save(productReview).getId();
         }
     }
