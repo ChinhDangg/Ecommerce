@@ -12,13 +12,13 @@ const searchURL = document.getElementById('search-url').innerText;
 
 let currentProductId = null;
 async function initiate(state = null) {
-    initializeProductInfoTabs();
     if (state) {
         currentProductId = state.id;
     } else {
         currentProductId = document.getElementById('product-id').innerText;
         document.getElementById('product-id').remove();
     }
+    initializeProductInfoTabs(Number.parseInt(currentProductId));
     const productInfo = await fetchProductInfo(currentProductId);
     showProductDetails(productInfo);
 }
@@ -347,7 +347,7 @@ function showContentTab(tab) {
 }
 
 let currentSelectedTabBtn = document.getElementById('overview-btn');
-function initializeProductInfoTabs() {
+function initializeProductInfoTabs(pid) {
     document.getElementById('overview-btn').addEventListener('click', function() {
         if (currentSelectedTabBtn === this)
             return;
@@ -358,6 +358,13 @@ function initializeProductInfoTabs() {
         if (currentSelectedTabBtn === this)
             return;
         showContentTab(document.getElementById('specification-tab'));
+        selectThisTabButton(this);
+    });
+    document.getElementById('review-btn').addEventListener('click', async function() {
+        if (currentSelectedTabBtn === this)
+            return;
+        await initializeReviewTab(pid);
+        showContentTab(document.getElementById('review-tab'));
         selectThisTabButton(this);
     });
 }
@@ -385,4 +392,84 @@ function getDayDifference(jsonDate) {
 
     // Return the rounded day difference (negative if given date is in the past)
     return Math.round(diffInDays);
+}
+
+let reviewInitializedCalled = false;
+async function initializeReviewTab(pid) {
+    if (reviewInitializedCalled)
+        return;
+
+    const initialGetReview = await getProductReview(pid, 0);
+    showProductReview(initialGetReview.content);
+
+    let page = 0;
+    const reviewTab = document.getElementById('review-tab');
+    const reviewPrevBtn = reviewTab.querySelector('.review-prev-btn');
+    const reviewNextBtn = reviewTab.querySelector('.review-next-btn');
+    reviewPrevBtn.addEventListener('click', async function() {
+        if (page <= 0)
+            return;
+        page -= 1;
+        const reviewInfo = await getProductReview(pid, page);
+        showProductReview(reviewInfo.content);
+        if (reviewInfo.first)
+            reviewPrevBtn.disabled = true;
+        reviewNextBtn.disabled = false;
+    });
+    reviewNextBtn.addEventListener('click', async function () {
+        page += 1;
+        const reviewInfo = await getProductReview(pid, page);
+        showProductReview(reviewInfo.content);
+        if (reviewInfo.last)
+            reviewNextBtn.disabled = true;
+        reviewPrevBtn.disabled = false;
+    });
+    if (initialGetReview.first)
+        reviewPrevBtn.disabled = true;
+    if (initialGetReview.last)
+        reviewNextBtn.disabled = true;
+    reviewInitializedCalled = true;
+}
+
+async function getProductReview(pid, page = 0) {
+    const response = await fetch(`/api/product/${pid}/review?page=${page}`);
+    if (!response.ok) {
+        console.error('Failed to get review');
+        alert('Failed to get review');
+        return;
+    }
+    return response.json();
+}
+
+function showProductReview(reviews) {
+    const reviewTab = document.getElementById('review-tab');
+    const filledStar = reviewTab.querySelector('.filled-star').cloneNode(true);
+    filledStar.classList.remove('hidden');
+    const notFilledStar = reviewTab.querySelector('.not-filled-star').cloneNode(true);
+    filledStar.classList.remove('hidden');
+    const allReviewContainer = reviewTab.querySelector('#all-review-container');
+    allReviewContainer.innerHTML = '';
+    const userReviewTemplate = reviewTab.querySelector('.user-review-template');
+
+    reviews.forEach(review => {
+       const userReview = userReviewTemplate.cloneNode(true);
+       userReview.classList.remove('hidden');
+
+       userReview.querySelector('.user-name').innerText = review.userDisplayName;
+       userReview.querySelector('.review-title').innerText = review.title;
+       userReview.querySelector('.review-comment').innerText = review.comment;
+       if (review.mediaURL) {
+           userReview.querySelector('.review-image').src = '/media/' + review.mediaURL;
+       } else {
+           userReview.querySelector('.review-image-container').remove();
+       }
+       const ratingContainer = userReview.querySelector('.rating-container');
+        for (let i = 1; i <= review.rating; i++) {
+            ratingContainer.appendChild(filledStar.cloneNode(true));
+        }
+        for (let i = review.rating; i < 5; i++) {
+            ratingContainer.appendChild(notFilledStar.cloneNode(true));
+        }
+        allReviewContainer.appendChild(userReview);
+    });
 }
