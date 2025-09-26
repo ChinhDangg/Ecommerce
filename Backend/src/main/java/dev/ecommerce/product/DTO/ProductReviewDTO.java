@@ -5,6 +5,6 @@ public record ProductReviewDTO(
         Integer rating,
         String title,
         String comment,
-        String medialURL
+        String mediaURL
 ) {
 }
