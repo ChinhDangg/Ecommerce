@@ -172,6 +172,14 @@
         </article>
     </div>
 
+    <button id="sign-out-btn"
+            class="bg-red-600 text-white py-2 px-4 rounded-lg
+               hover:bg-red-700 focus:outline-none
+               focus:ring-2 focus:ring-red-400 transition mt-2">
+        Sign Out
+    </button>
+
+
     <!-- Info banner -->
 <!--    <div role="status" class="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">-->
 <!--        <p class="text-sm"><span class="font-semibold">Tip:</span> This is a static template. Wire each card to your routes (e.g., <code>/orders</code>, <code>/account/security</code>, <code>/account/addresses</code>, <code>/wallet</code>) and feed the badges with real data from your backend.</p>-->
@@ -181,9 +189,6 @@
 <footer class="bg-gray-200 text-gray-900 py-12" th:insert="~{product-page/footer-template :: footer-content}">
 </footer>
 
-<script>
-    // Set current year
-    document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+<script type="module" th:src="@{/js/user-page/account-page.js}"></script>
 </body>
 </html>
