@@ -17,4 +17,9 @@ public class HomeController {
     public String getLoginPage() {
         return "/other-page/login";
     }
+
+    @GetMapping("/register")
+    public String getRegisterPage() {
+        return "/other-page/register-page";
+    }
 }
