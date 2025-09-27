@@ -61,7 +61,7 @@ public class SecurityConfig {
     // to avoid token check for public (like token cookies present or in header)
     @Bean @Order(1)
     SecurityFilterChain publicChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/", "/login", "/product/**", "/css/**", "/js/**", "/images/**")
+        http.securityMatcher("/", "/login", "/register", "/product/**", "/css/**", "/js/**", "/images/**")
                 .authorizeHttpRequests(a -> a.anyRequest().permitAll());
         return http.build();
     }
