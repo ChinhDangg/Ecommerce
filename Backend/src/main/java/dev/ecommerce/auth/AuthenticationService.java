@@ -27,15 +27,15 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
-        String username = registerRequest.username();
+        String username = registerRequest.email();
         // username must not yet be registered
         if (jpaUserDetailService.findByUsername(username).isPresent())
             throw new BadCredentialsException("Username already exists");
         else {
             User user = new User(
-                    registerRequest.firstname(),
-                    registerRequest.lastname(),
-                    registerRequest.username(),
+                    registerRequest.firstName(),
+                    registerRequest.lastName(),
+                    registerRequest.email(),
                     passwordEncoder.encode(registerRequest.password()),
                     Role.USER
             );

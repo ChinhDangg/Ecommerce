@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     public void register(@RequestBody RegisterRequest registerRequest, HttpServletResponse response) {
         if (!registerRequest.checkAllFields()) {
-            throw new IllegalArgumentException("Fields requirement not met.");
+            throw new BadCredentialsException("Fields requirement not met.");
         }
         AuthenticationResponse authenticationResponse = authenticationService.register(registerRequest);
         response.setHeader("Location", gatewayURL);
