@@ -44,8 +44,9 @@ public class JpaUserDetailService implements UserDetailsService {
     }
 
     public User save(User user) {
+        User savedUser = userRepository.save(user);
         UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now(), user.getFullName());
         userInfoRepository.save(userInfo);
-        return userRepository.save(user);
+        return savedUser;
     }
 }
