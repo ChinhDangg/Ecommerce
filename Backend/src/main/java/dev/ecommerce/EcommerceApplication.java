@@ -1,20 +1,15 @@
 package dev.ecommerce;
 
 import dev.ecommerce.configuration.RsaKeyProperties;
-import dev.ecommerce.orderProcess.entity.OrderItem;
-import dev.ecommerce.orderProcess.repository.OrderItemRepository;
 import dev.ecommerce.userInfo.entity.UserUsageInfo;
 import dev.ecommerce.orderProcess.service.CheckoutService;
-import dev.ecommerce.orderProcess.constant.ReserveStatus;
 import dev.ecommerce.product.constant.ConditionType;
 import dev.ecommerce.product.constant.ContentType;
 import dev.ecommerce.product.entity.*;
 import dev.ecommerce.product.repository.*;
 import dev.ecommerce.product.service.ProductService;
 import dev.ecommerce.user.constant.Role;
-import dev.ecommerce.userInfo.constant.UserItemType;
 import dev.ecommerce.user.entity.User;
-import dev.ecommerce.userInfo.entity.UserItem;
 import dev.ecommerce.userInfo.repository.UserItemRepository;
 import dev.ecommerce.user.repository.UserRepository;
 import dev.ecommerce.userInfo.repository.UserUsageInfoRepository;
@@ -25,12 +20,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @SpringBootApplication
 @EnableConfigurationProperties(RsaKeyProperties.class)
@@ -46,7 +39,7 @@ public class EcommerceApplication {
         SpringApplication.run(EcommerceApplication.class, args);
     }
 
-    //@Bean
+    @Bean
     CommandLineRunner commandLineRunner(
             ProductCategoryRepository productCategoryRepository,
             ProductRepository productRepository,
@@ -68,8 +61,7 @@ public class EcommerceApplication {
             );
             userRepository.save(user);
 
-            UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now());
-            userInfo.setDisplayName(user.getFirstname());
+            UserUsageInfo userInfo = new UserUsageInfo(user, Instant.now(), user.getFirstname() + " " + user.getLastname());
             userInfo.setAddress(
                     "Street",
                     "city",
