@@ -74,4 +74,5 @@ FrontEnd/  – Spring Boot 3.4.5 web app using Thymeleaf templates, static asset
 - Extend reservation for user in front-end
 - Add order processing UI for admin
 - Add product category management for admin
-- QoS for user to see error message from backend
+- QoS for user to see error message from backend when task failed
+- Add Jwt Refresh token if desired
