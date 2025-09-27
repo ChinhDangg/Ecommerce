@@ -71,7 +71,7 @@ public class SecurityConfig {
                                        BearerTokenResolver resolver, JwtAuthenticationConverter conv) throws Exception {
         http.authorizeHttpRequests(a -> a
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->
                         oauth2

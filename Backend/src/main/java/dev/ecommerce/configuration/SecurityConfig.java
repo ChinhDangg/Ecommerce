@@ -34,8 +34,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/media/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/user/**").authenticated()
-                        .requestMatchers("/api/order/**").authenticated()
+                        .requestMatchers("/api/user/**").hasAnyRole("USER")
+                        .requestMatchers("/api/order/**").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/product/cart").permitAll()
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/product/**", "POST"),
